@@ -22,6 +22,8 @@ if __name__ == "__main__":
             default=0)
     parser.add_argument('--adv_time', type=int,\
             default=0)
+    parser.add_argument('--wf_optimal',type=bool,\
+            default=True)
     parser.add_argument('--other_network_modifier', default=None)
     parser.add_argument('--in_dir')
     #directory = sys.argv[1] #N
