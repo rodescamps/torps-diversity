@@ -38,19 +38,6 @@ if __name__ == "__main__":
     network_state_files.sort(key = lambda x: os.path.basename(x))
     adv_insertion = network_modifiers.AdversaryInsertion(args, _testing)
     network_modifiers = [adv_insertion]
-    # create other network modification object
-    if (args.other_network_modifier is not None):
-        # dynamically import module and obtain reference to class
-        full_classname, class_arg = args.other_network_modifier.split('-')
-        class_components = full_classname.split('.')
-        modulename = '.'.join(class_components[0:-1])
-        classname = class_components[-1]
-        network_modifier_module = importlib.import_module(modulename)
-        network_modifier_class = getattr(network_modifier_module, classname)
-        # create object of class
-        other_network_modifier = network_modifier_class(args, _testing)
-        network_modifiers.append(other_network_modifier)
-
     # create iterator that applies network modifiers to nsf list
     network_states = pathsim.get_network_states(network_state_files,
             network_modifiers)
