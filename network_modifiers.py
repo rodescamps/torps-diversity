@@ -114,11 +114,11 @@ class Bwweights(object):
                     Wmd = Wgd = Wme = 0
                     if (G < M): Wmg = 0
                     else:
-                        if optimal_for_wf:
+                        if self.optimal_for_wf:
                             Wgg = (weightscale*(E+D))/G
                         else:
                             Wmg = (weightscale*(G-M))/(2*G)
-                    if optimal_for_wf:
+                    if self.optimal_for_wf:
                         Wmg = weightscale - Wgg
                     else:
                         Wgg = weightscale - Wmg
@@ -272,10 +272,11 @@ class Bwweights(object):
 ######
 
 
-    def __init__(self):
+    def __init__(self, wf_optimal):
         self.bww_errors = Enum(("NO_ERROR","SUMG_ERROR", "SUME_ERROR",\
                 "SUMD_ERROR","BALANCE_MID_ERROR", "BALANCE_EG_ERROR",\
                 "RANGE_ERROR"))
+        self.optimal_for_wf = wf_optimal
 
 ### Class inserting adversary relays ###
 class AdversaryInsertion(object):
@@ -338,7 +339,7 @@ class AdversaryInsertion(object):
             args.adv_exit_cons_bw, water_filling=True)
         self.testing = testing
         self.first_modification = True
-        self.bww = Bwweights()
+        self.bww = Bwweights(args.wf_optimal)
 
         
     def modify_network_state(self, network_state):
@@ -369,7 +370,7 @@ class AdversaryInsertion(object):
                 for fp in self.adv_relays])
             # recompute bwweights taking into account the new nodes added
             (casename, Wgg, Wgd, Wee, Wed, Wmg, Wme, Wmd) =\
-                    self.bww.recompute_bwweights(network_state, optimal_for_wf=True)
+                    self.bww.recompute_bwweights(network_state)
             bwweights = network_state.cons_bw_weights
             if self.testing: 
                 print("""New computation of bwweights, network load case
