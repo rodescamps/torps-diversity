@@ -1992,7 +1992,7 @@ pathsim, and pickle it. The pickled object is input to the simulate command')
         network_state_files = pad_network_state_files(network_state_files)
         # create object that will add adversarial relays into network
         adv_insertion = network_modifiers.AdversaryInsertion(args, _testing)
-        network_modifiers = [adv_insertion]
+        network_modifiers = [network_modifier.Bwweights(), adv_insertion]
         # create other network modification object
         if (args.other_network_modifier is not None):
             # dynamically import module and obtain reference to class
