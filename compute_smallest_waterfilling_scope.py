@@ -4,8 +4,8 @@ import sys
 import os
 from stem import Flag
 import network_modifiers
-
-_testing = False
+import pdb
+_testing = True
 
 if __name__ == "__main__":
 
@@ -22,13 +22,12 @@ if __name__ == "__main__":
             default=0)
     parser.add_argument('--adv_time', type=int,\
             default=0)
-    parser.add_argument('--wf_optimal',type=bool,\
-            default=True)
+    parser.add_argument('--wf_optimal', action="store_true")
     parser.add_argument('--other_network_modifier', default=None)
     parser.add_argument('--in_dir')
     #directory = sys.argv[1] #N
-    args = parser.parse_args()
-    directory = args.in_dir
+    args_parsed = parser.parse_args()
+    directory = args_parsed.in_dir
 
     network_state_files = []
     for dirpath, dirnames, fnames in os.walk(directory):
@@ -36,9 +35,9 @@ if __name__ == "__main__":
             if fname[0] != '.':
                 network_state_files.append(os.path.join(\
                         dirpath, fname))
-
+    pdb.set_trace()
     network_state_files.sort(key = lambda x: os.path.basename(x))
-    adv_insertion = network_modifiers.AdversaryInsertion(args, _testing)
+    adv_insertion = network_modifiers.AdversaryInsertion(args_parsed, _testing)
     network_modifiers = [adv_insertion]
     # create iterator that applies network modifiers to nsf list
     network_states = pathsim.get_network_states(network_state_files,
