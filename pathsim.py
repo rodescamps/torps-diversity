@@ -1891,6 +1891,8 @@ may expire, with 0 indicating no guard expiration')
         'WARNING', 'ERROR', 'CRITICAL'],
         help='set level of log messages to send to stdout, DEBUG produces testing output, quiet at all other levels', default='INFO')
         
+    simulate_parsed.add_argument('--wf_optimal', help='Recompute bwweights from dir-spec.txt\
+            in a way that waterfilling would then be optimal', action='store_true')
     pathalg_subparsers = simulate_parser.add_subparsers(help='simulate\
 commands', dest='pathalg_subparser')
     tor_simulate_parser = pathalg_subparsers.add_parser('tor',
