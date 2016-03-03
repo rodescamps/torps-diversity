@@ -14,6 +14,7 @@ import congestion_aware_pathsim
 import process_consensuses
 import re
 import network_modifiers
+from network_modifiers import *
 import event_callbacks
 import importlib
 import logging
@@ -1891,6 +1892,8 @@ may expire, with 0 indicating no guard expiration')
         'WARNING', 'ERROR', 'CRITICAL'],
         help='set level of log messages to send to stdout, DEBUG produces testing output, quiet at all other levels', default='INFO')
         
+    simulate_parser.add_argument('--wf_optimal', help='Recompute bwweights from dir-spec.txt\
+            in a way that waterfilling would then be optimal', action='store_true')
     pathalg_subparsers = simulate_parser.add_subparsers(help='simulate\
 commands', dest='pathalg_subparser')
     tor_simulate_parser = pathalg_subparsers.add_parser('tor',
@@ -2005,7 +2008,8 @@ pathsim, and pickle it. The pickled object is input to the simulate command')
             # create object of class
             other_network_modifier = network_modifier_class(args, _testing)
             network_modifiers.append(other_network_modifier)
-
+        if (args.wf_optimal):
+            network_modifiers.insert(0, Bwweights(True))
         # create iterator that applies network modifiers to nsf list
         network_states = get_network_states(network_state_files,
             network_modifiers)

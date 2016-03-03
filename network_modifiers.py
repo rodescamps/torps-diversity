@@ -6,207 +6,16 @@ import pathsim
 
 class Enum(tuple): __getattr__ = tuple.index
 
-### Class inserting adversary relays ###
-class AdversaryInsertion(object):
+### Class handling Bwweights methods of computation
+class Bwweights(object):
 
-
-    def add_adv_guards(self, num_adv_guards, bandwidth, water_filling=False):
-        """"Adds adv guards into self.add_relays and self.add_descriptors."""
-        #, adv_relays, adv_descriptors
-        for i in xrange(num_adv_guards):
-            # create consensus
-            num_str = str(i+1)
-            fingerprint = '0' * (40-len(num_str)) + num_str
-            nickname = 'BadGuyGuard' + num_str
-            flags = [Flag.FAST, Flag.GUARD, Flag.RUNNING, Flag.STABLE,
-                Flag.VALID]
-            self.adv_relays[fingerprint] = pathsim.RouterStatusEntry(fingerprint,
-                nickname, flags, bandwidth, water_filling)
-            
-            # create descriptor
-            hibernating = False
-            family = {}
-            address = '10.'+num_str+'.0.0' # avoid /16 conflicts
-            exit_policy = ExitPolicy('reject *:*')
-            ntor_onion_key = num_str # indicate ntor support w/ val != None
-            self.adv_descriptors[fingerprint] = pathsim.ServerDescriptor(fingerprint,
-                hibernating, nickname, family, address, exit_policy,
-                ntor_onion_key)
-
-
-    def add_adv_exits(self, num_adv_guards, num_adv_exits, bandwidth, water_filling=False):
-        """"Adds adv exits into self.add_relays and self.add_descriptors."""
-        for i in xrange(num_adv_exits):
-            # create consensus
-            num_str = str(i+1)
-            fingerprint = 'F' * (40-len(num_str)) + num_str
-            nickname = 'BadGuyExit' + num_str
-            flags = [Flag.FAST, Flag.EXIT, Flag.RUNNING, Flag.STABLE,
-                Flag.VALID]
-            self.adv_relays[fingerprint] = pathsim.RouterStatusEntry(fingerprint,
-                nickname, flags, bandwidth, water_filling)
-            
-            # create descriptor
-            hibernating = False
-            family = {}
-            address = '10.'+str(num_adv_guards+i+1)+'.0.0' # avoid /16 conflicts
-            exit_policy = ExitPolicy('accept *:*')
-            ntor_onion_key = num_str # indicate ntor support w/ val != None
-            self.adv_descriptors[fingerprint] = pathsim.ServerDescriptor(fingerprint,
-                hibernating, nickname, family, address, exit_policy,
-                ntor_onion_key)
-
-    def compute_tot_bandwidths(self, cons_rel_stats, descriptors):
-        """ Compute 
-        G the total bandwidth for Guard-flagged nodes
-        M the total bandwidth for non-flagged nodes
-        E the total bandwidth for Exit-flagged nodes
-        D the total bandwidth for Guard+Exit-flagged nodes
-        T = G+M+E+D
-        """
-        
-        def filter_flags(cons_rel_stats, descriptors, flags, no_flags):
-            nodes  = []
-            for fprint in cons_rel_stats:
-                rel_stat = cons_rel_stats[fprint]
-                i = 0
-                j = 0
-                for flag in no_flags:
-                    if flag in rel_stat.flags:
-                        j+=1
-                for flag in flags:
-                    if flag in rel_stat.flags:
-                        i+=1
-                if i == len(flags) and j==0 and (fprint in descriptors or\
-                        fprint in self.adv_descriptors):
-                    nodes.append(fprint)
-            return nodes
-
-        guards = filter_flags(cons_rel_stats, descriptors,\
-                    [Flag.RUNNING, Flag.VALID, Flag.GUARD], [Flag.EXIT])
-        exits = filter_flags(cons_rel_stats, descriptors,\
-                    [Flag.RUNNING, Flag.VALID, Flag.EXIT], [Flag.GUARD])
-        middles = filter_flags(cons_rel_stats, descriptors,\
-                    [Flag.RUNNING, Flag.VALID], [Flag.GUARD, Flag.EXIT])
-        guards_exits = filter_flags(cons_rel_stats, descriptors,\
-                        [Flag.RUNNING, Flag.VALID, Flag.GUARD, Flag.EXIT], [])
-        G = M = E = D = T = 0
-        
-        for fprint in guards:
-            G += cons_rel_stats[fprint].bandwidth
-        for fprint in middles:
-            M += cons_rel_stats[fprint].bandwidth
-        for fprint in exits:
-            E += cons_rel_stats[fprint].bandwidth
-        for fprint in guards_exits:
-            D += cons_rel_stats[fprint].bandwidth
-
-        T = G+M+E+D
-        return (int(G), int(M), int(E), int(D), int(T))
-
-    def check_weights_errors(self, Wgg, Wgd, Wmg, Wme, Wmd, Wee, Wed,
-            weightscale, G, M, E, D, T, margin, do_balance):
-
-        """Verify that our weights satify the formulas from dir-spec.txt"""
-
-        def check_eq(a, b, margin):
-            return (a - b) <= margin if (a - b) >= 0 else (b - a) <= margin
-        def check_range(a, b, c, d, e, f, g, mx):
-            return (a >= 0 and a <= mx and b >= 0 and b <= mx and\
-                    c >= 0 and c <= mx and d >= 0 and d <= mx and\
-                    e >= 0 and e <= mx and f >= 0 and f <= mx and\
-                    g >= 0 and g <= mx)
-
-        # Wed + Wmd + Wgd == weightscale
-        if (not check_eq(Wed+Wmd+Wgd, weightscale, margin)):
-            return self.bww_errors.SUMD_ERROR
-        # Wmg + Wgg == weightscale
-        if (not check_eq(Wmg+Wgg, weightscale, margin)):
-            return self.bww_errors.SUMG_ERROR
-        # Wme + Wee == 1
-        if (not check_eq(Wme+Wee, weightscale, margin)):
-            return self.bww_errors.SUME_ERROR
-        # Verify weights within range 0 -> weightscale
-        if (not check_range(Wgg, Wgd, Wmg, Wme, Wmd, Wed, Wee, weightscale)):
-            return self.bww_errors.RANGE_ERROR
-        if (do_balance):
-            #Wgg*G + Wgd*D == Wee*E + Wed*D
-            if (not check_eq(Wgg*G+Wgd*D, Wee*E+Wed*D, (margin*T)/3)):
-                return self.bww_errors.BALANCE_EG_ERROR
-            #Wgg*G+Wgd*D == M*weightscale + Wmd*D + Wme * E + Wmg*G
-            if (not check_eq(Wgg*G+Wgd*D, M*weightscale+Wmd*D+Wme*E+Wmg*G,\
-                    (margin*T)/3)):
-                return self.bww_errors.BALANCE_MID_ERROR
-
-
-        return self.bww_errors.NO_ERROR
-
-
-    def __init__(self, args, testing):
-        self.adv_time = args.adv_time
-        self.adv_relays = {}
-        self.adv_descriptors = {}
-        self.add_adv_guards(args.num_adv_guards, args.adv_guard_cons_bw, water_filling=True)
-        self.add_adv_exits(args.num_adv_guards, args.num_adv_exits,
-            args.adv_exit_cons_bw, water_filling=True)
-        self.testing = testing
-        self.first_modification = True
-        self.bww_errors = Enum(("NO_ERROR","SUMG_ERROR", "SUME_ERROR",\
-                "SUMD_ERROR","BALANCE_MID_ERROR", "BALANCE_EG_ERROR",\
-                "RANGE_ERROR"))
-
-        
-    def modify_network_state(self, network_state):
-        """Adds adversarial guards and exits to cons_rel_stats and
-        descriptors dicts."""
-
-        # add adversarial descriptors to nsf descriptors
-        # only add once because descriptors variable is assumed persistant
-        if (self.first_modification == True):
-            network_state.descriptors.update(self.adv_descriptors)
-            self.first_modification = False
-
-        # if insertion time has been reached, add adversarial relays into
-        # consensus and hibernating status list
-        if (self.adv_time <= network_state.cons_valid_after):
-            # include additional relays in consensus
-            if self.testing:
-                print('Adding {0} relays to consensus.'.format(\
-                    len(self.adv_relays)))
-            for fprint, relay in self.adv_relays.iteritems():
-                if fprint in network_state.cons_rel_stats:
-                    raise ValueError(\
-                        'Added relay exists in consensus: {0}:{1}'.\
-                            format(relay.nickname, fprint))
-                network_state.cons_rel_stats[fprint] = relay
-            # include hibernating statuses for added relays
-            network_state.hibernating_statuses.extend([(0, fp, False) \
-                for fp in self.adv_relays])
-            # recompute bwweights taking into account the new nodes added
-            (casename, Wgg, Wgd, Wee, Wed, Wmg, Wme, Wmd) =\
-                    self.recompute_bwweights(network_state)
-            bwweights = network_state.cons_bw_weights
-            if self.testing: 
-                print("""New computation of bwweights, network load case
-                       is {0} with weights Wgg={1}, Wgd={2}, Wee={3},
-                       Wed={4}, Wmg={5}, Wme={6}, Wmd={7}.\n
-                       The weights received from the consensus are Wgg=
-                       {8}, Wgd={9}, Wee={10}, Wed={11}, Wmg={12}, Wme=
-                       {13}, Wmd={14} """.format(casename, Wgg, Wgd, Wee,\
-                       Wed, Wmg, Wme, Wmd, bwweights['Wgg'], bwweights['Wgd'],\
-                       bwweights['Wee'], bwweights['Wed'], bwweights['Wmg'],\
-                       bwweights['Wme'], bwweights['Wmd']))
-            bwweights['Wgg'] = Wgg
-            bwweights['Wgd'] = Wgd
-            bwweights['Wee'] = Wee
-            bwweights['Wed'] = Wed
-            bwweights['Wmg'] = Wmg
-            bwweights['Wme'] = Wme
-            bwweights['Wmd'] = Wmd
-
-    def recompute_bwweights(self, network_state):
+    
+    def recompute_bwweights(self, network_state, optimal_for_wf=True):
         """Detects in which network case load we are according to section 3.8.3
         of dir-spec.txt from Tor' specifications and recompute bandwidth weights
+        if optimal_for_wf is true, then is does not compute bandwidht-weights as
+        it is indicated in dir-spec.txt. Achieving the balance in a smarter
+        way is possible
         """
         (G, M, E, D, T) = self.compute_tot_bandwidths(network_state.cons_rel_stats,\
                 network_state.descriptors)
@@ -304,8 +113,15 @@ class AdversaryInsertion(object):
                     Wee = Wed = weightscale
                     Wmd = Wgd = Wme = 0
                     if (G < M): Wmg = 0
-                    else: Wmg = (weightscale*(G-M))/(2*G)
-                    Wgg = weightscale - Wmg
+                    else:
+                        if self.optimal_for_wf:
+                            Wgg = (weightscale*(E+D))/G
+                        else:
+                            Wmg = (weightscale*(G-M))/(2*G)
+                    if self.optimal_for_wf:
+                        Wmg = weightscale - Wgg
+                    else:
+                        Wgg = weightscale - Wmg
             else:
                 #subcase S+D >= T/3
                 if (G < E):
@@ -345,8 +161,235 @@ class AdversaryInsertion(object):
                          Wgd, Wed, Wmd, Wee, Wmg, Wgg))
 
         return (casename, Wgg, Wgd, Wee, Wed, Wmg, Wme, Wmd)
+   
+    def compute_tot_bandwidths(self, cons_rel_stats, descriptors):
+        """ Compute 
+        G the total bandwidth for Guard-flagged nodes
+        M the total bandwidth for non-flagged nodes
+        E the total bandwidth for Exit-flagged nodes
+        D the total bandwidth for Guard+Exit-flagged nodes
+        T = G+M+E+D
+        """
+        
+        def filter_flags(cons_rel_stats, descriptors, flags, no_flags):
+            nodes  = []
+            for fprint in cons_rel_stats:
+                rel_stat = cons_rel_stats[fprint]
+                i = 0
+                j = 0
+                for flag in no_flags:
+                    if flag in rel_stat.flags:
+                        j+=1
+                for flag in flags:
+                    if flag in rel_stat.flags:
+                        i+=1
+                if i == len(flags) and j==0 and (fprint in descriptors or\
+                        fprint in self.adv_descriptors):
+                    nodes.append(fprint)
+            return nodes
+
+        guards = filter_flags(cons_rel_stats, descriptors,\
+                    [Flag.RUNNING, Flag.VALID, Flag.GUARD], [Flag.EXIT])
+        exits = filter_flags(cons_rel_stats, descriptors,\
+                    [Flag.RUNNING, Flag.VALID, Flag.EXIT], [Flag.GUARD])
+        middles = filter_flags(cons_rel_stats, descriptors,\
+                    [Flag.RUNNING, Flag.VALID], [Flag.GUARD, Flag.EXIT])
+        guards_exits = filter_flags(cons_rel_stats, descriptors,\
+                        [Flag.RUNNING, Flag.VALID, Flag.GUARD, Flag.EXIT], [])
+        G = M = E = D = T = 0
+        
+        for fprint in guards:
+            G += cons_rel_stats[fprint].bandwidth
+        for fprint in middles:
+            M += cons_rel_stats[fprint].bandwidth
+        for fprint in exits:
+            E += cons_rel_stats[fprint].bandwidth
+        for fprint in guards_exits:
+            D += cons_rel_stats[fprint].bandwidth
+
+        T = G+M+E+D
+        return (int(G), int(M), int(E), int(D), int(T))
+
+    def check_weights_errors(self, Wgg, Wgd, Wmg, Wme, Wmd, Wee, Wed,
+            weightscale, G, M, E, D, T, margin, do_balance):
+
+        """Verify that our weights satify the formulas from dir-spec.txt"""
+
+        def check_eq(a, b, margin):
+            return (a - b) <= margin if (a - b) >= 0 else (b - a) <= margin
+        def check_range(a, b, c, d, e, f, g, mx):
+            return (a >= 0 and a <= mx and b >= 0 and b <= mx and\
+                    c >= 0 and c <= mx and d >= 0 and d <= mx and\
+                    e >= 0 and e <= mx and f >= 0 and f <= mx and\
+                    g >= 0 and g <= mx)
+
+        # Wed + Wmd + Wgd == weightscale
+        if (not check_eq(Wed+Wmd+Wgd, weightscale, margin)):
+            return self.bww_errors.SUMD_ERROR
+        # Wmg + Wgg == weightscale
+        if (not check_eq(Wmg+Wgg, weightscale, margin)):
+            return self.bww_errors.SUMG_ERROR
+        # Wme + Wee == 1
+        if (not check_eq(Wme+Wee, weightscale, margin)):
+            return self.bww_errors.SUME_ERROR
+        # Verify weights within range 0 -> weightscale
+        if (not check_range(Wgg, Wgd, Wmg, Wme, Wmd, Wed, Wee, weightscale)):
+            return self.bww_errors.RANGE_ERROR
+        if (do_balance):
+            #Wgg*G + Wgd*D == Wee*E + Wed*D
+            if (not check_eq(Wgg*G+Wgd*D, Wee*E+Wed*D, (margin*T)/3)):
+                return self.bww_errors.BALANCE_EG_ERROR
+            #Wgg*G+Wgd*D == M*weightscale + Wmd*D + Wme * E + Wmg*G
+            if (not check_eq(Wgg*G+Wgd*D, M*weightscale+Wmd*D+Wme*E+Wmg*G,\
+                    (margin*T)/3)):
+                return self.bww_errors.BALANCE_MID_ERROR
 
 
+        return self.bww_errors.NO_ERROR
+    
+    def modify_network_state(self, network_state):
+        
+        (casename, Wgg, Wgd, Wee, Wed, Wmg, Wme, Wmd) =\
+            self.recompute_bwweights(network_state)
+        bwweights = network_state.cons_bw_weights
+        if self.testing: 
+            print("""New computation of bwweights, network load case
+                   is {0} with weights Wgg={1}, Wgd={2}, Wee={3},
+                   Wed={4}, Wmg={5}, Wme={6}, Wmd={7}.\n
+                   The weights received from the consensus are Wgg=
+                   {8}, Wgd={9}, Wee={10}, Wed={11}, Wmg={12}, Wme=
+                   {13}, Wmd={14} """.format(casename, Wgg, Wgd, Wee,\
+                   Wed, Wmg, Wme, Wmd, bwweights['Wgg'], bwweights['Wgd'],\
+                   bwweights['Wee'], bwweights['Wed'], bwweights['Wmg'],\
+                   bwweights['Wme'], bwweights['Wmd']))
+        bwweights['Wgg'] = Wgg
+        bwweights['Wgd'] = Wgd
+        bwweights['Wee'] = Wee
+        bwweights['Wed'] = Wed
+        bwweights['Wmg'] = Wmg
+        bwweights['Wme'] = Wme
+        bwweights['Wmd'] = Wmd
+######
+
+
+    def __init__(self, wf_optimal):
+        self.bww_errors = Enum(("NO_ERROR","SUMG_ERROR", "SUME_ERROR",\
+                "SUMD_ERROR","BALANCE_MID_ERROR", "BALANCE_EG_ERROR",\
+                "RANGE_ERROR"))
+        self.optimal_for_wf = wf_optimal
+        self.testing = False
+
+### Class inserting adversary relays ###
+class AdversaryInsertion(object):
+
+
+    def add_adv_guards(self, num_adv_guards, bandwidth, water_filling=False):
+        """"Adds adv guards into self.add_relays and self.add_descriptors."""
+        #, adv_relays, adv_descriptors
+        for i in xrange(num_adv_guards):
+            # create consensus
+            num_str = str(i+1)
+            fingerprint = '0' * (40-len(num_str)) + num_str
+            nickname = 'BadGuyGuard' + num_str
+            flags = [Flag.FAST, Flag.GUARD, Flag.RUNNING, Flag.STABLE,
+                Flag.VALID]
+            self.adv_relays[fingerprint] = pathsim.RouterStatusEntry(fingerprint,
+                nickname, flags, bandwidth, water_filling)
+            
+            # create descriptor
+            hibernating = False
+            family = {}
+            address = '10.'+num_str+'.0.0' # avoid /16 conflicts
+            exit_policy = ExitPolicy('reject *:*')
+            ntor_onion_key = num_str # indicate ntor support w/ val != None
+            self.adv_descriptors[fingerprint] = pathsim.ServerDescriptor(fingerprint,
+                hibernating, nickname, family, address, exit_policy,
+                ntor_onion_key)
+
+
+    def add_adv_exits(self, num_adv_guards, num_adv_exits, bandwidth, water_filling=False):
+        """"Adds adv exits into self.add_relays and self.add_descriptors."""
+        for i in xrange(num_adv_exits):
+            # create consensus
+            num_str = str(i+1)
+            fingerprint = 'F' * (40-len(num_str)) + num_str
+            nickname = 'BadGuyExit' + num_str
+            flags = [Flag.FAST, Flag.EXIT, Flag.RUNNING, Flag.STABLE,
+                Flag.VALID]
+            self.adv_relays[fingerprint] = pathsim.RouterStatusEntry(fingerprint,
+                nickname, flags, bandwidth, water_filling)
+            
+            # create descriptor
+            hibernating = False
+            family = {}
+            address = '10.'+str(num_adv_guards+i+1)+'.0.0' # avoid /16 conflicts
+            exit_policy = ExitPolicy('accept *:*')
+            ntor_onion_key = num_str # indicate ntor support w/ val != None
+            self.adv_descriptors[fingerprint] = pathsim.ServerDescriptor(fingerprint,
+                hibernating, nickname, family, address, exit_policy,
+                ntor_onion_key)
+
+
+
+    def __init__(self, args, testing):
+        self.adv_time = args.adv_time
+        self.adv_relays = {}
+        self.adv_descriptors = {}
+        self.add_adv_guards(args.num_adv_guards, args.adv_guard_cons_bw, water_filling=True)
+        self.add_adv_exits(args.num_adv_guards, args.num_adv_exits,
+            args.adv_exit_cons_bw, water_filling=True)
+        self.testing = testing
+        self.first_modification = True
+        self.bww = Bwweights(args.wf_optimal)
+
+        
+    def modify_network_state(self, network_state):
+        """Adds adversarial guards and exits to cons_rel_stats and
+        descriptors dicts."""
+
+        # add adversarial descriptors to nsf descriptors
+        # only add once because descriptors variable is assumed persistant
+        if (self.first_modification == True):
+            network_state.descriptors.update(self.adv_descriptors)
+            self.first_modification = False
+
+        # if insertion time has been reached, add adversarial relays into
+        # consensus and hibernating status list
+        if (self.adv_time <= network_state.cons_valid_after):
+            # include additional relays in consensus
+            if self.testing:
+                print('Adding {0} relays to consensus.'.format(\
+                    len(self.adv_relays)))
+            for fprint, relay in self.adv_relays.iteritems():
+                if fprint in network_state.cons_rel_stats:
+                    raise ValueError(\
+                        'Added relay exists in consensus: {0}:{1}'.\
+                            format(relay.nickname, fprint))
+                network_state.cons_rel_stats[fprint] = relay
+            # include hibernating statuses for added relays
+            network_state.hibernating_statuses.extend([(0, fp, False) \
+                for fp in self.adv_relays])
+            # recompute bwweights taking into account the new nodes added
+            (casename, Wgg, Wgd, Wee, Wed, Wmg, Wme, Wmd) =\
+                    self.bww.recompute_bwweights(network_state)
+            bwweights = network_state.cons_bw_weights
+            if self.testing: 
+                print("""New computation of bwweights, network load case
+                       is {0} with weights Wgg={1}, Wgd={2}, Wee={3},
+                       Wed={4}, Wmg={5}, Wme={6}, Wmd={7}.\n
+                       The weights received from the consensus are Wgg=
+                       {8}, Wgd={9}, Wee={10}, Wed={11}, Wmg={12}, Wme=
+                       {13}, Wmd={14} """.format(casename, Wgg, Wgd, Wee,\
+                       Wed, Wmg, Wme, Wmd, bwweights['Wgg'], bwweights['Wgd'],\
+                       bwweights['Wee'], bwweights['Wed'], bwweights['Wmg'],\
+                       bwweights['Wme'], bwweights['Wmd']))
+            bwweights['Wgg'] = Wgg
+            bwweights['Wgd'] = Wgd
+            bwweights['Wee'] = Wee
+            bwweights['Wed'] = Wed
+            bwweights['Wmg'] = Wmg
+            bwweights['Wme'] = Wme
+            bwweights['Wmd'] = Wmd
 ######
 
 ### Class adjusting Guard flags ###

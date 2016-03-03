@@ -11,7 +11,8 @@ NSF_TYPE="slim"
 TRACEFILE=$BASE_DIR/in/users2-processed.traces.pickle
 LOGLEVEL="INFO"
 PARALLEL_PROCESS_MAX=22
-NETWORKCASE="2b2M<T"
+NETWORKCASE="3aE=SGM"
+WF_OPTIMAL="--wf_optimal"
 
 DIRS=`ls -l $NSF_ROOT_DIR | egrep '^d' | awk '{print $9}'`
 j=1
@@ -24,10 +25,10 @@ do
   if [ $j -eq $(($PARALLEL_PROCESS_MAX-1)) ]
   then
    
-      (time pypy pathsim.py simulate --nsf_dir $NSF_DIR --num_samples $NUM_SAMPLES --trace_file $TRACEFILE --user_model $USERMODEL --format $OUTPUT --loglevel $LOGLEVEL $PATH_ALG) 2> $OUT_DIR/simulate.$EXP_NAME.$NUM_SAMPLES-samples.time 1> $OUT_DIR/simulate.$EXP_NAME.$NUM_SAMPLES-samples.out
+      (time pypy pathsim.py simulate --nsf_dir $NSF_DIR --num_samples $NUM_SAMPLES --trace_file $TRACEFILE --user_model $USERMODEL $WF_OPTIMAL --format $OUTPUT --loglevel $LOGLEVEL $PATH_ALG) 2> $OUT_DIR/simulate.$EXP_NAME.$NUM_SAMPLES-samples.time 1> $OUT_DIR/simulate.$EXP_NAME.$NUM_SAMPLES-samples.out
       j=0
   else
-      (time pypy pathsim.py simulate --nsf_dir $NSF_DIR --num_samples $NUM_SAMPLES --trace_file $TRACEFILE --user_model $USERMODEL --format $OUTPUT --loglevel $LOGLEVEL $PATH_ALG) 2> $OUT_DIR/simulate.$EXP_NAME.$NUM_SAMPLES-samples.time 1> $OUT_DIR/simulate.$EXP_NAME.$NUM_SAMPLES-samples.out &
+      (time pypy pathsim.py simulate --nsf_dir $NSF_DIR --num_samples $NUM_SAMPLES --trace_file $TRACEFILE --user_model $USERMODEL $WF_OPTIMAL --format $OUTPUT --loglevel $LOGLEVEL $PATH_ALG) 2> $OUT_DIR/simulate.$EXP_NAME.$NUM_SAMPLES-samples.time 1> $OUT_DIR/simulate.$EXP_NAME.$NUM_SAMPLES-samples.out &
   fi
   j=$(($j+1))
 
