@@ -277,6 +277,7 @@ class Bwweights(object):
                 "SUMD_ERROR","BALANCE_MID_ERROR", "BALANCE_EG_ERROR",\
                 "RANGE_ERROR"))
         self.optimal_for_wf = wf_optimal
+        self.testing = False
 
 ### Class inserting adversary relays ###
 class AdversaryInsertion(object):

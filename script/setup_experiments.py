@@ -46,7 +46,6 @@ def consensus_chosen(network_case, nbr_experiments, year_from,\
     else:
         step = int(counter/nbr_experiments)
     i = 0
-    pdb.set_trace()
     for pathname in pathnames:
         f = open(pathname, "r")
         for line in f:
@@ -80,7 +79,6 @@ if __name__ == "__main__":
         os.makedirs(root_path)
     except OSError:
         pass #ouuuu ugly
-    
     filenames = consensus_chosen(network_case, nbr_experiments_max, year_from,\
             year_to, month_from, month_to, path_to_networkcase_info)
     pdb.set_trace()

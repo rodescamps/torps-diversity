@@ -14,6 +14,7 @@ import congestion_aware_pathsim
 import process_consensuses
 import re
 import network_modifiers
+from network_modifiers import *
 import event_callbacks
 import importlib
 import logging
@@ -1891,7 +1892,7 @@ may expire, with 0 indicating no guard expiration')
         'WARNING', 'ERROR', 'CRITICAL'],
         help='set level of log messages to send to stdout, DEBUG produces testing output, quiet at all other levels', default='INFO')
         
-    simulate_parsed.add_argument('--wf_optimal', help='Recompute bwweights from dir-spec.txt\
+    simulate_parser.add_argument('--wf_optimal', help='Recompute bwweights from dir-spec.txt\
             in a way that waterfilling would then be optimal', action='store_true')
     pathalg_subparsers = simulate_parser.add_subparsers(help='simulate\
 commands', dest='pathalg_subparser')
@@ -1994,7 +1995,7 @@ pathsim, and pickle it. The pickled object is input to the simulate command')
         network_state_files = pad_network_state_files(network_state_files)
         # create object that will add adversarial relays into network
         adv_insertion = network_modifiers.AdversaryInsertion(args, _testing)
-        network_modifiers = [network_modifier.Bwweights(), adv_insertion]
+        network_modifiers = [adv_insertion]
         # create other network modification object
         if (args.other_network_modifier is not None):
             # dynamically import module and obtain reference to class
@@ -2008,7 +2009,7 @@ pathsim, and pickle it. The pickled object is input to the simulate command')
             other_network_modifier = network_modifier_class(args, _testing)
             network_modifiers.append(other_network_modifier)
         if (args.wf_optimal):
-            network_modifiers.insert(0, network_modifer.Bwweights(True))
+            network_modifiers.insert(0, Bwweights(True))
         # create iterator that applies network modifiers to nsf list
         network_states = get_network_states(network_state_files,
             network_modifiers)
