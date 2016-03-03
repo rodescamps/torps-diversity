@@ -1,0 +1,743 @@
+3 b E=S 2013-01-01-00-00-00-network_state Wgg=7820, Wgd=2023, Wmd=2023, Wed=5953
+3 b E=S 2013-01-01-01-00-00-network_state Wgg=7799, Wgd=2000, Wmd=2000, Wed=5999
+3 b E=S 2013-01-01-02-00-00-network_state Wgg=7460, Wgd=2108, Wmd=2108, Wed=5784
+3 b E=S 2013-01-01-03-00-00-network_state Wgg=7411, Wgd=2098, Wmd=2098, Wed=5804
+3 b E=S 2013-01-01-04-00-00-network_state Wgg=7294, Wgd=2259, Wmd=2259, Wed=5481
+3 b E=S 2013-01-01-05-00-00-network_state Wgg=7073, Wgd=2392, Wmd=2392, Wed=5216
+3 b E=S 2013-01-01-06-00-00-network_state Wgg=7021, Wgd=2377, Wmd=2377, Wed=5245
+3 b E=S 2013-01-01-07-00-00-network_state Wgg=6919, Wgd=2424, Wmd=2424, Wed=5152
+3 b E=S 2013-01-01-08-00-00-network_state Wgg=6891, Wgd=2371, Wmd=2371, Wed=5257
+3 b E=S 2013-01-01-09-00-00-network_state Wgg=6937, Wgd=2458, Wmd=2458, Wed=5083
+3 b E=S 2013-01-01-10-00-00-network_state Wgg=6936, Wgd=2441, Wmd=2441, Wed=5117
+3 b E=S 2013-01-01-11-00-00-network_state Wgg=7028, Wgd=2430, Wmd=2430, Wed=5140
+3 b E=S 2013-01-01-12-00-00-network_state Wgg=7013, Wgd=2308, Wmd=2308, Wed=5384
+3 b E=S 2013-01-01-13-00-00-network_state Wgg=7012, Wgd=2328, Wmd=2328, Wed=5344
+3 b E=S 2013-01-01-14-00-00-network_state Wgg=7080, Wgd=2303, Wmd=2303, Wed=5393
+3 b E=S 2013-01-01-15-00-00-network_state Wgg=7056, Wgd=2308, Wmd=2308, Wed=5383
+3 b E=S 2013-01-01-16-00-00-network_state Wgg=7129, Wgd=2348, Wmd=2348, Wed=5303
+3 b E=S 2013-01-01-17-00-00-network_state Wgg=7037, Wgd=2273, Wmd=2273, Wed=5453
+3 b E=S 2013-01-01-18-00-00-network_state Wgg=7252, Wgd=2136, Wmd=2136, Wed=5728
+3 b E=S 2013-01-01-19-00-00-network_state Wgg=7426, Wgd=1884, Wmd=1884, Wed=6231
+3 b E=S 2013-01-01-20-00-00-network_state Wgg=7260, Wgd=1998, Wmd=1998, Wed=6003
+3 b E=S 2013-01-01-21-00-00-network_state Wgg=7298, Wgd=1923, Wmd=1923, Wed=6153
+3 b E=S 2013-01-01-22-00-00-network_state Wgg=7307, Wgd=1937, Wmd=1937, Wed=6126
+3 b E=S 2013-01-01-23-00-00-network_state Wgg=7329, Wgd=1847, Wmd=1847, Wed=6305
+3 b E=S 2013-01-02-00-00-00-network_state Wgg=7927, Wgd=1706, Wmd=1706, Wed=6588
+2 b 2 M < T/3 2013-01-02-01-00-00-network_state Wed=6225, Wgd=207, Wmd=3568 
+3 b E=S 2013-01-02-02-00-00-network_state Wgg=7545, Wgd=2070, Wmd=2070, Wed=5860
+3 b E=S 2013-01-02-03-00-00-network_state Wgg=7420, Wgd=2173, Wmd=2173, Wed=5654
+3 b E=S 2013-01-02-04-00-00-network_state Wgg=7461, Wgd=2127, Wmd=2127, Wed=5745
+3 b E=S 2013-01-02-05-00-00-network_state Wgg=7349, Wgd=2099, Wmd=2099, Wed=5801
+3 b E=S 2013-01-02-06-00-00-network_state Wgg=7335, Wgd=2107, Wmd=2107, Wed=5786
+3 b E=S 2013-01-02-07-00-00-network_state Wgg=7213, Wgd=2011, Wmd=2011, Wed=5978
+3 b E=S 2013-01-02-08-00-00-network_state Wgg=7148, Wgd=2057, Wmd=2057, Wed=5886
+3 b E=S 2013-01-02-09-00-00-network_state Wgg=7297, Wgd=2100, Wmd=2100, Wed=5799
+3 b E=S 2013-01-02-10-00-00-network_state Wgg=7223, Wgd=2093, Wmd=2093, Wed=5813
+3 b E=S 2013-01-02-11-00-00-network_state Wgg=7109, Wgd=2116, Wmd=2116, Wed=5767
+3 b E=S 2013-01-02-12-00-00-network_state Wgg=7230, Wgd=2016, Wmd=2016, Wed=5968
+3 b E=S 2013-01-02-13-00-00-network_state Wgg=7272, Wgd=2011, Wmd=2011, Wed=5977
+3 b E=S 2013-01-02-14-00-00-network_state Wgg=7282, Wgd=2016, Wmd=2016, Wed=5967
+3 b E=S 2013-01-02-15-00-00-network_state Wgg=7354, Wgd=1978, Wmd=1978, Wed=6044
+3 b E=S 2013-01-02-16-00-00-network_state Wgg=7464, Wgd=2020, Wmd=2020, Wed=5960
+3 b E=S 2013-01-02-17-00-00-network_state Wgg=7399, Wgd=2006, Wmd=2006, Wed=5988
+3 b E=S 2013-01-02-18-00-00-network_state Wgg=7483, Wgd=1974, Wmd=1974, Wed=6051
+3 b E=S 2013-01-02-19-00-00-network_state Wgg=7442, Wgd=2021, Wmd=2021, Wed=5957
+3 b E=S 2013-01-02-20-00-00-network_state Wgg=7444, Wgd=2031, Wmd=2031, Wed=5938
+3 b E=S 2013-01-02-21-00-00-network_state Wgg=7467, Wgd=2083, Wmd=2083, Wed=5834
+2 b 1 2013-01-02-22-00-00-network_state Wee=863, Wed=8899, Wgd=550, Wmd=550
+2 b 1 2013-01-02-23-00-00-network_state Wee=1002, Wed=8722, Wgd=639, Wmd=639
+2 b 1 2013-01-03-00-00-00-network_state Wee=2236, Wed=8465, Wgd=767, Wmd=767
+2 b 2 M < T/3 2013-01-03-01-00-00-network_state Wed=6025, Wgd=214, Wmd=3761 
+3 b E=S 2013-01-03-02-00-00-network_state Wgg=7226, Wgd=2171, Wmd=2171, Wed=5658
+3 b E=S 2013-01-03-03-00-00-network_state Wgg=7124, Wgd=2232, Wmd=2232, Wed=5536
+2 b 2 M < T/3 2013-01-03-04-00-00-network_state Wed=5548, Wgd=81, Wmd=4371 
+2 b 2 M < T/3 2013-01-03-05-00-00-network_state Wed=5543, Wgd=181, Wmd=4276 
+3 b E=S 2013-01-03-06-00-00-network_state Wgg=7129, Wgd=2170, Wmd=2170, Wed=5660
+3 b E=S 2013-01-03-07-00-00-network_state Wgg=6937, Wgd=2175, Wmd=2175, Wed=5649
+3 b E=S 2013-01-03-08-00-00-network_state Wgg=6942, Wgd=2189, Wmd=2189, Wed=5621
+3 b E=S 2013-01-03-09-00-00-network_state Wgg=6975, Wgd=2187, Wmd=2187, Wed=5626
+3 b E=S 2013-01-03-10-00-00-network_state Wgg=7036, Wgd=2278, Wmd=2278, Wed=5444
+2 b 2 M < T/3 2013-01-03-11-00-00-network_state Wed=5437, Wgd=74, Wmd=4489 
+2 b 2 M < T/3 2013-01-03-12-00-00-network_state Wed=5451, Wgd=50, Wmd=4499 
+2 b 2 M < T/3 2013-01-03-13-00-00-network_state Wed=4666, Wgd=447, Wmd=4887 
+2 b 2 M < T/3 2013-01-03-14-00-00-network_state Wed=4576, Wgd=497, Wmd=4927 
+2 b 2 M < T/3 2013-01-03-15-00-00-network_state Wed=4795, Wgd=244, Wmd=4961 
+2 b 2 M < T/3 2013-01-03-16-00-00-network_state Wed=4751, Wgd=214, Wmd=5035 
+2 b 2 M < T/3 2013-01-03-17-00-00-network_state Wed=4488, Wgd=307, Wmd=5205 
+2 b 2 M < T/3 2013-01-03-18-00-00-network_state Wed=4501, Wgd=373, Wmd=5126 
+2 b 2 M < T/3 2013-01-03-19-00-00-network_state Wed=4481, Wgd=615, Wmd=4904 
+2 b 2 M < T/3 2013-01-03-20-00-00-network_state Wed=4457, Wgd=637, Wmd=4906 
+2 b 2 M < T/3 2013-01-03-21-00-00-network_state Wed=4417, Wgd=283, Wmd=5300 
+2 b 2 M < T/3 2013-01-03-22-00-00-network_state Wed=4329, Wgd=336, Wmd=5335 
+2 b 2 M < T/3 2013-01-03-23-00-00-network_state Wed=4422, Wgd=309, Wmd=5269 
+2 b 2 M < T/3 2013-01-04-00-00-00-network_state Wed=4502, Wgd=657, Wmd=4841 
+2 b 2 M < T/3 2013-01-04-01-00-00-network_state Wed=4493, Wgd=613, Wmd=4894 
+2 b 2 M < T/3 2013-01-04-02-00-00-network_state Wed=4168, Wgd=290, Wmd=5542 
+3 b E=S 2013-01-04-03-00-00-network_state Wgg=6714, Wgd=2477, Wmd=2477, Wed=5046
+3 b E=S 2013-01-04-04-00-00-network_state Wgg=6746, Wgd=2500, Wmd=2500, Wed=5000
+3 b E=S 2013-01-04-05-00-00-network_state Wgg=6698, Wgd=2314, Wmd=2314, Wed=5372
+3 b E=S 2013-01-04-06-00-00-network_state Wgg=6807, Wgd=2266, Wmd=2266, Wed=5467
+3 b E=S 2013-01-04-07-00-00-network_state Wgg=6910, Wgd=2209, Wmd=2209, Wed=5582
+3 b E=S 2013-01-04-08-00-00-network_state Wgg=7012, Wgd=2111, Wmd=2111, Wed=5778
+3 b E=S 2013-01-04-09-00-00-network_state Wgg=7047, Wgd=2083, Wmd=2083, Wed=5834
+3 b E=S 2013-01-04-10-00-00-network_state Wgg=7102, Wgd=2106, Wmd=2106, Wed=5788
+2 b 2 M < T/3 2013-01-04-11-00-00-network_state Wed=5540, Wgd=234, Wmd=4226 
+2 b 2 M < T/3 2013-01-04-12-00-00-network_state Wed=5488, Wgd=267, Wmd=4245 
+2 b 2 M < T/3 2013-01-04-13-00-00-network_state Wed=4236, Wgd=776, Wmd=4988 
+2 b 1 2013-01-04-14-00-00-network_state Wee=566, Wed=8629, Wgd=685, Wmd=685
+2 b 1 2013-01-04-15-00-00-network_state Wee=714, Wed=8669, Wgd=665, Wmd=665
+2 b 2 M < T/3 2013-01-04-16-00-00-network_state Wed=4399, Wgd=422, Wmd=5179 
+2 b 2 M < T/3 2013-01-04-17-00-00-network_state Wed=4214, Wgd=324, Wmd=5462 
+2 b 2 M < T/3 2013-01-04-18-00-00-network_state Wed=4273, Wgd=361, Wmd=5366 
+2 b 2 M < T/3 2013-01-04-19-00-00-network_state Wed=4284, Wgd=350, Wmd=5366 
+2 b 2 M < T/3 2013-01-04-20-00-00-network_state Wed=4223, Wgd=257, Wmd=5520 
+2 b 2 M < T/3 2013-01-04-21-00-00-network_state Wed=4235, Wgd=306, Wmd=5459 
+2 b 2 M < T/3 2013-01-04-22-00-00-network_state Wed=4200, Wgd=377, Wmd=5423 
+2 b 2 M < T/3 2013-01-04-23-00-00-network_state Wed=4114, Wgd=364, Wmd=5522 
+2 b 2 M < T/3 2013-01-05-00-00-00-network_state Wed=5005, Wgd=502, Wmd=4493 
+2 b 1 2013-01-05-01-00-00-network_state Wee=343, Wed=8924, Wgd=538, Wmd=538
+3 b E=S 2013-01-05-02-00-00-network_state Wgg=7148, Wgd=2338, Wmd=2338, Wed=5324
+3 b E=S 2013-01-05-03-00-00-network_state Wgg=7032, Wgd=2345, Wmd=2345, Wed=5310
+3 b E=S 2013-01-05-04-00-00-network_state Wgg=6981, Wgd=2332, Wmd=2332, Wed=5335
+3 b E=S 2013-01-05-05-00-00-network_state Wgg=7030, Wgd=2325, Wmd=2325, Wed=5349
+3 b E=S 2013-01-05-06-00-00-network_state Wgg=7049, Wgd=2264, Wmd=2264, Wed=5471
+3 b E=S 2013-01-05-07-00-00-network_state Wgg=7152, Wgd=2217, Wmd=2217, Wed=5565
+3 b E=S 2013-01-05-08-00-00-network_state Wgg=7235, Wgd=2103, Wmd=2103, Wed=5794
+3 b E=S 2013-01-05-09-00-00-network_state Wgg=7159, Wgd=2024, Wmd=2024, Wed=5952
+3 b E=S 2013-01-05-10-00-00-network_state Wgg=7177, Wgd=2035, Wmd=2035, Wed=5930
+3 b E=S 2013-01-05-11-00-00-network_state Wgg=7200, Wgd=2032, Wmd=2032, Wed=5936
+3 b E=S 2013-01-05-12-00-00-network_state Wgg=7277, Wgd=2019, Wmd=2019, Wed=5962
+3 b E=S 2013-01-05-13-00-00-network_state Wgg=7242, Wgd=2031, Wmd=2031, Wed=5938
+3 b E=S 2013-01-05-14-00-00-network_state Wgg=7249, Wgd=2005, Wmd=2005, Wed=5990
+2 b 2 M < T/3 2013-01-05-15-00-00-network_state Wed=4558, Wgd=83, Wmd=5359 
+2 b 1 2013-01-05-16-00-00-network_state Wee=78, Wed=9222, Wgd=389, Wmd=389
+3 b E=S 2013-01-05-17-00-00-network_state Wgg=7201, Wgd=2058, Wmd=2058, Wed=5884
+2 b 2 M < T/3 2013-01-05-18-00-00-network_state Wed=4648, Wgd=342, Wmd=5010 
+2 b 1 2013-01-05-20-00-00-network_state Wee=368, Wed=8568, Wgd=716, Wmd=716
+2 b 1 2013-01-05-21-00-00-network_state Wee=468, Wed=8286, Wgd=857, Wmd=857
+2 b 2 M < T/3 2013-01-05-22-00-00-network_state Wed=5582, Wgd=159, Wmd=4259 
+2 b 2 M < T/3 2013-01-05-23-00-00-network_state Wed=5473, Wgd=145, Wmd=4382 
+2 b 2 M < T/3 2013-01-06-00-00-00-network_state Wed=5559, Wgd=546, Wmd=3895 
+2 b 2 M < T/3 2013-01-06-01-00-00-network_state Wed=5552, Wgd=524, Wmd=3924 
+2 b 2 M < T/3 2013-01-06-02-00-00-network_state Wed=5261, Wgd=109, Wmd=4630 
+3 b E=S 2013-01-06-03-00-00-network_state Wgg=6978, Wgd=2355, Wmd=2355, Wed=5289
+3 b E=S 2013-01-06-04-00-00-network_state Wgg=6929, Wgd=2304, Wmd=2304, Wed=5392
+3 b E=S 2013-01-06-05-00-00-network_state Wgg=6955, Wgd=2238, Wmd=2238, Wed=5524
+3 b E=S 2013-01-06-06-00-00-network_state Wgg=6927, Wgd=2253, Wmd=2253, Wed=5494
+3 b E=S 2013-01-06-07-00-00-network_state Wgg=6988, Wgd=2268, Wmd=2268, Wed=5464
+3 b E=S 2013-01-06-08-00-00-network_state Wgg=7004, Wgd=2262, Wmd=2262, Wed=5475
+3 b E=S 2013-01-06-09-00-00-network_state Wgg=7147, Wgd=2251, Wmd=2251, Wed=5497
+2 b 2 M < T/3 2013-01-06-10-00-00-network_state Wed=5391, Wgd=6, Wmd=4603 
+3 b E=S 2013-01-06-11-00-00-network_state Wgg=7247, Wgd=2261, Wmd=2261, Wed=5477
+3 b E=S 2013-01-06-12-00-00-network_state Wgg=7313, Wgd=2208, Wmd=2208, Wed=5583
+3 b E=S 2013-01-06-13-00-00-network_state Wgg=7220, Wgd=2182, Wmd=2182, Wed=5635
+3 b E=S 2013-01-06-14-00-00-network_state Wgg=7257, Wgd=2206, Wmd=2206, Wed=5587
+2 b 1 2013-01-06-15-00-00-network_state Wee=214, Wed=8695, Wgd=652, Wmd=652
+2 b 2 M < T/3 2013-01-06-16-00-00-network_state Wed=4369, Wgd=613, Wmd=5018 
+3 b E=S 2013-01-06-17-00-00-network_state Wgg=7346, Wgd=2137, Wmd=2137, Wed=5725
+2 b 2 M < T/3 2013-01-06-18-00-00-network_state Wed=5711, Wgd=61, Wmd=4228 
+2 b 2 M < T/3 2013-01-06-19-00-00-network_state Wed=4821, Wgd=468, Wmd=4711 
+2 b 2 M < T/3 2013-01-06-20-00-00-network_state Wed=4585, Wgd=554, Wmd=4861 
+2 b 2 M < T/3 2013-01-06-21-00-00-network_state Wed=4654, Wgd=588, Wmd=4758 
+2 b 1 2013-01-06-22-00-00-network_state Wee=109, Wed=8440, Wgd=780, Wmd=780
+2 b 1 2013-01-06-23-00-00-network_state Wee=388, Wed=8388, Wgd=806, Wmd=806
+2 b 1 2013-01-07-00-00-00-network_state Wee=3027, Wed=7565, Wgd=1217, Wmd=1217
+2 b 1 2013-01-07-01-00-00-network_state Wee=1390, Wed=8484, Wgd=758, Wmd=758
+2 b 2 M < T/3 2013-01-07-02-00-00-network_state Wed=4106, Wgd=335, Wmd=5559 
+2 b 2 M < T/3 2013-01-07-03-00-00-network_state Wed=4209, Wgd=219, Wmd=5572 
+2 b 2 M < T/3 2013-01-07-04-00-00-network_state Wed=4169, Wgd=375, Wmd=5456 
+2 b 2 M < T/3 2013-01-07-05-00-00-network_state Wed=4229, Wgd=144, Wmd=5627 
+2 b 2 M < T/3 2013-01-07-06-00-00-network_state Wed=4390, Wgd=109, Wmd=5501 
+2 b 2 M < T/3 2013-01-07-07-00-00-network_state Wed=4582, Wgd=6, Wmd=5412 
+3 b E=S 2013-01-07-08-00-00-network_state Wgg=6933, Wgd=2731, Wmd=2731, Wed=4537
+2 b 2 M < T/3 2013-01-07-09-00-00-network_state Wed=4479, Wgd=193, Wmd=5328 
+2 b 2 M < T/3 2013-01-07-10-00-00-network_state Wed=4528, Wgd=214, Wmd=5258 
+3 b E=S 2013-01-07-11-00-00-network_state Wgg=6820, Wgd=2765, Wmd=2765, Wed=4470
+3 b E=S 2013-01-07-12-00-00-network_state Wgg=6826, Wgd=2750, Wmd=2750, Wed=4499
+3 b E=S 2013-01-07-13-00-00-network_state Wgg=6772, Wgd=2764, Wmd=2764, Wed=4472
+3 b E=S 2013-01-07-14-00-00-network_state Wgg=6788, Wgd=2782, Wmd=2782, Wed=4435
+2 b 2 M < T/3 2013-01-07-15-00-00-network_state Wed=4427, Wgd=44, Wmd=5529 
+2 b 2 M < T/3 2013-01-07-16-00-00-network_state Wed=4461, Wgd=236, Wmd=5303 
+2 b 2 M < T/3 2013-01-07-17-00-00-network_state Wed=4538, Wgd=200, Wmd=5262 
+2 b 2 M < T/3 2013-01-07-18-00-00-network_state Wed=4573, Wgd=110, Wmd=5317 
+3 b E=S 2013-01-07-19-00-00-network_state Wgg=6691, Wgd=2705, Wmd=2705, Wed=4590
+3 b E=S 2013-01-07-20-00-00-network_state Wgg=6717, Wgd=2638, Wmd=2638, Wed=4723
+3 b E=S 2013-01-07-21-00-00-network_state Wgg=6716, Wgd=2655, Wmd=2655, Wed=4690
+2 b 2 M < T/3 2013-01-07-22-00-00-network_state Wed=4684, Wgd=45, Wmd=5271 
+2 b 2 M < T/3 2013-01-07-23-00-00-network_state Wed=4854, Wgd=17, Wmd=5129 
+2 b 2 M < T/3 2013-01-08-00-00-00-network_state Wed=5030, Wgd=380, Wmd=4590 
+2 b 2 M < T/3 2013-01-08-01-00-00-network_state Wed=4908, Wgd=623, Wmd=4469 
+2 b 2 M < T/3 2013-01-08-02-00-00-network_state Wed=4596, Wgd=426, Wmd=4978 
+2 b 2 M < T/3 2013-01-08-03-00-00-network_state Wed=4527, Wgd=369, Wmd=5104 
+2 b 2 M < T/3 2013-01-08-04-00-00-network_state Wed=4578, Wgd=239, Wmd=5183 
+2 b 2 M < T/3 2013-01-08-05-00-00-network_state Wed=4363, Wgd=337, Wmd=5300 
+2 b 2 M < T/3 2013-01-08-06-00-00-network_state Wed=4408, Wgd=122, Wmd=5470 
+2 b 2 M < T/3 2013-01-08-07-00-00-network_state Wed=4219, Wgd=282, Wmd=5499 
+2 b 2 M < T/3 2013-01-08-08-00-00-network_state Wed=4037, Wgd=330, Wmd=5633 
+2 b 2 M < T/3 2013-01-08-09-00-00-network_state Wed=4184, Wgd=295, Wmd=5521 
+2 b 2 M < T/3 2013-01-08-10-00-00-network_state Wed=4202, Wgd=182, Wmd=5616 
+2 b 2 M < T/3 2013-01-08-11-00-00-network_state Wed=4169, Wgd=217, Wmd=5614 
+2 b 2 M < T/3 2013-01-08-12-00-00-network_state Wed=4286, Wgd=2, Wmd=5712 
+3 b E=S 2013-01-08-13-00-00-network_state Wgg=6578, Wgd=2871, Wmd=2871, Wed=4258
+3 b E=S 2013-01-08-14-00-00-network_state Wgg=6491, Wgd=2858, Wmd=2858, Wed=4284
+3 b E=S 2013-01-08-15-00-00-network_state Wgg=6401, Wgd=2884, Wmd=2884, Wed=4231
+3 b E=S 2013-01-08-16-00-00-network_state Wgg=6398, Wgd=2897, Wmd=2897, Wed=4205
+3 b E=S 2013-01-08-17-00-00-network_state Wgg=6522, Wgd=2861, Wmd=2861, Wed=4278
+2 b 2 M < T/3 2013-01-08-18-00-00-network_state Wed=4267, Wgd=18, Wmd=5715 
+2 b 2 M < T/3 2013-01-08-19-00-00-network_state Wed=4272, Wgd=93, Wmd=5635 
+2 b 2 M < T/3 2013-01-08-20-00-00-network_state Wed=4230, Wgd=105, Wmd=5665 
+2 b 2 M < T/3 2013-01-08-21-00-00-network_state Wed=4410, Wgd=6, Wmd=5584 
+3 b E=S 2013-01-08-22-00-00-network_state Wgg=6584, Wgd=2806, Wmd=2806, Wed=4387
+3 b E=S 2013-01-08-23-00-00-network_state Wgg=6615, Wgd=2786, Wmd=2786, Wed=4428
+2 b 2 M < T/3 2013-01-09-00-00-00-network_state Wed=4662, Wgd=267, Wmd=5071 
+2 b 2 M < T/3 2013-01-09-01-00-00-network_state Wed=4578, Wgd=334, Wmd=5088 
+2 b 2 M < T/3 2013-01-09-02-00-00-network_state Wed=4762, Wgd=192, Wmd=5046 
+2 b 2 M < T/3 2013-01-09-03-00-00-network_state Wed=4580, Wgd=173, Wmd=5247 
+2 b 2 M < T/3 2013-01-09-04-00-00-network_state Wed=4786, Wgd=20, Wmd=5194 
+3 b E=S 2013-01-09-05-00-00-network_state Wgg=6709, Wgd=2619, Wmd=2619, Wed=4762
+3 b E=S 2013-01-09-06-00-00-network_state Wgg=6615, Wgd=2526, Wmd=2526, Wed=4948
+3 b E=S 2013-01-09-07-00-00-network_state Wgg=6633, Wgd=2561, Wmd=2561, Wed=4878
+3 b E=S 2013-01-09-08-00-00-network_state Wgg=6709, Wgd=2576, Wmd=2576, Wed=4847
+3 b E=S 2013-01-09-09-00-00-network_state Wgg=6774, Wgd=2584, Wmd=2584, Wed=4832
+3 b E=S 2013-01-09-10-00-00-network_state Wgg=6755, Wgd=2577, Wmd=2577, Wed=4846
+3 b E=S 2013-01-09-11-00-00-network_state Wgg=6801, Wgd=2587, Wmd=2587, Wed=4825
+3 b E=S 2013-01-09-12-00-00-network_state Wgg=6812, Wgd=2583, Wmd=2583, Wed=4833
+3 b E=S 2013-01-09-13-00-00-network_state Wgg=6822, Wgd=2544, Wmd=2544, Wed=4911
+2 b 2 M < T/3 2013-01-09-14-00-00-network_state Wed=4853, Wgd=200, Wmd=4947 
+2 b 2 M < T/3 2013-01-09-15-00-00-network_state Wed=4831, Wgd=235, Wmd=4934 
+2 b 2 M < T/3 2013-01-09-16-00-00-network_state Wed=4556, Wgd=241, Wmd=5203 
+2 b 2 M < T/3 2013-01-09-17-00-00-network_state Wed=4502, Wgd=253, Wmd=5245 
+2 b 2 M < T/3 2013-01-09-18-00-00-network_state Wed=4690, Wgd=303, Wmd=5007 
+2 b 2 M < T/3 2013-01-09-19-00-00-network_state Wed=4866, Wgd=188, Wmd=4946 
+2 b 2 M < T/3 2013-01-09-20-00-00-network_state Wed=4986, Wgd=77, Wmd=4937 
+2 b 2 M < T/3 2013-01-09-21-00-00-network_state Wed=5002, Wgd=46, Wmd=4952 
+2 b 2 M < T/3 2013-01-09-22-00-00-network_state Wed=4936, Wgd=90, Wmd=4974 
+2 b 2 M < T/3 2013-01-09-23-00-00-network_state Wed=4907, Wgd=431, Wmd=4662 
+2 b 2 M < T/3 2013-01-10-00-00-00-network_state Wed=5027, Wgd=658, Wmd=4315 
+2 b 2 M < T/3 2013-01-10-01-00-00-network_state Wed=4814, Wgd=545, Wmd=4641 
+2 b 2 M < T/3 2013-01-10-02-00-00-network_state Wed=4775, Wgd=227, Wmd=4998 
+2 b 2 M < T/3 2013-01-10-03-00-00-network_state Wed=4533, Wgd=364, Wmd=5103 
+2 b 2 M < T/3 2013-01-10-04-00-00-network_state Wed=4472, Wgd=300, Wmd=5228 
+2 b 2 M < T/3 2013-01-10-05-00-00-network_state Wed=4390, Wgd=197, Wmd=5413 
+2 b 2 M < T/3 2013-01-10-06-00-00-network_state Wed=4300, Wgd=258, Wmd=5442 
+2 b 2 M < T/3 2013-01-10-07-00-00-network_state Wed=4276, Wgd=223, Wmd=5501 
+2 b 2 M < T/3 2013-01-10-08-00-00-network_state Wed=4201, Wgd=81, Wmd=5718 
+2 b 2 M < T/3 2013-01-10-09-00-00-network_state Wed=4134, Wgd=35, Wmd=5831 
+3 b E=S 2013-01-10-10-00-00-network_state Wgg=6463, Wgd=2831, Wmd=2831, Wed=4337
+3 b E=S 2013-01-10-11-00-00-network_state Wgg=6445, Wgd=2768, Wmd=2768, Wed=4464
+3 b E=S 2013-01-10-12-00-00-network_state Wgg=6433, Wgd=2803, Wmd=2803, Wed=4394
+3 b E=S 2013-01-10-13-00-00-network_state Wgg=6464, Wgd=2777, Wmd=2777, Wed=4446
+3 b E=S 2013-01-10-14-00-00-network_state Wgg=6563, Wgd=2795, Wmd=2795, Wed=4409
+3 b E=S 2013-01-10-15-00-00-network_state Wgg=6548, Wgd=2808, Wmd=2808, Wed=4383
+2 b 2 M < T/3 2013-01-10-16-00-00-network_state Wed=4402, Wgd=118, Wmd=5480 
+2 b 2 M < T/3 2013-01-10-17-00-00-network_state Wed=4398, Wgd=212, Wmd=5390 
+2 b 2 M < T/3 2013-01-10-18-00-00-network_state Wed=4653, Wgd=114, Wmd=5233 
+2 b 2 M < T/3 2013-01-10-19-00-00-network_state Wed=4552, Wgd=243, Wmd=5205 
+2 b 2 M < T/3 2013-01-10-20-00-00-network_state Wed=4528, Wgd=291, Wmd=5181 
+2 b 2 M < T/3 2013-01-10-21-00-00-network_state Wed=4806, Wgd=308, Wmd=4886 
+2 b 2 M < T/3 2013-01-10-22-00-00-network_state Wed=4796, Wgd=249, Wmd=4955 
+2 b 2 M < T/3 2013-01-10-23-00-00-network_state Wed=4830, Wgd=383, Wmd=4787 
+2 b 2 M < T/3 2013-01-11-00-00-00-network_state Wed=5040, Wgd=668, Wmd=4292 
+2 b 2 M < T/3 2013-01-11-01-00-00-network_state Wed=4940, Wgd=612, Wmd=4448 
+2 b 2 M < T/3 2013-01-11-02-00-00-network_state Wed=4816, Wgd=237, Wmd=4947 
+2 b 2 M < T/3 2013-01-11-03-00-00-network_state Wed=4849, Wgd=75, Wmd=5076 
+3 b E=S 2013-01-11-04-00-00-network_state Wgg=6542, Wgd=2683, Wmd=2683, Wed=4633
+3 b E=S 2013-01-11-05-00-00-network_state Wgg=6542, Wgd=2617, Wmd=2617, Wed=4765
+3 b E=S 2013-01-11-06-00-00-network_state Wgg=6546, Wgd=2650, Wmd=2650, Wed=4699
+3 b E=S 2013-01-11-07-00-00-network_state Wgg=6631, Wgd=2658, Wmd=2658, Wed=4684
+3 b E=S 2013-01-11-08-00-00-network_state Wgg=6661, Wgd=2642, Wmd=2642, Wed=4715
+3 b E=S 2013-01-11-09-00-00-network_state Wgg=6689, Wgd=2647, Wmd=2647, Wed=4706
+3 b E=S 2013-01-11-10-00-00-network_state Wgg=6710, Wgd=2622, Wmd=2622, Wed=4756
+3 b E=S 2013-01-11-11-00-00-network_state Wgg=6732, Wgd=2639, Wmd=2639, Wed=4721
+3 b E=S 2013-01-11-12-00-00-network_state Wgg=6768, Wgd=2600, Wmd=2600, Wed=4800
+3 b E=S 2013-01-11-13-00-00-network_state Wgg=6798, Wgd=2619, Wmd=2619, Wed=4761
+3 b E=S 2013-01-11-14-00-00-network_state Wgg=6738, Wgd=2618, Wmd=2618, Wed=4764
+3 b E=S 2013-01-11-15-00-00-network_state Wgg=6869, Wgd=2508, Wmd=2508, Wed=4983
+3 b E=S 2013-01-11-16-00-00-network_state Wgg=7158, Wgd=2480, Wmd=2480, Wed=5040
+3 b E=S 2013-01-11-17-00-00-network_state Wgg=7149, Wgd=2479, Wmd=2479, Wed=5042
+3 b E=S 2013-01-11-18-00-00-network_state Wgg=7180, Wgd=2453, Wmd=2453, Wed=5094
+3 b E=S 2013-01-11-19-00-00-network_state Wgg=7183, Wgd=2400, Wmd=2400, Wed=5199
+3 b E=S 2013-01-11-20-00-00-network_state Wgg=7315, Wgd=2284, Wmd=2284, Wed=5432
+3 b E=S 2013-01-11-21-00-00-network_state Wgg=7347, Wgd=2349, Wmd=2349, Wed=5302
+3 b E=S 2013-01-11-22-00-00-network_state Wgg=7226, Wgd=2327, Wmd=2327, Wed=5345
+2 b 2 M < T/3 2013-01-11-23-00-00-network_state Wed=4766, Wgd=105, Wmd=5129 
+2 b 1 2013-01-12-00-00-00-network_state Wee=951, Wed=8871, Wgd=564, Wmd=564
+2 b 1 2013-01-12-01-00-00-network_state Wee=244, Wed=8977, Wgd=511, Wmd=511
+2 b 2 M < T/3 2013-01-12-02-00-00-network_state Wed=4776, Wgd=139, Wmd=5085 
+2 b 2 M < T/3 2013-01-12-03-00-00-network_state Wed=4792, Wgd=58, Wmd=5150 
+2 b 2 M < T/3 2013-01-12-04-00-00-network_state Wed=4849, Wgd=62, Wmd=5089 
+2 b 2 M < T/3 2013-01-12-05-00-00-network_state Wed=4736, Wgd=176, Wmd=5088 
+2 b 2 M < T/3 2013-01-12-06-00-00-network_state Wed=4688, Wgd=169, Wmd=5143 
+2 b 2 M < T/3 2013-01-12-07-00-00-network_state Wed=4752, Wgd=79, Wmd=5169 
+2 b 2 M < T/3 2013-01-12-08-00-00-network_state Wed=4530, Wgd=251, Wmd=5219 
+2 b 2 M < T/3 2013-01-12-09-00-00-network_state Wed=4496, Wgd=227, Wmd=5277 
+3 b E=S 2013-01-12-10-00-00-network_state Wgg=6645, Wgd=2735, Wmd=2735, Wed=4530
+3 b E=S 2013-01-12-11-00-00-network_state Wgg=6602, Wgd=2748, Wmd=2748, Wed=4503
+3 b E=S 2013-01-12-12-00-00-network_state Wgg=6605, Wgd=2742, Wmd=2742, Wed=4515
+3 b E=S 2013-01-12-13-00-00-network_state Wgg=6523, Wgd=2764, Wmd=2764, Wed=4472
+3 b E=S 2013-01-12-14-00-00-network_state Wgg=6502, Wgd=2783, Wmd=2783, Wed=4433
+3 b E=S 2013-01-12-15-00-00-network_state Wgg=6526, Wgd=2746, Wmd=2746, Wed=4507
+2 b 2 M < T/3 2013-01-12-16-00-00-network_state Wed=4520, Wgd=24, Wmd=5456 
+2 b 2 M < T/3 2013-01-12-17-00-00-network_state Wed=4450, Wgd=42, Wmd=5508 
+2 b 2 M < T/3 2013-01-12-18-00-00-network_state Wed=4548, Wgd=138, Wmd=5314 
+2 b 2 M < T/3 2013-01-12-19-00-00-network_state Wed=4503, Wgd=132, Wmd=5365 
+2 b 2 M < T/3 2013-01-12-20-00-00-network_state Wed=4482, Wgd=166, Wmd=5352 
+2 b 2 M < T/3 2013-01-12-21-00-00-network_state Wed=4707, Wgd=99, Wmd=5194 
+2 b 2 M < T/3 2013-01-12-22-00-00-network_state Wed=4913, Wgd=96, Wmd=4991 
+2 b 2 M < T/3 2013-01-12-23-00-00-network_state Wed=4881, Wgd=128, Wmd=4991 
+2 b 2 M < T/3 2013-01-13-00-00-00-network_state Wed=4954, Wgd=571, Wmd=4475 
+2 b 2 M < T/3 2013-01-13-01-00-00-network_state Wed=4832, Wgd=638, Wmd=4530 
+2 b 2 M < T/3 2013-01-13-02-00-00-network_state Wed=4693, Wgd=207, Wmd=5100 
+2 b 2 M < T/3 2013-01-13-03-00-00-network_state Wed=4571, Wgd=173, Wmd=5256 
+2 b 2 M < T/3 2013-01-13-04-00-00-network_state Wed=4301, Wgd=196, Wmd=5503 
+2 b 2 M < T/3 2013-01-13-05-00-00-network_state Wed=4369, Wgd=98, Wmd=5533 
+2 b 2 M < T/3 2013-01-13-06-00-00-network_state Wed=4171, Wgd=190, Wmd=5639 
+2 b 2 M < T/3 2013-01-13-07-00-00-network_state Wed=4084, Wgd=117, Wmd=5799 
+3 b E=S 2013-01-13-08-00-00-network_state Wgg=6393, Wgd=2933, Wmd=2933, Wed=4133
+3 b E=S 2013-01-13-09-00-00-network_state Wgg=6395, Wgd=2942, Wmd=2942, Wed=4116
+3 b E=S 2013-01-13-10-00-00-network_state Wgg=6392, Wgd=2948, Wmd=2948, Wed=4103
+2 b 2 M < T/3 2013-01-13-11-00-00-network_state Wed=4133, Wgd=65, Wmd=5802 
+3 b E=S 2013-01-13-12-00-00-network_state Wgg=6329, Wgd=2955, Wmd=2955, Wed=4090
+2 b 2 M < T/3 2013-01-13-13-00-00-network_state Wed=4071, Wgd=12, Wmd=5917 
+2 b 2 M < T/3 2013-01-13-14-00-00-network_state Wed=4067, Wgd=60, Wmd=5873 
+2 b 2 M < T/3 2013-01-13-15-00-00-network_state Wed=4084, Wgd=88, Wmd=5828 
+2 b 2 M < T/3 2013-01-13-16-00-00-network_state Wed=4061, Wgd=42, Wmd=5897 
+3 b E=S 2013-01-13-17-00-00-network_state Wgg=6437, Wgd=2769, Wmd=2769, Wed=4461
+3 b E=S 2013-01-13-18-00-00-network_state Wgg=6536, Wgd=2739, Wmd=2739, Wed=4522
+2 b 2 M < T/3 2013-01-13-19-00-00-network_state Wed=4345, Wgd=210, Wmd=5445 
+2 b 2 M < T/3 2013-01-13-20-00-00-network_state Wed=4431, Wgd=193, Wmd=5376 
+2 b 2 M < T/3 2013-01-13-21-00-00-network_state Wed=4344, Wgd=266, Wmd=5390 
+2 b 2 M < T/3 2013-01-13-22-00-00-network_state Wed=4433, Wgd=451, Wmd=5116 
+2 b 2 M < T/3 2013-01-13-23-00-00-network_state Wed=4488, Wgd=497, Wmd=5015 
+2 b 2 M < T/3 2013-01-14-00-00-00-network_state Wed=4507, Wgd=690, Wmd=4803 
+3 b E=S 2013-01-14-01-00-00-network_state Wgg=7729, Wgd=1276, Wmd=1276, Wed=7448
+3 b E=S 2013-01-14-02-00-00-network_state Wgg=7596, Wgd=1302, Wmd=1302, Wed=7395
+3 b E=S 2013-01-14-03-00-00-network_state Wgg=6715, Wgd=2306, Wmd=2306, Wed=5388
+3 b E=S 2013-01-14-04-00-00-network_state Wgg=6720, Wgd=2330, Wmd=2330, Wed=5339
+3 b E=S 2013-01-14-05-00-00-network_state Wgg=6575, Wgd=2522, Wmd=2522, Wed=4956
+3 b E=S 2013-01-14-06-00-00-network_state Wgg=6788, Wgd=2580, Wmd=2580, Wed=4840
+3 b E=S 2013-01-14-07-00-00-network_state Wgg=6906, Wgd=2571, Wmd=2571, Wed=4858
+3 b E=S 2013-01-14-08-00-00-network_state Wgg=6929, Wgd=2652, Wmd=2652, Wed=4696
+3 b E=S 2013-01-14-09-00-00-network_state Wgg=6855, Wgd=2685, Wmd=2685, Wed=4629
+3 b E=S 2013-01-14-10-00-00-network_state Wgg=6906, Wgd=2652, Wmd=2652, Wed=4696
+3 b E=S 2013-01-14-11-00-00-network_state Wgg=7056, Wgd=2553, Wmd=2553, Wed=4894
+3 b E=S 2013-01-14-12-00-00-network_state Wgg=7039, Wgd=2572, Wmd=2572, Wed=4855
+3 b E=S 2013-01-14-13-00-00-network_state Wgg=7029, Wgd=2655, Wmd=2655, Wed=4689
+3 b E=S 2013-01-14-14-00-00-network_state Wgg=7081, Wgd=2739, Wmd=2739, Wed=4522
+3 b E=S 2013-01-14-15-00-00-network_state Wgg=7226, Wgd=2705, Wmd=2705, Wed=4589
+3 b E=S 2013-01-14-16-00-00-network_state Wgg=7219, Wgd=2753, Wmd=2753, Wed=4494
+3 b E=S 2013-01-14-17-00-00-network_state Wgg=7206, Wgd=2817, Wmd=2817, Wed=4365
+3 b E=S 2013-01-14-18-00-00-network_state Wgg=7280, Wgd=2670, Wmd=2670, Wed=4659
+3 b E=S 2013-01-14-19-00-00-network_state Wgg=7294, Wgd=2677, Wmd=2677, Wed=4646
+3 b E=S 2013-01-14-20-00-00-network_state Wgg=7242, Wgd=2689, Wmd=2689, Wed=4622
+3 b E=S 2013-01-14-21-00-00-network_state Wgg=7337, Wgd=2678, Wmd=2678, Wed=4643
+3 b E=S 2013-01-14-22-00-00-network_state Wgg=7209, Wgd=2738, Wmd=2738, Wed=4523
+3 b E=S 2013-01-14-23-00-00-network_state Wgg=7507, Wgd=2625, Wmd=2625, Wed=4749
+2 b 1 2013-01-15-00-00-00-network_state Wee=3513, Wed=8833, Wgd=583, Wmd=583
+2 b 1 2013-01-15-01-00-00-network_state Wee=2448, Wed=9057, Wgd=471, Wmd=471
+3 b E=S 2013-01-15-02-00-00-network_state Wgg=7365, Wgd=2560, Wmd=2560, Wed=4880
+2 b 2 M < T/3 2013-01-15-03-00-00-network_state Wed=4601, Wgd=205, Wmd=5194 
+2 b 2 M < T/3 2013-01-15-04-00-00-network_state Wed=4599, Wgd=157, Wmd=5244 
+2 b 2 M < T/3 2013-01-15-05-00-00-network_state Wed=4568, Wgd=100, Wmd=5332 
+2 b 2 M < T/3 2013-01-15-06-00-00-network_state Wed=4272, Wgd=152, Wmd=5576 
+2 b 2 M < T/3 2013-01-15-07-00-00-network_state Wed=4358, Wgd=137, Wmd=5505 
+2 b 2 M < T/3 2013-01-15-08-00-00-network_state Wed=4311, Wgd=48, Wmd=5641 
+2 b 2 M < T/3 2013-01-15-09-00-00-network_state Wed=4298, Wgd=169, Wmd=5533 
+2 b 2 M < T/3 2013-01-15-10-00-00-network_state Wed=4198, Wgd=240, Wmd=5562 
+2 b 2 M < T/3 2013-01-15-11-00-00-network_state Wed=3978, Wgd=263, Wmd=5759 
+2 b 2 M < T/3 2013-01-15-12-00-00-network_state Wed=3755, Wgd=239, Wmd=6006 
+2 b 2 M < T/3 2013-01-15-13-00-00-network_state Wed=3814, Wgd=309, Wmd=5877 
+2 b 2 M < T/3 2013-01-15-14-00-00-network_state Wed=3754, Wgd=65, Wmd=6181 
+2 b 2 M < T/3 2013-01-15-15-00-00-network_state Wed=3821, Wgd=72, Wmd=6107 
+2 b 2 M < T/3 2013-01-15-16-00-00-network_state Wed=3776, Wgd=129, Wmd=6095 
+2 b 2 M < T/3 2013-01-15-17-00-00-network_state Wed=3850, Wgd=40, Wmd=6110 
+2 b 2 M < T/3 2013-01-15-18-00-00-network_state Wed=3860, Wgd=55, Wmd=6085 
+2 b 2 M < T/3 2013-01-15-19-00-00-network_state Wed=3896, Wgd=79, Wmd=6025 
+3 b E=S 2013-01-15-20-00-00-network_state Wgg=6450, Wgd=2974, Wmd=2974, Wed=4051
+3 b E=S 2013-01-15-21-00-00-network_state Wgg=6423, Wgd=2978, Wmd=2978, Wed=4043
+3 b E=S 2013-01-15-22-00-00-network_state Wgg=6475, Wgd=3034, Wmd=3034, Wed=3932
+3 b E=S 2013-01-15-23-00-00-network_state Wgg=6564, Wgd=2977, Wmd=2977, Wed=4045
+2 b 2 M < T/3 2013-01-16-00-00-00-network_state Wed=4239, Wgd=107, Wmd=5654 
+2 b 1 2013-01-16-01-00-00-network_state Wee=75, Wed=9181, Wgd=409, Wmd=409
+2 b 2 M < T/3 2013-01-16-02-00-00-network_state Wed=4222, Wgd=177, Wmd=5601 
+3 b E=S 2013-01-16-03-00-00-network_state Wgg=7000, Wgd=2858, Wmd=2858, Wed=4283
+2 b 2 M < T/3 2013-01-16-04-00-00-network_state Wed=4117, Wgd=249, Wmd=5634 
+3 b E=S 2013-01-16-05-00-00-network_state Wgg=6754, Wgd=2958, Wmd=2958, Wed=4083
+2 b 2 M < T/3 2013-01-16-06-00-00-network_state Wed=3929, Wgd=32, Wmd=6039 
+2 b 2 M < T/3 2013-01-16-07-00-00-network_state Wed=3988, Wgd=276, Wmd=5736 
+2 b 2 M < T/3 2013-01-16-08-00-00-network_state Wed=3933, Wgd=173, Wmd=5894 
+2 b 2 M < T/3 2013-01-16-09-00-00-network_state Wed=3718, Wgd=292, Wmd=5990 
+2 b 2 M < T/3 2013-01-16-10-00-00-network_state Wed=3866, Wgd=301, Wmd=5833 
+2 b 2 M < T/3 2013-01-16-11-00-00-network_state Wed=3776, Wgd=323, Wmd=5901 
+2 b 2 M < T/3 2013-01-16-12-00-00-network_state Wed=3742, Wgd=386, Wmd=5872 
+2 b 2 M < T/3 2013-01-16-13-00-00-network_state Wed=3866, Wgd=341, Wmd=5793 
+2 b 2 M < T/3 2013-01-16-14-00-00-network_state Wed=3772, Wgd=353, Wmd=5875 
+2 b 2 M < T/3 2013-01-16-15-00-00-network_state Wed=3664, Wgd=374, Wmd=5962 
+2 b 2 M < T/3 2013-01-16-16-00-00-network_state Wed=3959, Wgd=237, Wmd=5804 
+3 b E=S 2013-01-16-17-00-00-network_state Wgg=6753, Wgd=2948, Wmd=2948, Wed=4104
+3 b E=S 2013-01-16-18-00-00-network_state Wgg=6538, Wgd=3005, Wmd=3005, Wed=3990
+3 b E=S 2013-01-16-19-00-00-network_state Wgg=6610, Wgd=3145, Wmd=3145, Wed=3710
+3 b E=S 2013-01-16-20-00-00-network_state Wgg=6675, Wgd=3038, Wmd=3038, Wed=3923
+3 b E=S 2013-01-16-21-00-00-network_state Wgg=6721, Wgd=3000, Wmd=3000, Wed=3999
+2 b 2 M < T/3 2013-01-16-22-00-00-network_state Wed=4097, Wgd=203, Wmd=5700 
+2 b 2 M < T/3 2013-01-16-23-00-00-network_state Wed=4184, Wgd=212, Wmd=5604 
+2 b 1 2013-01-17-00-00-00-network_state Wee=3227, Wed=7898, Wgd=1051, Wmd=1051
+2 b 1 2013-01-17-01-00-00-network_state Wee=3304, Wed=7805, Wgd=1097, Wmd=1097
+2 b 1 2013-01-17-02-00-00-network_state Wee=1490, Wed=8445, Wgd=777, Wmd=777
+2 b 1 2013-01-17-03-00-00-network_state Wee=1399, Wed=8248, Wgd=876, Wmd=876
+2 b 1 2013-01-17-04-00-00-network_state Wee=1090, Wed=8108, Wgd=946, Wmd=946
+2 b 1 2013-01-17-05-00-00-network_state Wee=502, Wed=8198, Wgd=901, Wmd=901
+2 b 1 2013-01-17-06-00-00-network_state Wee=1501, Wed=7784, Wgd=1108, Wmd=1108
+2 b 1 2013-01-17-07-00-00-network_state Wee=1537, Wed=7609, Wgd=1195, Wmd=1195
+2 b 1 2013-01-17-08-00-00-network_state Wee=2030, Wed=7429, Wgd=1285, Wmd=1285
+2 b 1 2013-01-17-09-00-00-network_state Wee=1779, Wed=7631, Wgd=1184, Wmd=1184
+2 b 1 2013-01-17-10-00-00-network_state Wee=1755, Wed=7634, Wgd=1183, Wmd=1183
+2 b 1 2013-01-17-11-00-00-network_state Wee=1707, Wed=7662, Wgd=1169, Wmd=1169
+2 b 1 2013-01-17-12-00-00-network_state Wee=2234, Wed=7330, Wgd=1335, Wmd=1335
+2 b 1 2013-01-17-13-00-00-network_state Wee=2242, Wed=7301, Wgd=1349, Wmd=1349
+2 b 1 2013-01-17-14-00-00-network_state Wee=1769, Wed=7494, Wgd=1253, Wmd=1253
+2 b 1 2013-01-17-15-00-00-network_state Wee=1578, Wed=7586, Wgd=1207, Wmd=1207
+2 b 1 2013-01-17-16-00-00-network_state Wee=1405, Wed=7617, Wgd=1191, Wmd=1191
+2 b 1 2013-01-17-17-00-00-network_state Wee=845, Wed=7811, Wgd=1094, Wmd=1094
+2 b 2 M < T/3 2013-01-17-18-00-00-network_state Wed=3717, Wgd=882, Wmd=5401 
+2 b 1 2013-01-17-19-00-00-network_state Wee=138, Wed=8190, Wgd=905, Wmd=905
+2 b 1 2013-01-17-20-00-00-network_state Wee=196, Wed=8228, Wgd=886, Wmd=886
+2 b 1 2013-01-17-21-00-00-network_state Wee=118, Wed=8216, Wgd=892, Wmd=892
+2 b 2 M < T/3 2013-01-17-22-00-00-network_state Wed=3419, Wgd=852, Wmd=5729 
+2 b 1 2013-01-17-23-00-00-network_state Wee=513, Wed=8221, Wgd=889, Wmd=889
+2 b 1 2013-01-18-00-00-00-network_state Wee=930, Wed=8104, Wgd=948, Wmd=948
+2 b 1 2013-01-18-01-00-00-network_state Wee=697, Wed=8215, Wgd=892, Wmd=892
+2 b 1 2013-01-18-02-00-00-network_state Wee=252, Wed=8472, Wgd=764, Wmd=764
+2 b 1 2013-01-18-03-00-00-network_state Wee=487, Wed=8243, Wgd=878, Wmd=878
+2 b 1 2013-01-18-04-00-00-network_state Wee=319, Wed=8400, Wgd=800, Wmd=800
+2 b 2 M < T/3 2013-01-18-05-00-00-network_state Wed=3443, Wgd=675, Wmd=5882 
+2 b 1 2013-01-18-06-00-00-network_state Wee=471, Wed=8325, Wgd=837, Wmd=837
+2 b 2 M < T/3 2013-01-18-07-00-00-network_state Wed=3489, Wgd=642, Wmd=5869 
+2 b 2 M < T/3 2013-01-18-08-00-00-network_state Wed=3409, Wgd=683, Wmd=5908 
+2 b 2 M < T/3 2013-01-18-09-00-00-network_state Wed=3147, Wgd=759, Wmd=6094 
+2 b 2 M < T/3 2013-01-18-10-00-00-network_state Wed=3237, Wgd=767, Wmd=5996 
+2 b 2 M < T/3 2013-01-18-11-00-00-network_state Wed=3217, Wgd=757, Wmd=6026 
+2 b 2 M < T/3 2013-01-18-12-00-00-network_state Wed=3247, Wgd=725, Wmd=6028 
+2 b 2 M < T/3 2013-01-18-13-00-00-network_state Wed=3215, Wgd=757, Wmd=6028 
+2 b 2 M < T/3 2013-01-18-14-00-00-network_state Wed=3215, Wgd=762, Wmd=6023 
+2 b 2 M < T/3 2013-01-18-15-00-00-network_state Wed=3263, Wgd=781, Wmd=5956 
+2 b 1 2013-01-18-16-00-00-network_state Wee=767, Wed=8102, Wgd=949, Wmd=949
+2 b 1 2013-01-18-17-00-00-network_state Wee=613, Wed=8188, Wgd=906, Wmd=906
+2 b 1 2013-01-18-18-00-00-network_state Wee=352, Wed=8179, Wgd=910, Wmd=910
+2 b 1 2013-01-18-19-00-00-network_state Wee=32, Wed=8303, Wgd=848, Wmd=848
+2 b 1 2013-01-18-20-00-00-network_state Wee=407, Wed=8038, Wgd=981, Wmd=981
+2 b 1 2013-01-18-21-00-00-network_state Wee=497, Wed=7989, Wgd=1005, Wmd=1005
+2 b 1 2013-01-18-22-00-00-network_state Wee=1078, Wed=7874, Wgd=1063, Wmd=1063
+2 b 1 2013-01-18-23-00-00-network_state Wee=1066, Wed=7798, Wgd=1101, Wmd=1101
+2 b 1 2013-01-19-00-00-00-network_state Wee=2382, Wed=7304, Wgd=1348, Wmd=1348
+2 b 1 2013-01-19-01-00-00-network_state Wee=2302, Wed=7317, Wgd=1341, Wmd=1341
+2 b 1 2013-01-19-02-00-00-network_state Wee=1883, Wed=7343, Wgd=1328, Wmd=1328
+2 b 1 2013-01-19-03-00-00-network_state Wee=1499, Wed=7418, Wgd=1291, Wmd=1291
+2 b 1 2013-01-19-04-00-00-network_state Wee=1664, Wed=7403, Wgd=1298, Wmd=1298
+2 b 1 2013-01-19-05-00-00-network_state Wee=1571, Wed=7484, Wgd=1258, Wmd=1258
+2 b 1 2013-01-19-06-00-00-network_state Wee=593, Wed=7990, Wgd=1005, Wmd=1005
+2 b 1 2013-01-19-07-00-00-network_state Wee=698, Wed=7952, Wgd=1024, Wmd=1024
+2 b 1 2013-01-19-08-00-00-network_state Wee=791, Wed=7949, Wgd=1025, Wmd=1025
+2 b 1 2013-01-19-09-00-00-network_state Wee=621, Wed=8158, Wgd=921, Wmd=921
+2 b 1 2013-01-19-10-00-00-network_state Wee=460, Wed=8153, Wgd=923, Wmd=923
+2 b 1 2013-01-19-11-00-00-network_state Wee=677, Wed=7997, Wgd=1001, Wmd=1001
+2 b 1 2013-01-19-12-00-00-network_state Wee=631, Wed=7986, Wgd=1007, Wmd=1007
+2 b 1 2013-01-19-13-00-00-network_state Wee=1059, Wed=7833, Wgd=1083, Wmd=1083
+2 b 1 2013-01-19-14-00-00-network_state Wee=1147, Wed=7811, Wgd=1094, Wmd=1094
+2 b 1 2013-01-19-15-00-00-network_state Wee=867, Wed=7898, Wgd=1051, Wmd=1051
+2 b 1 2013-01-19-16-00-00-network_state Wee=736, Wed=7989, Wgd=1005, Wmd=1005
+2 b 1 2013-01-19-17-00-00-network_state Wee=850, Wed=7858, Wgd=1071, Wmd=1071
+2 b 1 2013-01-19-18-00-00-network_state Wee=860, Wed=7857, Wgd=1071, Wmd=1071
+2 b 1 2013-01-19-19-00-00-network_state Wee=981, Wed=8006, Wgd=997, Wmd=997
+2 b 1 2013-01-19-20-00-00-network_state Wee=934, Wed=8098, Wgd=951, Wmd=951
+2 b 1 2013-01-19-21-00-00-network_state Wee=1211, Wed=7978, Wgd=1011, Wmd=1011
+2 b 1 2013-01-19-22-00-00-network_state Wee=1567, Wed=7720, Wgd=1140, Wmd=1140
+2 b 1 2013-01-19-23-00-00-network_state Wee=1492, Wed=7747, Wgd=1126, Wmd=1126
+2 b 1 2013-01-20-00-00-00-network_state Wee=2575, Wed=7968, Wgd=1016, Wmd=1016
+2 b 1 2013-01-20-01-00-00-network_state Wee=2610, Wed=7994, Wgd=1003, Wmd=1003
+2 b 1 2013-01-20-02-00-00-network_state Wee=1792, Wed=8284, Wgd=858, Wmd=858
+2 b 1 2013-01-20-03-00-00-network_state Wee=1967, Wed=8068, Wgd=966, Wmd=966
+2 b 1 2013-01-20-04-00-00-network_state Wee=1861, Wed=8309, Wgd=845, Wmd=845
+2 b 1 2013-01-20-05-00-00-network_state Wee=1996, Wed=8181, Wgd=909, Wmd=909
+2 b 1 2013-01-20-06-00-00-network_state Wee=2187, Wed=8114, Wgd=943, Wmd=943
+2 b 1 2013-01-20-07-00-00-network_state Wee=2365, Wed=7927, Wgd=1036, Wmd=1036
+2 b 1 2013-01-20-08-00-00-network_state Wee=2184, Wed=7821, Wgd=1089, Wmd=1089
+2 b 1 2013-01-20-09-00-00-network_state Wee=2298, Wed=7462, Wgd=1269, Wmd=1269
+2 b 1 2013-01-20-10-00-00-network_state Wee=1885, Wed=7562, Wgd=1219, Wmd=1219
+2 b 1 2013-01-20-11-00-00-network_state Wee=1472, Wed=7833, Wgd=1083, Wmd=1083
+2 b 1 2013-01-20-12-00-00-network_state Wee=1456, Wed=7744, Wgd=1128, Wmd=1128
+2 b 1 2013-01-20-13-00-00-network_state Wee=1361, Wed=7790, Wgd=1105, Wmd=1105
+2 b 1 2013-01-20-14-00-00-network_state Wee=165, Wed=8387, Wgd=806, Wmd=806
+2 b 1 2013-01-20-15-00-00-network_state Wee=252, Wed=8365, Wgd=817, Wmd=817
+2 b 1 2013-01-20-16-00-00-network_state Wee=315, Wed=8328, Wgd=836, Wmd=836
+2 b 2 M < T/3 2013-01-20-17-00-00-network_state Wed=3292, Wgd=821, Wmd=5887 
+2 b 2 M < T/3 2013-01-20-18-00-00-network_state Wed=3223, Wgd=849, Wmd=5928 
+2 b 1 2013-01-20-19-00-00-network_state Wee=241, Wed=8231, Wgd=884, Wmd=884
+2 b 1 2013-01-20-20-00-00-network_state Wee=17, Wed=8345, Wgd=827, Wmd=827
+2 b 1 2013-01-20-21-00-00-network_state Wee=903, Wed=8063, Wgd=968, Wmd=968
+2 b 1 2013-01-20-22-00-00-network_state Wee=1084, Wed=7939, Wgd=1030, Wmd=1030
+2 b 1 2013-01-20-23-00-00-network_state Wee=2308, Wed=7165, Wgd=1417, Wmd=1417
+2 b 1 2013-01-21-00-00-00-network_state Wee=2844, Wed=7137, Wgd=1431, Wmd=1431
+2 b 1 2013-01-21-01-00-00-network_state Wee=3689, Wed=6569, Wgd=1715, Wmd=1715
+2 b 1 2013-01-21-02-00-00-network_state Wee=2922, Wed=6861, Wgd=1569, Wmd=1569
+2 b 1 2013-01-21-03-00-00-network_state Wee=2485, Wed=7216, Wgd=1392, Wmd=1392
+2 b 1 2013-01-21-04-00-00-network_state Wee=2767, Wed=6979, Wgd=1510, Wmd=1510
+2 b 1 2013-01-21-05-00-00-network_state Wee=2656, Wed=6933, Wgd=1533, Wmd=1533
+2 b 1 2013-01-21-06-00-00-network_state Wee=2590, Wed=6769, Wgd=1615, Wmd=1615
+2 b 1 2013-01-21-07-00-00-network_state Wee=2277, Wed=6954, Wgd=1523, Wmd=1523
+2 b 1 2013-01-21-08-00-00-network_state Wee=2197, Wed=7018, Wgd=1491, Wmd=1491
+2 b 1 2013-01-21-09-00-00-network_state Wee=2355, Wed=6935, Wgd=1532, Wmd=1532
+2 b 1 2013-01-21-10-00-00-network_state Wee=2423, Wed=6927, Wgd=1536, Wmd=1536
+2 b 1 2013-01-21-11-00-00-network_state Wee=2697, Wed=6831, Wgd=1584, Wmd=1584
+2 b 1 2013-01-21-12-00-00-network_state Wee=2806, Wed=6888, Wgd=1556, Wmd=1556
+2 b 1 2013-01-21-13-00-00-network_state Wee=2418, Wed=7108, Wgd=1446, Wmd=1446
+2 b 1 2013-01-21-14-00-00-network_state Wee=2825, Wed=6851, Wgd=1574, Wmd=1574
+2 b 1 2013-01-21-15-00-00-network_state Wee=3059, Wed=6684, Wgd=1658, Wmd=1658
+2 b 1 2013-01-21-16-00-00-network_state Wee=3085, Wed=6888, Wgd=1556, Wmd=1556
+2 b 1 2013-01-21-17-00-00-network_state Wee=3067, Wed=6813, Wgd=1593, Wmd=1593
+2 b 1 2013-01-21-18-00-00-network_state Wee=3121, Wed=6793, Wgd=1603, Wmd=1603
+2 b 1 2013-01-21-19-00-00-network_state Wee=3042, Wed=6837, Wgd=1581, Wmd=1581
+2 b 1 2013-01-21-20-00-00-network_state Wee=3020, Wed=6871, Wgd=1564, Wmd=1564
+2 b 1 2013-01-21-21-00-00-network_state Wee=3128, Wed=6830, Wgd=1585, Wmd=1585
+2 b 1 2013-01-21-22-00-00-network_state Wee=3382, Wed=6550, Wgd=1725, Wmd=1725
+2 b 1 2013-01-21-23-00-00-network_state Wee=3401, Wed=6556, Wgd=1722, Wmd=1722
+2 b 1 2013-01-22-00-00-00-network_state Wee=4173, Wed=6248, Wgd=1876, Wmd=1876
+2 b 1 2013-01-22-01-00-00-network_state Wee=4023, Wed=6522, Wgd=1739, Wmd=1739
+2 b 1 2013-01-22-02-00-00-network_state Wee=3154, Wed=6988, Wgd=1506, Wmd=1506
+2 b 1 2013-01-22-03-00-00-network_state Wee=3279, Wed=6763, Wgd=1618, Wmd=1618
+2 b 1 2013-01-22-04-00-00-network_state Wee=2808, Wed=6906, Wgd=1547, Wmd=1547
+2 b 1 2013-01-22-05-00-00-network_state Wee=2755, Wed=6974, Wgd=1513, Wmd=1513
+2 b 1 2013-01-22-06-00-00-network_state Wee=2689, Wed=7014, Wgd=1493, Wmd=1493
+2 b 1 2013-01-22-07-00-00-network_state Wee=3061, Wed=6833, Wgd=1583, Wmd=1583
+2 b 1 2013-01-22-08-00-00-network_state Wee=3125, Wed=6847, Wgd=1576, Wmd=1576
+2 b 1 2013-01-22-09-00-00-network_state Wee=2648, Wed=7112, Wgd=1444, Wmd=1444
+2 b 1 2013-01-22-10-00-00-network_state Wee=2709, Wed=7103, Wgd=1448, Wmd=1448
+2 b 1 2013-01-22-11-00-00-network_state Wee=2742, Wed=7224, Wgd=1388, Wmd=1388
+2 b 1 2013-01-22-12-00-00-network_state Wee=2848, Wed=7177, Wgd=1411, Wmd=1411
+2 b 1 2013-01-22-13-00-00-network_state Wee=2225, Wed=7489, Wgd=1255, Wmd=1255
+2 b 1 2013-01-22-14-00-00-network_state Wee=1865, Wed=7732, Wgd=1134, Wmd=1134
+2 b 1 2013-01-22-15-00-00-network_state Wee=1522, Wed=7953, Wgd=1023, Wmd=1023
+2 b 1 2013-01-22-16-00-00-network_state Wee=1402, Wed=7993, Wgd=1003, Wmd=1003
+2 b 1 2013-01-22-17-00-00-network_state Wee=1205, Wed=8093, Wgd=953, Wmd=953
+2 b 1 2013-01-22-18-00-00-network_state Wee=1074, Wed=8069, Wgd=965, Wmd=965
+2 b 1 2013-01-22-19-00-00-network_state Wee=2290, Wed=7642, Wgd=1179, Wmd=1179
+2 b 1 2013-01-22-20-00-00-network_state Wee=957, Wed=8087, Wgd=956, Wmd=956
+2 b 1 2013-01-22-21-00-00-network_state Wee=1031, Wed=8075, Wgd=962, Wmd=962
+2 b 1 2013-01-22-22-00-00-network_state Wee=888, Wed=8130, Wgd=935, Wmd=935
+2 b 1 2013-01-22-23-00-00-network_state Wee=1030, Wed=8133, Wgd=933, Wmd=933
+2 b 1 2013-01-23-00-00-00-network_state Wee=1970, Wed=7795, Wgd=1102, Wmd=1102
+2 b 1 2013-01-23-01-00-00-network_state Wee=1844, Wed=7852, Wgd=1074, Wmd=1074
+2 b 1 2013-01-23-02-00-00-network_state Wee=1142, Wed=8185, Wgd=907, Wmd=907
+2 b 1 2013-01-23-03-00-00-network_state Wee=508, Wed=8498, Wgd=751, Wmd=751
+2 b 1 2013-01-23-04-00-00-network_state Wee=35, Wed=8502, Wgd=749, Wmd=749
+2 b 1 2013-01-23-05-00-00-network_state Wee=210, Wed=8318, Wgd=841, Wmd=841
+2 b 1 2013-01-23-06-00-00-network_state Wee=93, Wed=8371, Wgd=814, Wmd=814
+2 b 1 2013-01-23-07-00-00-network_state Wee=1065, Wed=7708, Wgd=1146, Wmd=1146
+2 b 1 2013-01-23-08-00-00-network_state Wee=1151, Wed=7664, Wgd=1168, Wmd=1168
+2 b 1 2013-01-23-09-00-00-network_state Wee=1500, Wed=7554, Wgd=1223, Wmd=1223
+2 b 1 2013-01-23-10-00-00-network_state Wee=1056, Wed=7761, Wgd=1119, Wmd=1119
+2 b 1 2013-01-23-11-00-00-network_state Wee=1242, Wed=7702, Wgd=1149, Wmd=1149
+2 b 1 2013-01-23-12-00-00-network_state Wee=989, Wed=7785, Wgd=1107, Wmd=1107
+2 b 1 2013-01-23-13-00-00-network_state Wee=766, Wed=8298, Wgd=851, Wmd=851
+2 b 1 2013-01-23-14-00-00-network_state Wee=761, Wed=8379, Wgd=810, Wmd=810
+2 b 1 2013-01-23-15-00-00-network_state Wee=1006, Wed=8423, Wgd=788, Wmd=788
+2 b 1 2013-01-23-16-00-00-network_state Wee=1091, Wed=8521, Wgd=739, Wmd=739
+2 b 1 2013-01-23-17-00-00-network_state Wee=641, Wed=8802, Wgd=599, Wmd=599
+2 b 1 2013-01-23-18-00-00-network_state Wee=631, Wed=8846, Wgd=577, Wmd=577
+2 b 1 2013-01-23-19-00-00-network_state Wee=622, Wed=8770, Wgd=615, Wmd=615
+2 b 1 2013-01-23-20-00-00-network_state Wee=265, Wed=8778, Wgd=611, Wmd=611
+2 b 1 2013-01-23-21-00-00-network_state Wee=952, Wed=8454, Wgd=773, Wmd=773
+2 b 1 2013-01-23-22-00-00-network_state Wee=578, Wed=8705, Wgd=647, Wmd=647
+2 b 1 2013-01-23-23-00-00-network_state Wee=698, Wed=8677, Wgd=661, Wmd=661
+2 b 1 2013-01-24-00-00-00-network_state Wee=1829, Wed=8230, Wgd=885, Wmd=885
+2 b 1 2013-01-24-01-00-00-network_state Wee=1919, Wed=7981, Wgd=1009, Wmd=1009
+2 b 1 2013-01-24-02-00-00-network_state Wee=1666, Wed=8038, Wgd=981, Wmd=981
+2 b 1 2013-01-24-03-00-00-network_state Wee=1104, Wed=7576, Wgd=1212, Wmd=1212
+2 b 1 2013-01-24-04-00-00-network_state Wee=1281, Wed=7412, Wgd=1294, Wmd=1294
+2 b 1 2013-01-24-05-00-00-network_state Wee=1327, Wed=7319, Wgd=1340, Wmd=1340
+2 b 1 2013-01-24-06-00-00-network_state Wee=236, Wed=8126, Wgd=937, Wmd=937
+2 b 1 2013-01-24-07-00-00-network_state Wee=449, Wed=8041, Wgd=979, Wmd=979
+2 b 1 2013-01-24-08-00-00-network_state Wee=352, Wed=8144, Wgd=928, Wmd=928
+2 b 1 2013-01-24-09-00-00-network_state Wee=510, Wed=8135, Wgd=932, Wmd=932
+2 b 1 2013-01-24-10-00-00-network_state Wee=804, Wed=8132, Wgd=934, Wmd=934
+2 b 1 2013-01-24-11-00-00-network_state Wee=984, Wed=8024, Wgd=988, Wmd=988
+2 b 1 2013-01-24-12-00-00-network_state Wee=391, Wed=8278, Wgd=861, Wmd=861
+2 b 2 M < T/3 2013-01-24-13-00-00-network_state Wed=3366, Wgd=775, Wmd=5859 
+2 b 2 M < T/3 2013-01-24-14-00-00-network_state Wed=3475, Wgd=665, Wmd=5860 
+2 b 2 M < T/3 2013-01-24-15-00-00-network_state Wed=3498, Wgd=527, Wmd=5975 
+2 b 2 M < T/3 2013-01-24-16-00-00-network_state Wed=3627, Wgd=338, Wmd=6035 
+2 b 2 M < T/3 2013-01-24-17-00-00-network_state Wed=3613, Wgd=362, Wmd=6025 
+2 b 2 M < T/3 2013-01-24-18-00-00-network_state Wed=3604, Wgd=365, Wmd=6031 
+2 b 2 M < T/3 2013-01-24-19-00-00-network_state Wed=3570, Wgd=363, Wmd=6067 
+2 b 2 M < T/3 2013-01-24-20-00-00-network_state Wed=3446, Wgd=300, Wmd=6254 
+2 b 2 M < T/3 2013-01-24-21-00-00-network_state Wed=3412, Wgd=286, Wmd=6302 
+2 b 2 M < T/3 2013-01-24-22-00-00-network_state Wed=3444, Wgd=266, Wmd=6290 
+2 b 2 M < T/3 2013-01-24-23-00-00-network_state Wed=3311, Wgd=359, Wmd=6330 
+2 b 2 M < T/3 2013-01-25-00-00-00-network_state Wed=3311, Wgd=630, Wmd=6059 
+2 b 2 M < T/3 2013-01-25-01-00-00-network_state Wed=3633, Wgd=440, Wmd=5927 
+2 b 2 M < T/3 2013-01-25-02-00-00-network_state Wed=3589, Wgd=333, Wmd=6078 
+2 b 2 M < T/3 2013-01-25-03-00-00-network_state Wed=3445, Wgd=431, Wmd=6124 
+2 b 2 M < T/3 2013-01-25-04-00-00-network_state Wed=3356, Wgd=427, Wmd=6217 
+2 b 2 M < T/3 2013-01-25-05-00-00-network_state Wed=3267, Wgd=355, Wmd=6378 
+2 b 2 M < T/3 2013-01-25-06-00-00-network_state Wed=2999, Wgd=453, Wmd=6548 
+2 b 1 2013-01-25-07-00-00-network_state Wee=234, Wed=8693, Wgd=653, Wmd=653
+2 b 1 2013-01-25-08-00-00-network_state Wee=116, Wed=8855, Wgd=572, Wmd=572
+2 b 1 2013-01-25-09-00-00-network_state Wee=499, Wed=8735, Wgd=632, Wmd=632
+2 b 1 2013-01-25-10-00-00-network_state Wee=486, Wed=8737, Wgd=631, Wmd=631
+2 b 2 M < T/3 2013-01-25-11-00-00-network_state Wed=2816, Wgd=500, Wmd=6684 
+2 b 1 2013-01-25-12-00-00-network_state Wee=277, Wed=8885, Wgd=557, Wmd=557
+2 b 1 2013-01-25-13-00-00-network_state Wee=595, Wed=8691, Wgd=654, Wmd=654
+2 b 1 2013-01-25-14-00-00-network_state Wee=670, Wed=8637, Wgd=681, Wmd=681
+2 b 1 2013-01-25-15-00-00-network_state Wee=543, Wed=8713, Wgd=643, Wmd=643
+2 b 1 2013-01-25-16-00-00-network_state Wee=247, Wed=9074, Wgd=463, Wmd=463
+2 b 1 2013-01-25-17-00-00-network_state Wee=297, Wed=9039, Wgd=480, Wmd=480
+2 b 1 2013-01-25-18-00-00-network_state Wee=676, Wed=9020, Wgd=490, Wmd=490
+2 b 1 2013-01-25-19-00-00-network_state Wee=1064, Wed=8947, Wgd=526, Wmd=526
+2 b 1 2013-01-25-20-00-00-network_state Wee=1054, Wed=8949, Wgd=525, Wmd=525
+2 b 1 2013-01-25-21-00-00-network_state Wee=1409, Wed=8713, Wgd=643, Wmd=643
+2 b 1 2013-01-25-22-00-00-network_state Wee=1030, Wed=8988, Wgd=506, Wmd=506
+2 b 1 2013-01-25-23-00-00-network_state Wee=1426, Wed=8715, Wgd=642, Wmd=642
+2 b 1 2013-01-26-00-00-00-network_state Wee=2096, Wed=8377, Wgd=811, Wmd=811
+2 b 1 2013-01-26-01-00-00-network_state Wee=2081, Wed=8377, Wgd=811, Wmd=811
+2 b 1 2013-01-26-02-00-00-network_state Wee=866, Wed=8906, Wgd=547, Wmd=547
+2 b 1 2013-01-26-03-00-00-network_state Wee=581, Wed=9147, Wgd=426, Wmd=426
+2 b 1 2013-01-26-04-00-00-network_state Wee=196, Wed=9261, Wgd=369, Wmd=369
+2 b 2 M < T/3 2013-01-26-05-00-00-network_state Wed=3388, Wgd=646, Wmd=5966 
+2 b 2 M < T/3 2013-01-26-06-00-00-network_state Wed=3365, Wgd=715, Wmd=5920 
+2 b 2 M < T/3 2013-01-26-07-00-00-network_state Wed=3347, Wgd=803, Wmd=5850 
+2 b 1 2013-01-26-08-00-00-network_state Wee=32, Wed=8259, Wgd=870, Wmd=870
+2 b 2 M < T/3 2013-01-26-09-00-00-network_state Wed=3303, Wgd=806, Wmd=5891 
+2 b 2 M < T/3 2013-01-26-10-00-00-network_state Wed=3304, Wgd=810, Wmd=5886 
+2 b 2 M < T/3 2013-01-26-11-00-00-network_state Wed=3258, Wgd=796, Wmd=5946 
+2 b 2 M < T/3 2013-01-26-12-00-00-network_state Wed=3325, Wgd=739, Wmd=5936 
+2 b 2 M < T/3 2013-01-26-13-00-00-network_state Wed=3280, Wgd=784, Wmd=5936 
+2 b 2 M < T/3 2013-01-26-14-00-00-network_state Wed=3299, Wgd=710, Wmd=5991 
+2 b 2 M < T/3 2013-01-26-15-00-00-network_state Wed=3386, Wgd=534, Wmd=6080 
+2 b 2 M < T/3 2013-01-26-16-00-00-network_state Wed=3431, Wgd=538, Wmd=6031 
+2 b 2 M < T/3 2013-01-26-17-00-00-network_state Wed=3718, Wgd=526, Wmd=5756 
+2 b 2 M < T/3 2013-01-26-18-00-00-network_state Wed=3679, Wgd=568, Wmd=5753 
+2 b 1 2013-01-26-19-00-00-network_state Wee=104, Wed=8348, Wgd=826, Wmd=826
+2 b 2 M < T/3 2013-01-26-20-00-00-network_state Wed=3280, Wgd=722, Wmd=5998 
+2 b 2 M < T/3 2013-01-26-21-00-00-network_state Wed=3321, Wgd=561, Wmd=6118 
+2 b 2 M < T/3 2013-01-26-22-00-00-network_state Wed=3337, Wgd=588, Wmd=6075 
+2 b 2 M < T/3 2013-01-26-23-00-00-network_state Wed=3371, Wgd=637, Wmd=5992 
+2 b 1 2013-01-27-00-00-00-network_state Wee=895, Wed=8153, Wgd=923, Wmd=923
+2 b 1 2013-01-27-01-00-00-network_state Wee=746, Wed=8218, Wgd=891, Wmd=891
+2 b 1 2013-01-27-02-00-00-network_state Wee=242, Wed=8524, Wgd=738, Wmd=738
+2 b 2 M < T/3 2013-01-27-03-00-00-network_state Wed=3353, Wgd=625, Wmd=6022 
+2 b 2 M < T/3 2013-01-27-04-00-00-network_state Wed=3385, Wgd=409, Wmd=6206 
+2 b 2 M < T/3 2013-01-27-05-00-00-network_state Wed=3338, Wgd=496, Wmd=6166 
+2 b 2 M < T/3 2013-01-27-06-00-00-network_state Wed=3159, Wgd=535, Wmd=6306 
+2 b 1 2013-01-27-07-00-00-network_state Wee=254, Wed=9008, Wgd=496, Wmd=496
+2 b 1 2013-01-27-08-00-00-network_state Wee=430, Wed=8944, Wgd=528, Wmd=528
+2 b 2 M < T/3 2013-01-27-09-00-00-network_state Wed=3112, Wgd=385, Wmd=6503 
+2 b 2 M < T/3 2013-01-27-10-00-00-network_state Wed=3171, Wgd=350, Wmd=6479 
+2 b 1 2013-01-27-11-00-00-network_state Wee=0, Wed=9355, Wgd=322, Wmd=322
+2 b 2 M < T/3 2013-01-27-12-00-00-network_state Wed=3250, Wgd=188, Wmd=6562 
+3 b E=S 2013-01-27-13-00-00-network_state Wgg=6547, Wgd=3231, Wmd=3231, Wed=3537
+3 b E=S 2013-01-27-14-00-00-network_state Wgg=6506, Wgd=3315, Wmd=3315, Wed=3369
+3 b E=S 2013-01-27-15-00-00-network_state Wgg=6543, Wgd=3323, Wmd=3323, Wed=3354
+2 b 2 M < T/3 2013-01-27-16-00-00-network_state Wed=3342, Wgd=87, Wmd=6571 
+2 b 1 2013-01-27-17-00-00-network_state Wee=144, Wed=9152, Wgd=424, Wmd=424
+2 b 2 M < T/3 2013-01-27-18-00-00-network_state Wed=3528, Wgd=119, Wmd=6353 
+2 b 2 M < T/3 2013-01-27-19-00-00-network_state Wed=3518, Wgd=123, Wmd=6359 
+2 b 2 M < T/3 2013-01-27-20-00-00-network_state Wed=3496, Wgd=306, Wmd=6198 
+2 b 2 M < T/3 2013-01-27-21-00-00-network_state Wed=3490, Wgd=172, Wmd=6338 
+2 b 2 M < T/3 2013-01-27-22-00-00-network_state Wed=3545, Wgd=37, Wmd=6418 
+2 b 2 M < T/3 2013-01-27-23-00-00-network_state Wed=3482, Wgd=48, Wmd=6470 
+3 b E=S 2013-01-28-00-00-00-network_state Wgg=6755, Wgd=3025, Wmd=3025, Wed=3949
+2 b 2 M < T/3 2013-01-28-01-00-00-network_state Wed=3850, Wgd=121, Wmd=6029 
+2 b 2 M < T/3 2013-01-28-02-00-00-network_state Wed=3616, Wgd=95, Wmd=6289 
+2 b 2 M < T/3 2013-01-28-03-00-00-network_state Wed=3420, Wgd=14, Wmd=6566 
+2 b 2 M < T/3 2013-01-28-04-00-00-network_state Wed=3287, Wgd=162, Wmd=6551 
+2 b 2 M < T/3 2013-01-28-05-00-00-network_state Wed=3314, Wgd=124, Wmd=6562 
+2 b 1 2013-01-28-06-00-00-network_state Wee=461, Wed=9396, Wgd=302, Wmd=302
+2 b 1 2013-01-28-07-00-00-network_state Wee=720, Wed=9498, Wgd=251, Wmd=251
+2 b 1 2013-01-28-08-00-00-network_state Wee=877, Wed=9360, Wgd=320, Wmd=320
+2 b 1 2013-01-28-09-00-00-network_state Wee=407, Wed=9791, Wgd=104, Wmd=104
+2 b 1 2013-01-28-10-00-00-network_state Wee=415, Wed=9619, Wgd=190, Wmd=190
+2 b 2 M < T/3 2013-01-28-11-00-00-network_state Wed=2782, Wgd=87, Wmd=7131 
+2 b 1 2013-01-28-12-00-00-network_state Wee=433, Wed=9600, Wgd=200, Wmd=200
+2 b 1 2013-01-28-13-00-00-network_state Wee=607, Wed=9260, Wgd=370, Wmd=370
+2 b 2 M < T/3 2013-01-28-14-00-00-network_state Wed=3011, Wgd=162, Wmd=6827 
+2 b 1 2013-01-28-15-00-00-network_state Wee=25, Wed=9329, Wgd=335, Wmd=335
+2 b 2 M < T/3 2013-01-28-16-00-00-network_state Wed=2793, Wgd=361, Wmd=6846 
+2 b 2 M < T/3 2013-01-28-17-00-00-network_state Wed=2936, Wgd=207, Wmd=6857 
+2 b 2 M < T/3 2013-01-28-18-00-00-network_state Wed=2859, Wgd=281, Wmd=6860 
+2 b 2 M < T/3 2013-01-28-19-00-00-network_state Wed=2912, Wgd=189, Wmd=6899 
+2 b 2 M < T/3 2013-01-28-20-00-00-network_state Wed=2823, Wgd=332, Wmd=6845 
+2 b 1 2013-01-28-21-00-00-network_state Wee=17, Wed=9425, Wgd=287, Wmd=287
+2 b 2 M < T/3 2013-01-28-22-00-00-network_state Wed=3229, Wgd=173, Wmd=6598 
+2 b 2 M < T/3 2013-01-28-23-00-00-network_state Wed=3204, Wgd=265, Wmd=6531 
+2 b 1 2013-01-29-00-00-00-network_state Wee=389, Wed=9138, Wgd=431, Wmd=431
+2 b 1 2013-01-29-01-00-00-network_state Wee=866, Wed=9103, Wgd=448, Wmd=448
+2 b 1 2013-01-29-02-00-00-network_state Wee=614, Wed=9127, Wgd=436, Wmd=436
+3 b E=S 2013-01-29-03-00-00-network_state Wgg=6180, Wgd=3529, Wmd=3529, Wed=2941
+2 b 2 M < T/3 2013-01-29-04-00-00-network_state Wed=2892, Wgd=61, Wmd=7047 
+2 b 2 M < T/3 2013-01-29-05-00-00-network_state Wed=3194, Wgd=161, Wmd=6645 
+2 b 2 M < T/3 2013-01-29-06-00-00-network_state Wed=3263, Wgd=223, Wmd=6514 
+2 b 2 M < T/3 2013-01-29-07-00-00-network_state Wed=3090, Wgd=306, Wmd=6604 
+2 b 2 M < T/3 2013-01-29-08-00-00-network_state Wed=3105, Wgd=254, Wmd=6641 
+3 b E=S 2013-01-29-09-00-00-network_state Wgg=6251, Wgd=3463, Wmd=3463, Wed=3074
+3 b E=S 2013-01-29-10-00-00-network_state Wgg=6161, Wgd=3513, Wmd=3513, Wed=2973
+3 b E=S 2013-01-29-11-00-00-network_state Wgg=6255, Wgd=3604, Wmd=3604, Wed=2791
+3 b E=S 2013-01-29-12-00-00-network_state Wgg=6087, Wgd=3565, Wmd=3565, Wed=2869
+3 b E=S 2013-01-29-13-00-00-network_state Wgg=6205, Wgd=3526, Wmd=3526, Wed=2948
+3 b E=S 2013-01-29-14-00-00-network_state Wgg=6246, Wgd=3687, Wmd=3687, Wed=2625
+3 b E=S 2013-01-29-15-00-00-network_state Wgg=6277, Wgd=3696, Wmd=3696, Wed=2608
+3 b E=S 2013-01-29-16-00-00-network_state Wgg=6317, Wgd=3705, Wmd=3705, Wed=2590
+3 b E=S 2013-01-29-17-00-00-network_state Wgg=6361, Wgd=3665, Wmd=3665, Wed=2669
+2 b 1 2013-01-29-18-00-00-network_state Wee=562, Wed=9820, Wgd=90, Wmd=90
+2 b 2 M < T/3 2013-01-29-19-00-00-network_state Wed=2791, Wgd=46, Wmd=7163 
+2 b 2 M < T/3 2013-01-29-20-00-00-network_state Wed=2755, Wgd=72, Wmd=7173 
+2 b 1 2013-01-29-21-00-00-network_state Wee=2725, Wed=7863, Wgd=1068, Wmd=1068
+2 b 1 2013-01-29-22-00-00-network_state Wee=3388, Wed=7167, Wgd=1416, Wmd=1416
+2 b 1 2013-01-29-23-00-00-network_state Wee=3589, Wed=6961, Wgd=1519, Wmd=1519
+2 b 1 2013-01-30-00-00-00-network_state Wee=5133, Wed=5359, Wgd=2320, Wmd=2320
+2 b 1 2013-01-30-01-00-00-network_state Wee=5010, Wed=5588, Wgd=2206, Wmd=2206
+2 b 1 2013-01-30-02-00-00-network_state Wee=4249, Wed=6263, Wgd=1868, Wmd=1868
+2 b 1 2013-01-30-03-00-00-network_state Wee=3810, Wed=6540, Wgd=1730, Wmd=1730
+2 b 1 2013-01-30-04-00-00-network_state Wee=3766, Wed=6704, Wgd=1648, Wmd=1648
+2 b 1 2013-01-30-05-00-00-network_state Wee=3051, Wed=7470, Wgd=1265, Wmd=1265
+2 b 1 2013-01-30-06-00-00-network_state Wee=3418, Wed=7032, Wgd=1484, Wmd=1484
+2 b 1 2013-01-30-07-00-00-network_state Wee=3223, Wed=7137, Wgd=1431, Wmd=1431
+2 b 1 2013-01-30-08-00-00-network_state Wee=2911, Wed=7275, Wgd=1362, Wmd=1362
+2 b 1 2013-01-30-09-00-00-network_state Wee=2607, Wed=7557, Wgd=1221, Wmd=1221
+2 b 1 2013-01-30-10-00-00-network_state Wee=2692, Wed=7707, Wgd=1146, Wmd=1146
+2 b 1 2013-01-30-11-00-00-network_state Wee=2740, Wed=7578, Wgd=1211, Wmd=1211
+2 b 1 2013-01-30-12-00-00-network_state Wee=2666, Wed=7729, Wgd=1135, Wmd=1135
+2 b 1 2013-01-30-13-00-00-network_state Wee=2576, Wed=7807, Wgd=1096, Wmd=1096
+2 b 1 2013-01-30-14-00-00-network_state Wee=2482, Wed=7923, Wgd=1038, Wmd=1038
+2 b 1 2013-01-30-15-00-00-network_state Wee=2383, Wed=8065, Wgd=967, Wmd=967
+2 b 1 2013-01-30-16-00-00-network_state Wee=2674, Wed=7732, Wgd=1134, Wmd=1134
+2 b 1 2013-01-30-17-00-00-network_state Wee=2700, Wed=7688, Wgd=1156, Wmd=1156
+3 b G=S 2013-01-30-18-00-00-network_state Wee=5867, Wgd=1134, Wmd=4433, Wed=4433
+3 b G=S 2013-01-30-19-00-00-network_state Wee=5921, Wgd=1107, Wmd=4446, Wed=4446
+2 b 1 2013-01-30-20-00-00-network_state Wee=2807, Wed=7833, Wgd=1083, Wmd=1083
+3 b G=S 2013-01-30-21-00-00-network_state Wee=5870, Wgd=1349, Wmd=4325, Wed=4325
+3 b G=S 2013-01-30-22-00-00-network_state Wee=5923, Wgd=978, Wmd=4511, Wed=4511
+3 b G=S 2013-01-30-23-00-00-network_state Wee=5997, Wgd=1047, Wmd=4476, Wed=4476
+3 b G=S 2013-01-31-00-00-00-network_state Wee=6178, Wgd=1441, Wmd=4279, Wed=4279
+3 b G=S 2013-01-31-01-00-00-network_state Wee=6099, Wgd=1258, Wmd=4371, Wed=4371
+3 b G=S 2013-01-31-02-00-00-network_state Wee=6007, Wgd=1191, Wmd=4404, Wed=4404
+3 b G=S 2013-01-31-03-00-00-network_state Wee=5904, Wgd=937, Wmd=4531, Wed=4531
+2 b 1 2013-01-31-04-00-00-network_state Wee=2400, Wed=8402, Wgd=799, Wmd=799
+3 b G=S 2013-01-31-05-00-00-network_state Wee=5876, Wgd=1024, Wmd=4488, Wed=4488
+2 b 1 2013-01-31-06-00-00-network_state Wee=2428, Wed=8478, Wgd=761, Wmd=761
+2 b 1 2013-01-31-07-00-00-network_state Wee=2405, Wed=8565, Wgd=717, Wmd=717
+2 b 1 2013-01-31-08-00-00-network_state Wee=2361, Wed=8561, Wgd=719, Wmd=719
+2 b 1 2013-01-31-09-00-00-network_state Wee=2275, Wed=8595, Wgd=702, Wmd=702
+2 b 1 2013-01-31-10-00-00-network_state Wee=2282, Wed=8590, Wgd=705, Wmd=705
+2 b 1 2013-01-31-11-00-00-network_state Wee=2117, Wed=8596, Wgd=702, Wmd=702
+2 b 1 2013-01-31-12-00-00-network_state Wee=1529, Wed=9206, Wgd=397, Wmd=397
+2 b 1 2013-01-31-13-00-00-network_state Wee=1545, Wed=9215, Wgd=392, Wmd=392
+2 b 1 2013-01-31-14-00-00-network_state Wee=1832, Wed=9076, Wgd=462, Wmd=462
+2 b 1 2013-01-31-15-00-00-network_state Wee=2269, Wed=8773, Wgd=613, Wmd=613
+2 b 1 2013-01-31-16-00-00-network_state Wee=2048, Wed=8986, Wgd=507, Wmd=507
+2 b 1 2013-01-31-17-00-00-network_state Wee=2054, Wed=9004, Wgd=498, Wmd=498
+2 b 1 2013-01-31-18-00-00-network_state Wee=2208, Wed=8979, Wgd=510, Wmd=510
+2 b 1 2013-01-31-19-00-00-network_state Wee=1754, Wed=9462, Wgd=269, Wmd=269
+2 b 1 2013-01-31-20-00-00-network_state Wee=1762, Wed=9402, Wgd=299, Wmd=299
+2 b 1 2013-01-31-21-00-00-network_state Wee=1400, Wed=9779, Wgd=110, Wmd=110
+2 b 1 2013-01-31-22-00-00-network_state Wee=1585, Wed=9612, Wgd=194, Wmd=194
+2 b 1 2013-01-31-23-00-00-network_state Wee=1566, Wed=9638, Wgd=181, Wmd=181

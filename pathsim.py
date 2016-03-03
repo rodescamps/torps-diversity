@@ -2007,7 +2007,8 @@ pathsim, and pickle it. The pickled object is input to the simulate command')
             # create object of class
             other_network_modifier = network_modifier_class(args, _testing)
             network_modifiers.append(other_network_modifier)
-
+        if (args.wf_optimal):
+            network_modifiers.insert(0, network_modifer.Bwweights(True))
         # create iterator that applies network modifiers to nsf list
         network_states = get_network_states(network_state_files,
             network_modifiers)

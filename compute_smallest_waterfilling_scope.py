@@ -5,7 +5,7 @@ import os
 from stem import Flag
 import network_modifiers
 import pdb
-_testing = True
+_testing = False
 
 if __name__ == "__main__":
 
