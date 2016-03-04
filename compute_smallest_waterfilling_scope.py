@@ -35,7 +35,6 @@ if __name__ == "__main__":
             if fname[0] != '.':
                 network_state_files.append(os.path.join(\
                         dirpath, fname))
-    pdb.set_trace()
     network_state_files.sort(key = lambda x: os.path.basename(x))
     adv_insertion = network_modifiers.AdversaryInsertion(args_parsed, _testing)
     network_modifiers = [adv_insertion]
@@ -46,6 +45,9 @@ if __name__ == "__main__":
     min_cons_weight = 1000000
     max_cons_weight = 0
     average_cons_weight = 0
+    min_wgg = 100000
+    max_wgg = 0
+    average_wgg = 0
     flags = [Flag.RUNNING, Flag.VALID, Flag.GUARD]
     no_flags = [Flag.EXIT]
     for network_state in network_states:
@@ -67,7 +69,13 @@ if __name__ == "__main__":
         if cons_rel_stats[nodes[pivot]].bandwidth > max_cons_weight:
             max_cons_weight = cons_rel_stats[nodes[pivot]].bandwidth
         average_cons_weight += cons_rel_stats[nodes[pivot]].bandwidth
+        if cons_bw_weights['Wgg'] < min_wgg:
+            min_wgg = cons_bw_weights['Wgg']
+        if cons_bw_weights['Wgg'] > max_wgg:
+            max_wgg = cons_bw_weights['Wgg']
+        average_wgg += cons_bw_weights['Wgg']
     average_cons_weight = float(average_cons_weight)/len(network_state_files)
-    print min_cons_weight, average_cons_weight, max_cons_weight
+    average_wgg = float(average_wgg)/len(network_state_files)
+    print min_cons_weight, average_cons_weight, max_cons_weight, min_wgg, average_wgg, max_wgg
 
 

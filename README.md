@@ -19,7 +19,19 @@ Then, run script:
 
  ./run_simulations_waterfilling2.sh /home/frochet/Tor/torps_git-crypto/torps/ simple=6 tor-wf
    out/simulate/3aE\=SGM/2015.1-2015.5/
+
 some variables might need to be modified inside the script, such as the
 name of the network case. This script launches 20 simulations in paralell and output in 
 /out/simulate/$PATH_ALG/$NETWORKCASE/ 
+
+Once finished, we can compute the metrics:
+
+ ./analyze_pathim_metrics.sh /home/frochet/Tor/torps_git-crypto/torps/ tor-wf 3aE=SGM degree-uniformity
+
+ ./analyze_pathim_metrics.sh /home/frochet/Tor/torps_git-crypto/torps/
+tor-wf 3aE=SGM guessing-entropy
+
+output results in /out/metric/$NETWORKCASE/
+
+
 

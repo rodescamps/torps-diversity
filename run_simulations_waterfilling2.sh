@@ -11,7 +11,7 @@ NSF_TYPE="slim"
 TRACEFILE=$BASE_DIR/in/users2-processed.traces.pickle
 LOGLEVEL="INFO"
 PARALLEL_PROCESS_MAX=22
-NETWORKCASE="3aE=SGM"
+NETWORKCASE="3bE=S"
 WF_OPTIMAL="--wf_optimal"
 
 DIRS=`ls -l $NSF_ROOT_DIR | egrep '^d' | awk '{print $9}'`
