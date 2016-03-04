@@ -4,7 +4,7 @@ import pdb
 import stem
 from stem import Flag
 import matplotlib.pyplot
-
+from network_modifiers import Bwweights
 
 class TestWaterFilling(unittest.TestCase):
 
@@ -15,10 +15,12 @@ class TestWaterFilling(unittest.TestCase):
         self.descriptors = []
         self.cons_bw_weights = []
         self.pivots = []
+        self.bww = Bwweights(True)
         self.bwws_remaining = []
         for ns_file in ns_files:
             self.network_states.append(pathsim.get_network_state(ns_file))
         for network_state in self.network_states:
+            self.bww.modify_network_state(network_state) #recompute weights
             cons_valid_after = network_state.cons_valid_after
             cons_fresh_until = network_state.cons_fresh_until
             cons_bw_weights = network_state.cons_bw_weights
