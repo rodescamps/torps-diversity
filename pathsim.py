@@ -1881,6 +1881,17 @@ consensuses')
         help='indicates the number of adversarial guards to add')
     simulate_parser.add_argument('--num_adv_exits', type=int, default=0,
         help='indicates the number of adversarial exits to add')
+    simulate_parser.add_argument('--diversity_guard_cons_bw', type=float, default=0,
+        help='consensus bandwidth of each custom guard to add')
+    simulate_parser.add_argument('--diversity_exit_cons_bw', type=float, default=0,
+        help='consensus bandwidth of each custom exit to add')
+    simulate_parser.add_argument('--diversity_time', type=int, default=0,
+        help='indicates timestamp after which to add custom relays to \
+consensuses')
+    simulate_parser.add_argument('--num_diversity_guards', type=int, default=0,
+        help='indicates the number of custom guards to add')
+    simulate_parser.add_argument('--num_diversity_exits', type=int, default=0,
+        help='indicates the number of custom exits to add')
     simulate_parser.add_argument('--other_network_modifier', default=None,
         help='class to modify network, argument syntax: module.class-argstring')
     simulate_parser.add_argument('--num_guards', type=int, default=3,
@@ -1993,9 +2004,15 @@ pathsim, and pickle it. The pickled object is input to the simulate command')
         # insert gaps for missing time periods
         network_state_files.sort(key = lambda x: os.path.basename(x))
         network_state_files = pad_network_state_files(network_state_files)
+
+        # create object that will add diversity relays into network
+        diversity_insertion = network_modifiers.CustomInsertion(args, _testing)
+        network_modifiers = [diversity_insertion]
+
         # create object that will add adversarial relays into network
         adv_insertion = network_modifiers.AdversaryInsertion(args, _testing)
-        network_modifiers = [adv_insertion]
+        network_modifiers.append(adv_insertion)
+
         # create other network modification object
         if (args.other_network_modifier is not None):
             # dynamically import module and obtain reference to class

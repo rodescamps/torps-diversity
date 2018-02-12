@@ -279,6 +279,121 @@ class Bwweights(object):
         self.optimal_for_wf = wf_optimal
         self.testing = False
 
+
+### Class inserting custom relays ###
+class CustomInsertion(object):
+
+
+    def add_custom_guards(self, num_custom_guards, bandwidth, water_filling=False):
+        """"Adds custom guards into self.add_relays and self.add_descriptors."""
+        #, custom_relays, custom_descriptors
+        for i in xrange(num_custom_guards):
+            # create consensus
+            num_str = str(i+1)
+            fingerprint = '0' * (40-len(num_str)) + num_str
+            nickname = 'DiversityGuard' + num_str
+            flags = [Flag.FAST, Flag.GUARD, Flag.RUNNING, Flag.STABLE,
+                     Flag.VALID]
+            self.custom_relays[fingerprint] = pathsim.RouterStatusEntry(fingerprint,
+                                                                     nickname, flags, bandwidth, water_filling)
+
+            # create descriptor
+            hibernating = False
+            family = {}
+            address = '10.'+num_str+'.0.0' # avoid /16 conflicts
+            exit_policy = ExitPolicy('reject *:*')
+            ntor_onion_key = num_str # indicate ntor support w/ val != None
+            self.custom_descriptors[fingerprint] = pathsim.ServerDescriptor(fingerprint,
+                                                                         hibernating, nickname, family, address, exit_policy,
+                                                                         ntor_onion_key)
+
+
+    def add_custom_exits(self, num_custom_guards, num_custom_exits, bandwidth, water_filling=False):
+        """"Adds custom exits into self.add_relays and self.add_descriptors."""
+        for i in xrange(num_custom_exits):
+            # create consensus
+            num_str = str(i+1)
+            fingerprint = 'F' * (40-len(num_str)) + num_str
+            nickname = 'DiversityExit' + num_str
+            flags = [Flag.FAST, Flag.EXIT, Flag.RUNNING, Flag.STABLE,
+                     Flag.VALID]
+            self.custom_relays[fingerprint] = pathsim.RouterStatusEntry(fingerprint,
+                                                                     nickname, flags, bandwidth, water_filling)
+
+            # create descriptor
+            hibernating = False
+            family = {}
+            address = '10.'+str(num_custom_guards+i+1)+'.0.0' # avoid /16 conflicts
+            exit_policy = ExitPolicy('accept *:*')
+            ntor_onion_key = num_str # indicate ntor support w/ val != None
+            self.custom_descriptors[fingerprint] = pathsim.ServerDescriptor(fingerprint,
+                                                                         hibernating, nickname, family, address, exit_policy,
+                                                                         ntor_onion_key)
+
+
+
+    def __init__(self, args, testing):
+        self.custom_time = args.custom_time
+        self.custom_relays = {}
+        self.custom_descriptors = {}
+        self.add_custom_guards(args.num_custom_guards, args.custom_guard_cons_bw, water_filling=True)
+        self.add_custom_exits(args.num_custom_guards, args.num_custom_exits,
+                           args.custom_exit_cons_bw, water_filling=True)
+        self.testing = testing
+        self.first_modification = True
+        self.bww = Bwweights(args.wf_optimal)
+
+
+    def modify_network_state(self, network_state):
+        """Adds custom guards and exits to cons_rel_stats and
+        descriptors dicts."""
+
+        # add custom descriptors to nsf descriptors
+        # only add once because descriptors variable is assumed persistant
+        if (self.first_modification == True):
+            network_state.descriptors.update(self.custom_descriptors)
+            self.first_modification = False
+
+        # if insertion time has been reached, add custom relays into
+        # consensus and hibernating status list
+        if (self.custom_time <= network_state.cons_valid_after):
+            # include additional relays in consensus
+            if self.testing:
+                print('Adding {0} relays to consensus.'.format( \
+                    len(self.custom_relays)))
+            for fprint, relay in self.custom_relays.iteritems():
+                if fprint in network_state.cons_rel_stats:
+                    raise ValueError( \
+                        'Added relay exists in consensus: {0}:{1}'. \
+                            format(relay.nickname, fprint))
+                network_state.cons_rel_stats[fprint] = relay
+            # include hibernating statuses for added relays
+            network_state.hibernating_statuses.extend([(0, fp, False) \
+                                                       for fp in self.custom_relays])
+            # recompute bwweights taking into account the new nodes added
+            (casename, Wgg, Wgd, Wee, Wed, Wmg, Wme, Wmd) = \
+                self.bww.recompute_bwweights(network_state)
+            bwweights = network_state.cons_bw_weights
+            if self.testing:
+                print("""New computation of bwweights, network load case
+                       is {0} with weights Wgg={1}, Wgd={2}, Wee={3},
+                       Wed={4}, Wmg={5}, Wme={6}, Wmd={7}.\n
+                       The weights received from the consensus are Wgg=
+                       {8}, Wgd={9}, Wee={10}, Wed={11}, Wmg={12}, Wme=
+                       {13}, Wmd={14} """.format(casename, Wgg, Wgd, Wee, \
+                                                 Wed, Wmg, Wme, Wmd, bwweights['Wgg'], bwweights['Wgd'], \
+                                                 bwweights['Wee'], bwweights['Wed'], bwweights['Wmg'], \
+                                                 bwweights['Wme'], bwweights['Wmd']))
+            bwweights['Wgg'] = Wgg
+            bwweights['Wgd'] = Wgd
+            bwweights['Wee'] = Wee
+            bwweights['Wed'] = Wed
+            bwweights['Wmg'] = Wmg
+            bwweights['Wme'] = Wme
+            bwweights['Wmd'] = Wmd
+######
+
+
 ### Class inserting adversary relays ###
 class AdversaryInsertion(object):
 
