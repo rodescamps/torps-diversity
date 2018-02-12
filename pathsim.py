@@ -1881,17 +1881,17 @@ consensuses')
         help='indicates the number of adversarial guards to add')
     simulate_parser.add_argument('--num_adv_exits', type=int, default=0,
         help='indicates the number of adversarial exits to add')
-    simulate_parser.add_argument('--diversity_guard_cons_bw', type=float, default=0,
-        help='consensus bandwidth of each custom guard to add')
-    simulate_parser.add_argument('--diversity_exit_cons_bw', type=float, default=0,
-        help='consensus bandwidth of each custom exit to add')
-    simulate_parser.add_argument('--diversity_time', type=int, default=0,
-        help='indicates timestamp after which to add custom relays to \
+    simulate_parser.add_argument('--custom_guard_cons_bw', type=float, default=0,
+        help='consensus bandwidth of each diversity guard to add')
+    simulate_parser.add_argument('--custom_exit_cons_bw', type=float, default=0,
+        help='consensus bandwidth of each diversity exit to add')
+    simulate_parser.add_argument('--custom_time', type=int, default=0,
+        help='indicates timestamp after which to add diversity relays to \
 consensuses')
-    simulate_parser.add_argument('--num_diversity_guards', type=int, default=0,
-        help='indicates the number of custom guards to add')
-    simulate_parser.add_argument('--num_diversity_exits', type=int, default=0,
-        help='indicates the number of custom exits to add')
+    simulate_parser.add_argument('--num_custom_guards', type=int, default=0,
+        help='indicates the number of diversity guards to add')
+    simulate_parser.add_argument('--num_custom_exits', type=int, default=0,
+        help='indicates the number of diversity exits to add')
     simulate_parser.add_argument('--other_network_modifier', default=None,
         help='class to modify network, argument syntax: module.class-argstring')
     simulate_parser.add_argument('--num_guards', type=int, default=3,
