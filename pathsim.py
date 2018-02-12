@@ -2007,11 +2007,11 @@ pathsim, and pickle it. The pickled object is input to the simulate command')
 
         # create object that will add diversity relays into network
         diversity_insertion = network_modifiers.CustomInsertion(args, _testing)
-        network_modifiers = [diversity_insertion]
+        network_modifications = [diversity_insertion]
 
         # create object that will add adversarial relays into network
         adv_insertion = network_modifiers.AdversaryInsertion(args, _testing)
-        network_modifiers.append(adv_insertion)
+        network_modifications.append(adv_insertion)
 
         # create other network modification object
         if (args.other_network_modifier is not None):
@@ -2024,12 +2024,12 @@ pathsim, and pickle it. The pickled object is input to the simulate command')
             network_modifier_class = getattr(network_modifier_module, classname)
             # create object of class
             other_network_modifier = network_modifier_class(args, _testing)
-            network_modifiers.append(other_network_modifier)
+            network_modifications.append(other_network_modifier)
         if (args.wf_optimal):
-            network_modifiers.insert(0, Bwweights(True))
+            network_modifications.insert(0, Bwweights(True))
         # create iterator that applies network modifiers to nsf list
         network_states = get_network_states(network_state_files,
-            network_modifiers)
+            network_modifications)
 
         # determine start and end times
         start_time = None
