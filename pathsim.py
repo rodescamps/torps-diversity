@@ -2000,6 +2000,7 @@ pathsim, and pickle it. The pickled object is input to the simulate command')
             followlinks=True):
             for filename in filenames:
                 if (filename[0] != '.'):
+                    print(dirpath,filename)
                     network_state_files.append(os.path.join(dirpath,filename))
         # insert gaps for missing time periods
         network_state_files.sort(key = lambda x: os.path.basename(x))
