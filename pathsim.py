@@ -831,6 +831,7 @@ def get_network_states(network_state_files, network_modifiers):
         if (ns_file is not None):
             # get network state variables from file    
             network_state = get_network_state(ns_file)
+            print(ns_file)
             # apply network modifications
             for network_modifier in network_modifiers:
                 network_modifier.modify_network_state(network_state)
