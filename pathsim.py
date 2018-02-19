@@ -792,7 +792,6 @@ def get_network_state(ns_file):
 
     cons_rel_stats = {}
     with open(ns_file, 'r') as nsf:
-        print(ns_file)
         consensus = pickle.load(nsf)
         new_descriptors = pickle.load(nsf)
         hibernating_statuses = pickle.load(nsf)
@@ -831,7 +830,6 @@ def get_network_states(network_state_files, network_modifiers):
     for ns_file in network_state_files:
         if (ns_file is not None):
             # get network state variables from file
-            print(ns_file)
             network_state = get_network_state(ns_file)
             # apply network modifications
             for network_modifier in network_modifiers:

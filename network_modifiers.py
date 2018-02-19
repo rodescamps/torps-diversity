@@ -290,7 +290,7 @@ class CustomInsertion(object):
         for i in xrange(num_custom_guards):
             # create consensus
             num_str = str(i+1)
-            fingerprint = '0' * (40-len(num_str)) + num_str
+            fingerprint = 'D' * (40-len(num_str)) + num_str
             nickname = 'DiversityGuard' + num_str
             flags = [Flag.FAST, Flag.GUARD, Flag.RUNNING, Flag.STABLE,
                      Flag.VALID]
@@ -313,7 +313,7 @@ class CustomInsertion(object):
         for i in xrange(num_custom_exits):
             # create consensus
             num_str = str(i+1)
-            fingerprint = 'F' * (40-len(num_str)) + num_str
+            fingerprint = 'E' * (40-len(num_str)) + num_str
             nickname = 'DiversityExit' + num_str
             flags = [Flag.FAST, Flag.EXIT, Flag.RUNNING, Flag.STABLE,
                      Flag.VALID]
