@@ -184,7 +184,7 @@ class Bwweights(object):
                     if flag in rel_stat.flags:
                         i+=1
                 if i == len(flags) and j==0 and (fprint in descriptors or\
-                        fprint in self.adv_descriptors):
+                        fprint in self.descriptors):
                     nodes.append(fprint)
             return nodes
 
@@ -286,7 +286,7 @@ class CustomInsertion(object):
 
     def add_custom_guards(self, num_custom_guards, bandwidth, water_filling=False):
         """"Adds custom guards into self.add_relays and self.add_descriptors."""
-        #, custom_relays, custom_descriptors
+        #, custom_relays, descriptors
         for i in xrange(num_custom_guards):
             # create consensus
             num_str = str(i+1)
@@ -303,7 +303,7 @@ class CustomInsertion(object):
             address = '10.'+num_str+'.0.0' # avoid /16 conflicts
             exit_policy = ExitPolicy('reject *:*')
             ntor_onion_key = num_str # indicate ntor support w/ val != None
-            self.custom_descriptors[fingerprint] = pathsim.ServerDescriptor(fingerprint,
+            self.descriptors[fingerprint] = pathsim.ServerDescriptor(fingerprint,
                                                                          hibernating, nickname, family, address, exit_policy,
                                                                          ntor_onion_key)
 
@@ -326,7 +326,7 @@ class CustomInsertion(object):
             address = '10.'+str(num_custom_guards+i+1)+'.0.0' # avoid /16 conflicts
             exit_policy = ExitPolicy('accept *:*')
             ntor_onion_key = num_str # indicate ntor support w/ val != None
-            self.custom_descriptors[fingerprint] = pathsim.ServerDescriptor(fingerprint,
+            self.descriptors[fingerprint] = pathsim.ServerDescriptor(fingerprint,
                                                                          hibernating, nickname, family, address, exit_policy,
                                                                          ntor_onion_key)
 
@@ -335,7 +335,7 @@ class CustomInsertion(object):
     def __init__(self, args, testing):
         self.custom_time = args.custom_time
         self.custom_relays = {}
-        self.custom_descriptors = {}
+        self.descriptors = {}
         self.add_custom_guards(args.num_custom_guards, args.custom_guard_cons_bw, water_filling=True)
         self.add_custom_exits(args.num_custom_guards, args.num_custom_exits,
                            args.custom_exit_cons_bw, water_filling=True)
@@ -351,7 +351,7 @@ class CustomInsertion(object):
         # add custom descriptors to nsf descriptors
         # only add once because descriptors variable is assumed persistant
         if (self.first_modification == True):
-            network_state.descriptors.update(self.custom_descriptors)
+            network_state.descriptors.update(self.descriptors)
             self.first_modification = False
 
         # if insertion time has been reached, add custom relays into
@@ -400,7 +400,7 @@ class AdversaryInsertion(object):
 
     def add_adv_guards(self, num_adv_guards, bandwidth, water_filling=False):
         """"Adds adv guards into self.add_relays and self.add_descriptors."""
-        #, adv_relays, adv_descriptors
+        #, adv_relays, descriptors
         for i in xrange(num_adv_guards):
             # create consensus
             num_str = str(i+1)
@@ -417,7 +417,7 @@ class AdversaryInsertion(object):
             address = '10.'+num_str+'.0.0' # avoid /16 conflicts
             exit_policy = ExitPolicy('reject *:*')
             ntor_onion_key = num_str # indicate ntor support w/ val != None
-            self.adv_descriptors[fingerprint] = pathsim.ServerDescriptor(fingerprint,
+            self.descriptors[fingerprint] = pathsim.ServerDescriptor(fingerprint,
                 hibernating, nickname, family, address, exit_policy,
                 ntor_onion_key)
 
@@ -440,7 +440,7 @@ class AdversaryInsertion(object):
             address = '10.'+str(num_adv_guards+i+1)+'.0.0' # avoid /16 conflicts
             exit_policy = ExitPolicy('accept *:*')
             ntor_onion_key = num_str # indicate ntor support w/ val != None
-            self.adv_descriptors[fingerprint] = pathsim.ServerDescriptor(fingerprint,
+            self.descriptors[fingerprint] = pathsim.ServerDescriptor(fingerprint,
                 hibernating, nickname, family, address, exit_policy,
                 ntor_onion_key)
 
@@ -449,7 +449,7 @@ class AdversaryInsertion(object):
     def __init__(self, args, testing):
         self.adv_time = args.adv_time
         self.adv_relays = {}
-        self.adv_descriptors = {}
+        self.descriptors = {}
         self.add_adv_guards(args.num_adv_guards, args.adv_guard_cons_bw, water_filling=True)
         self.add_adv_exits(args.num_adv_guards, args.num_adv_exits,
             args.adv_exit_cons_bw, water_filling=True)
@@ -465,7 +465,7 @@ class AdversaryInsertion(object):
         # add adversarial descriptors to nsf descriptors
         # only add once because descriptors variable is assumed persistant
         if (self.first_modification == True):
-            network_state.descriptors.update(self.adv_descriptors)
+            network_state.descriptors.update(self.descriptors)
             self.first_modification = False
 
         # if insertion time has been reached, add adversarial relays into

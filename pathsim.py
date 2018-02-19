@@ -2000,7 +2000,6 @@ pathsim, and pickle it. The pickled object is input to the simulate command')
             followlinks=True):
             for filename in filenames:
                 if (filename[0] != '.'):
-                    print(dirpath,filename)
                     network_state_files.append(os.path.join(dirpath,filename))
         # insert gaps for missing time periods
         network_state_files.sort(key = lambda x: os.path.basename(x))
@@ -2028,6 +2027,7 @@ pathsim, and pickle it. The pickled object is input to the simulate command')
             network_modifications.append(other_network_modifier)
         if (args.wf_optimal):
             network_modifications.insert(0, Bwweights(True))
+
         # create iterator that applies network modifiers to nsf list
         network_states = get_network_states(network_state_files,
             network_modifications)
