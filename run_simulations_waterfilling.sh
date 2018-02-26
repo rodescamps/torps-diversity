@@ -22,9 +22,9 @@ do
   OUT_DIR=$BASE_DIR/out/simulate/$EXP_NAME
   mkdir -p $OUT_DIR
   i=1
-  while [ $i -lt $PARALLEL_PROCESS]
+  while [ $i -lt $PARALLEL_PROCESS ]
   do
-    if [ $j -le $(($PARALLEL_PROCESS_MAX-1))]
+    if [ $j -le $(($PARALLEL_PROCESS_MAX-1)) ]
     then
       # wait this process to finish
       (time pypy pathsim.py simulate --nsf_dir $NSF_DIR --num_samples $NUM_SAMPLES --trace_file $TRACEFILE --user_model $USERMODEL --format $OUTPUT --loglevel $LOGLEVEL $PATH_ALG) 2> $OUT_DIR/simulate.$EXP_NAME.$NUM_SAMPLES-samples.$i.time 1> $OUT_DIR/simulate.$EXP_NAME.$NUM_SAMPLES-samples.$i.out
