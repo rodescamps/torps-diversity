@@ -24,7 +24,7 @@ do
       time pypy pathsim.py simulate --nsf_dir $NSF_DIR --num_samples $NUM_SAMPLES --trace_file $TRACEFILE --user_model $USERMODEL --format $OUTPUT --loglevel $LOGLEVEL $PATH_ALG 2> $OUT_DIR/simulate.$EXP_NAME.$NUM_SAMPLES-samples.time 1> $OUT_DIR/simulate.$EXP_NAME.$NUM_SAMPLES-samples.out
       j=0
   else
-      nohup time pypy pathsim.py simulate --nsf_dir $NSF_DIR --num_samples $NUM_SAMPLES --trace_file $TRACEFILE --user_model $USERMODEL --format $OUTPUT --loglevel $LOGLEVEL $PATH_ALG 2> $OUT_DIR/simulate.$EXP_NAME.$NUM_SAMPLES-samples.time 1> $OUT_DIR/simulate.$EXP_NAME.$NUM_SAMPLES-samples.out
+      nohup time pypy pathsim.py simulate --nsf_dir $NSF_DIR --num_samples $NUM_SAMPLES --trace_file $TRACEFILE --user_model $USERMODEL --format $OUTPUT --loglevel $LOGLEVEL $PATH_ALG 2> $OUT_DIR/simulate.$EXP_NAME.$NUM_SAMPLES-samples.time 1> $OUT_DIR/simulate.$EXP_NAME.$NUM_SAMPLES-samples.out &
   fi
   j=$(($j+1))
 
