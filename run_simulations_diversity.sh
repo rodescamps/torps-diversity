@@ -9,7 +9,7 @@ NUM_SAMPLES=2500
 NSF_TYPE="slim"
 TRACEFILE=$BASE_DIR/in/users2-processed.traces.pickle
 LOGLEVEL="INFO"
-PARALLEL_PROCESS_MAX=20
+PARALLEL_PROCESS=20
 
 DIRS=`ls -l $NSF_ROOT_DIR | egrep '^d' | awk '{print $9}'`
 i=0
