@@ -12,7 +12,7 @@ LOGLEVEL="INFO"
 PARALLEL_PROCESS_MAX=20
 
 DIRS=`ls -l $NSF_ROOT_DIR | egrep '^d' | awk '{print $9}'`
-j=0
+i=0
 for DIR in $DIRS 
 do 
   EXP_NAME=$USERMODEL.${DIR}
