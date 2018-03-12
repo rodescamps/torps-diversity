@@ -65,13 +65,15 @@ def plot_cdf(lines, line_labels, xlabel, title, location, out_pathname,
     matplotlib.pyplot.yticks(numpy.arange(0, 1.1, 0.1))
     matplotlib.pyplot.xlabel(xlabel, fontsize=fontsize)
     matplotlib.pyplot.ylabel('Cumulative probability', fontsize=fontsize)
-#    matplotlib.pyplot.title(title, fontsize=fontsize)
+    matplotlib.pyplot.title(title, fontsize=fontsize)
     matplotlib.pyplot.grid()
     matplotlib.pyplot.tight_layout()
     
     # output    
     matplotlib.pyplot.show()
-    #matplotlib.pyplot.savefig(out_pathname)
+    matplotlib.pyplot.savefig(out_pathname)
+    matplotlib.pyplot.cla()
+    matplotlib.pyplot.close(fig)
 ##########
 
 def compromised_set_plot_rates(compromise_stats, line_labels, out_dir,
