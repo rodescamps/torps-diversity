@@ -18,7 +18,7 @@ if __name__ == '__main__':
         print(usage)
         sys.exit(1)
 
-    as_number = sys.argv[1]
+    searched_as_number = int(sys.argv[1])
     in_dir = sys.argv[2]
     guards_file = sys.argv[3]
     exits_file = sys.argv[4]
@@ -59,7 +59,7 @@ if __name__ == '__main__':
                     response = urllib.urlopen(url)
                     data = json.loads(response.read())
                     autonomous_system_number = data['as_number']
-                    if autonomous_system_number == as_number:
+                    if autonomous_system_number == searched_as_number:
                         as_guards.append(guard_ip)
                 if exit_ip not in as_exits:
                     """
@@ -70,7 +70,7 @@ if __name__ == '__main__':
                     response = urllib.urlopen(url)
                     data = json.loads(response.read())
                     autonomous_system_number = data['as_number']
-                    if autonomous_system_number == as_number:
+                    if autonomous_system_number == searched_as_number:
                         as_exits.append(exit_ip)
                 print(as_guards)
                 print(as_exits)
