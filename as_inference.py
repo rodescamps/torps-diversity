@@ -56,8 +56,10 @@ if __name__ == '__main__':
                     autonomous_system_number = autonomous_system.split()[0][2:]
                     """
                     url = 'https://api.iptoasn.com/v1/as/'+guard_ip+'/'
+                    print(url)
                     response = urllib.urlopen(url)
                     data = json.loads(response.read())
+                    print(data)
                     autonomous_system_number = data['as_number']
                     if autonomous_system_number == as_number:
                         as_guards.add(guard_ip)
@@ -74,9 +76,9 @@ if __name__ == '__main__':
                         as_exits.add(exit_ip)
                 print("Guards: "+as_guards)
                 print("Exits: "+as_exits)
-                
 
-    with open(guards_file, 'rw') as gf, open(exits_file, 'rw') as ef:
+
+    with open(guards_file, 'w') as gf, open(exits_file, 'w') as ef:
         # Write all the AS IPs to the specified files
         for as_guard in as_guards:
             gf.write("%s\n" % as_guard)
