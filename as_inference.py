@@ -74,8 +74,8 @@ if __name__ == '__main__':
                     autonomous_system_number = data['as_number']
                     if autonomous_system_number == as_number:
                         as_exits.add(exit_ip)
-                print("Guards: "+as_guards)
-                print("Exits: "+as_exits)
+                print(as_guards)
+                print(as_exits)
 
 
     with open(guards_file, 'w') as gf, open(exits_file, 'w') as ef:
