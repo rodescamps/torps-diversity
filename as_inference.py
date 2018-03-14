@@ -102,7 +102,7 @@ if __name__ == '__main__':
     as_exits = []
     i = 0
     for log_file in log_files:
-        print('Processing log file '+i+'/'+len(log_files))
+        print('Processing log file '+str(i)+'/'+str(len(log_files)))
         with open(log_file, 'r') as lf:
             lf.readline() # read header line
             for line in lf:
@@ -120,7 +120,7 @@ if __name__ == '__main__':
                     if ip_in_as(exit_ip, subnets):
                         as_exits.append(exit_ip)
         lf.close()
-        print('log file '+i+'/'+len(log_files)+' processed.')
+        print('log file '+str(i)+'/'+str(len(log_files))+' processed.')
         i += 1
 
 
