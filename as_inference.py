@@ -56,13 +56,11 @@ if __name__ == '__main__':
                     autonomous_system_number = autonomous_system.split()[0][2:]
                     """
                     url = 'https://api.iptoasn.com/v1/as/ip/'+guard_ip+'/'
-                    print(url)
                     response = urllib.urlopen(url)
                     data = json.loads(response.read())
-                    print(data)
                     autonomous_system_number = data['as_number']
                     if autonomous_system_number == as_number:
-                        as_guards.add(guard_ip)
+                        as_guards.append(guard_ip)
                 if exit_ip not in as_exits:
                     """
                     autonomous_system = requests.get('http://ipinfo.io/'+exit_ip+'/org?token=18a079694c3e61').text
@@ -73,7 +71,7 @@ if __name__ == '__main__':
                     data = json.loads(response.read())
                     autonomous_system_number = data['as_number']
                     if autonomous_system_number == as_number:
-                        as_exits.add(exit_ip)
+                        as_exits.append(exit_ip)
                 print(as_guards)
                 print(as_exits)
 
