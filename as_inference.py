@@ -100,7 +100,9 @@ if __name__ == '__main__':
     # Add guards and exits belonging to the searched AS for the guards/exits IP contained in log_files
     as_guards = []
     as_exits = []
+    i = 0
     for log_file in log_files:
+        print('Processing log file '+i+'/'+len(log_files))
         with open(log_file, 'r') as lf:
             lf.readline() # read header line
             for line in lf:
@@ -117,9 +119,9 @@ if __name__ == '__main__':
                 if exit_ip not in as_exits:
                     if ip_in_as(exit_ip, subnets):
                         as_exits.append(exit_ip)
-                print(as_guards)
-                print(as_exits)
         lf.close()
+        print('log file '+i+'/'+len(log_files)+' processed.')
+        i += 1
 
 
     with open(guards_file, 'w') as gf, open(exits_file, 'w') as ef:
