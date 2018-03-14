@@ -5,6 +5,7 @@ from pathsim import *
 import multiprocessing
 import re
 import requests
+import urllib, json
 
 
 
@@ -50,15 +51,30 @@ if __name__ == '__main__':
                 exit_ip = line_fields[4]
 
                 if guard_ip not in as_guards:
+                    """
                     autonomous_system = requests.get('http://ipinfo.io/'+guard_ip+'/org?token=18a079694c3e61').text
                     autonomous_system_number = autonomous_system.split()[0][2:]
+                    """
+                    url = 'https://api.iptoasn.com/v1/as/'+guard_ip+'/'
+                    response = urllib.urlopen(url)
+                    data = json.loads(response.read())
+                    autonomous_system_number = data['as_number']
                     if autonomous_system_number == as_number:
                         as_guards.add(guard_ip)
                 if exit_ip not in as_exits:
+                    """
                     autonomous_system = requests.get('http://ipinfo.io/'+exit_ip+'/org?token=18a079694c3e61').text
                     autonomous_system_number = autonomous_system.split()[0][2:]
+                    """
+                    url = 'https://api.iptoasn.com/v1/as/'+exit_ip+'/'
+                    response = urllib.urlopen(url)
+                    data = json.loads(response.read())
+                    autonomous_system_number = data['as_number']
                     if autonomous_system_number == as_number:
                         as_exits.add(exit_ip)
+                print("Guards: "+as_guards)
+                print("Exits: "+as_exits)
+                
 
     with open(guards_file, 'rw') as gf, open(exits_file, 'rw') as ef:
         # Write all the AS IPs to the specified files
