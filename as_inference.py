@@ -55,7 +55,7 @@ if __name__ == '__main__':
                     autonomous_system = requests.get('http://ipinfo.io/'+guard_ip+'/org?token=18a079694c3e61').text
                     autonomous_system_number = autonomous_system.split()[0][2:]
                     """
-                    url = 'https://api.iptoasn.com/v1/as/'+guard_ip+'/'
+                    url = 'https://api.iptoasn.com/v1/as/ip/'+guard_ip+'/'
                     print(url)
                     response = urllib.urlopen(url)
                     data = json.loads(response.read())
@@ -68,7 +68,7 @@ if __name__ == '__main__':
                     autonomous_system = requests.get('http://ipinfo.io/'+exit_ip+'/org?token=18a079694c3e61').text
                     autonomous_system_number = autonomous_system.split()[0][2:]
                     """
-                    url = 'https://api.iptoasn.com/v1/as/'+exit_ip+'/'
+                    url = 'https://api.iptoasn.com/v1/as/ip/'+exit_ip+'/'
                     response = urllib.urlopen(url)
                     data = json.loads(response.read())
                     autonomous_system_number = data['as_number']
