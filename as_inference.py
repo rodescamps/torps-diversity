@@ -68,7 +68,6 @@ def ip_in_as(ip, subnets):
     return False
 
 if __name__ == '__main__':
-    sys.stdout.flush() # flush in order to the print() to work
     usage = 'Usage: as_inference.py [AS number] [logs_in_dir] [top_guards_file] [top_exits_file]\n\
             Extracts the guard/exit IPs contained in [logs_in_dir] belonging to AS[AS number], and writes them in\
             [top_guards_file] (guard IPs) and [top_exits_file] (exit IPs)'
@@ -89,6 +88,7 @@ if __name__ == '__main__':
     log_files.sort(key = lambda x: os.path.basename(x))
 
     # Prepare the AS subnets in DictReader
+    print("Prepare the AS subnets...")
     subnets_as_file = urllib.URLopener()
     subnets_as_file.retrieve("https://iptoasn.com/data/ip2asn-v4.tsv.gz", "ip2asn-v4.tsv.gz")
     subnets = []
@@ -99,6 +99,7 @@ if __name__ == '__main__':
                 subnets.append(row['range_start']+','+row['range_end'])
 
     # Add guards and exits belonging to the searched AS for the guards/exits IP contained in log_files
+    print("Processing log files...")
     as_guards = []
     as_exits = []
     i = 0
