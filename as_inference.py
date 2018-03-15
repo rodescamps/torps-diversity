@@ -68,11 +68,12 @@ def ip_in_as(ip, subnets):
     return False
 
 if __name__ == '__main__':
+    sys.stdout.flush() # flush in order to the print() to work
     usage = 'Usage: as_inference.py [AS number] [logs_in_dir] [top_guards_file] [top_exits_file]\n\
-            Extracts the guard/exit IPs contained in [logs_in_dir] belonging to AS[AS number], and writes them in \
+            Extracts the guard/exit IPs contained in [logs_in_dir] belonging to AS[AS number], and writes them in\
             [top_guards_file] (guard IPs) and [top_exits_file] (exit IPs)'
 
-    if (len(sys.argv) < 4):
+    if (len(sys.argv) < 5):
         print(usage)
         sys.exit(1)
 
