@@ -1,6 +1,10 @@
 ## Generate graphs with added diversity
 
+
 ### 1. (Generate network files)
+```
+$ sh create_network_state.sh
+```
 
 ### 2. Run the simulations (vanilla/diversity)
 ```

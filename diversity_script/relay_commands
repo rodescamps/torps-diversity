@@ -1,0 +1,5 @@
+relay-adv run simulations vanilla
+pypy pathsim.py simulate --nsf_dir ../out/ns-2017-01--2017-02 --num_samples 50000 --trace_file in/users2-processed.traces.pickle --user_model typical --format relay-adv --adv_guard_cons_bw 40000 --adv_exit_cons_bw 25000 --adv_time 0 --num_adv_guards 3 --num_adv_exits 3 --num_guards 2 --guard_expiration 270 --loglevel INFO tor
+
+relay-adv run simulations diversity
+pypy pathsim.py simulate --nsf_dir ../out/ns-2017-01--2017-02 --num_samples 50000 --trace_file in/users2-processed.traces.pickle --user_model typical --format relay-adv --adv_guard_cons_bw 40000 --adv_exit_cons_bw 25000 --adv_time 0 --num_adv_guards 3 --num_adv_exits 3 --custom_guard_cons_bw 40000 --custom_exit_cons_bw 25000 --custom_time 0 --num_custom_guards 3 --num_custom_exits 3 --num_guards 2 --guard_expiration 270 --loglevel INFO tor
