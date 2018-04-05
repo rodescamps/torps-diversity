@@ -68,18 +68,17 @@ def ip_in_as(ip, subnets):
     return False
 
 if __name__ == '__main__':
-    usage = 'Usage: as_inference.py [AS number] [logs_in_dir] [top_guards_file] [top_exits_file]\n\
+    usage = 'Usage: as_inference.py [AS number] [logs_in_dir] [results_out_dir] \n\
             Extracts the guard/exit IPs contained in [logs_in_dir] belonging to AS[AS number], and writes them in\
-            [top_guards_file] (guard IPs) and [top_exits_file] (exit IPs)'
+            [results_out_dir/[AS number]_guards] (guard IPs) and [results_out_dir/[AS number]_exits] (exit IPs)'
 
-    if (len(sys.argv) < 5):
+    if (len(sys.argv) < 4):
         print(usage)
         sys.exit(1)
 
     searched_as_number = sys.argv[1]
     in_dir = sys.argv[2]
-    guards_file = sys.argv[3]
-    exits_file = sys.argv[4]
+    out_dir = sys.argv[3]
     log_files = []
     for dirpath, dirnames, filenames in os.walk(in_dir, followlinks=True):
         for filename in filenames:
@@ -88,7 +87,6 @@ if __name__ == '__main__':
     log_files.sort(key = lambda x: os.path.basename(x))
 
     # Prepare the AS subnets in DictReader
-    print("Prepare the AS subnets...")
     subnets_as_file = urllib.URLopener()
     subnets_as_file.retrieve("https://iptoasn.com/data/ip2asn-v4.tsv.gz", "ip2asn-v4.tsv.gz")
     subnets = []
@@ -99,12 +97,10 @@ if __name__ == '__main__':
                 subnets.append(row['range_start']+','+row['range_end'])
 
     # Add guards and exits belonging to the searched AS for the guards/exits IP contained in log_files
-    print("Processing log files...")
     as_guards = []
     as_exits = []
     i = 0
     for log_file in log_files:
-        print('Processing log file '+str(i)+'/'+str(len(log_files)))
         with open(log_file, 'r') as lf:
             lf.readline() # read header line
             for line in lf:
@@ -122,10 +118,10 @@ if __name__ == '__main__':
                     if ip_in_as(exit_ip, subnets):
                         as_exits.append(exit_ip)
         lf.close()
-        print('log file '+str(i)+'/'+str(len(log_files))+' processed.')
         i += 1
 
-
+    guards_file = os.path.join(out_dir,searched_as_number+"_guards")
+    exits_file = os.path.join(out_dir,searched_as_number+"_exits")
     with open(guards_file, 'w') as gf, open(exits_file, 'w') as ef:
         # Write all the AS IPs to the specified files
         for as_guard in as_guards:

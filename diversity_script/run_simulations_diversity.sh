@@ -19,7 +19,7 @@ for DIR in $DIRS
 do 
   EXP_NAME=$USERMODEL.${DIR}
   NSF_DIR=$NSF_ROOT_DIR/${DIR}
-  OUT_DIR=$BASE_DIR/out/simulate/$PATH_ALG/$EXP_NAME
+  OUT_DIR=$BASE_DIR/out/simulate/$PATH_ALG/$EXP_NAME/out
   mkdir -p $OUT_DIR
   while [ $i -lt $PARALLEL_PROCESS ]
   do
