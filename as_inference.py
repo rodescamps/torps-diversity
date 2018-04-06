@@ -109,7 +109,7 @@ if __name__ == '__main__':
                 id = int(line_fields[0])
                 time = float(line_fields[1])
                 guard_ip = line_fields[2]
-                exit_ip = line_fields[4]
+                exit_ip = line_fields[3]
 
                 if guard_ip not in as_guards:
                     if ip_in_as(guard_ip, subnets):
