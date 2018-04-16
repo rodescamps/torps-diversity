@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Example: sh run_simulations_vanilla_relay_adv.sh ../.. typical tor ../../out/network-states/ 50000 50000 0 5 5 1 270
+# Example: sh run_simulations_vanilla_relay_adv.sh ../.. typical tor ../../out/network-states 50000 50000 0 5 5 1 270
 
 BASE_DIR=$1
 USERMODEL=$2
@@ -12,8 +12,8 @@ ADV_EXIT_CONS_BW=$6
 ADV_TIME=$7
 NUM_ADV_GUARDS=$8
 NUM_ADV_EXITS=$9
-NUM_GUARDS=$10
-GUARD_EXPIRATION=$11
+NUM_GUARDS=${10}
+GUARD_EXPIRATION=${11}
 
 OUTPUT="relay-adv"
 NUM_SAMPLES=2500
