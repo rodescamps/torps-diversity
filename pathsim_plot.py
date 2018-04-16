@@ -5,7 +5,7 @@ import cPickle as pickle
 import sys
 import numpy
 import matplotlib
-#matplotlib.use('PDF') # alerts matplotlib that display not required
+matplotlib.use('Agg') # alerts matplotlib that display not required
 import matplotlib.pyplot
 #import matplotlib.mlab
 import math
@@ -290,8 +290,8 @@ def compromised_top_relays_plot_rates(compromise_stats, out_dir, out_name):
         raise ValueError('compromise_stats input cannot be empty')
     if (len(compromise_stats[0]) == 0):
         raise ValueError('Need statistics for each top guard/exit pair.')
-    num_top_guards = len(compromise_stats[0])
-    num_top_exits = len(compromise_stats[0][0])
+    num_top_guards = len(compromise_stats[0])-1
+    num_top_exits = len(compromise_stats[0][0])-1
     # only output for powers of two adversaries
     num_guards = 0
     while (num_guards <= num_top_guards):
@@ -377,8 +377,8 @@ def compromised_top_relays_plot_times(start_time, end_time, compromise_stats,\
         raise ValueError('compromise_stats input cannot be empty')
     if (len(compromise_stats[0]) == 0):
         raise ValueError('Need statistics for each top guard/exit pair.')
-    num_top_guards = len(compromise_stats[0])
-    num_top_exits = len(compromise_stats[0][0])
+    num_top_guards = len(compromise_stats[0])-1
+    num_top_exits = len(compromise_stats[0][0])-1
     # only output for powers of two adversaries
     num_guards = 0
     while (num_guards <= num_top_guards):
