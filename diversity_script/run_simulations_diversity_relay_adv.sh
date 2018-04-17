@@ -1,29 +1,44 @@
 #!/bin/bash
 
-# Example: sh run_simulations_diversity.sh ../.. typical tor ../../out network-adv
+# Example: sh run_simulations_vanilla_relay_adv.sh ../.. typical tor ../../out/network-states 50000 50000 0 5 5 5000 15000 0 1 3 1 270
 
 BASE_DIR=$1
 USERMODEL=$2
 PATH_ALG=$3
 NSF_ROOT_DIR=$4
-OUTPUT=$5
+
+ADV_GUARD_CONS_BW=$5
+ADV_EXIT_CONS_BW=$6
+ADV_TIME=$7
+NUM_ADV_GUARDS=$8
+NUM_ADV_EXITS=$9
+CUSTOM_GUARD_CONS_BW=${10}
+CUSTOM_EXIT_CONS_BW=${11}
+CUSTOM_TIME=${12}
+NUM_CUSTOM_GUARDS=${13}
+NUM_CUSTOM_EXITS=${14}
+NUM_GUARDS=${15}
+GUARD_EXPIRATION=${16}
+
+OUTPUT="relay-adv"
 NUM_SAMPLES=2500
 TRACEFILE=$BASE_DIR/in/users2-processed.traces.pickle
 LOGLEVEL="INFO"
-PARALLEL_PROCESS=21
+
+PARALLEL_PROCESS=`nproc --all`
+# PARALLEL_PROCESS=8
 
 DIRS=`ls -l $NSF_ROOT_DIR | egrep '^d' | awk '{print $9}'`
-i=1
-for DIR in $DIRS 
-do 
+i=0
+for DIR in $DIRS
+do
   EXP_NAME=$USERMODEL.${DIR}
   NSF_DIR=$NSF_ROOT_DIR/${DIR}
-  OUT_DIR=$BASE_DIR/out/simulate/$PATH_ALG/$EXP_NAME/out
+  OUT_DIR=$BASE_DIR/out/simulate/$PATH_ALG/$EXP_NAME/$OUTPUT/out
   mkdir -p $OUT_DIR
   while [ $i -lt $PARALLEL_PROCESS ]
   do
-      nohup pypy ../pathsim.py simulate --nsf_dir $NSF_DIR --num_samples $NUM_SAMPLES --trace_file $TRACEFILE --user_model $USERMODEL --format $OUTPUT --loglevel $LOGLEVEL $PATH_ALG 2> $OUT_DIR/simulate.$EXP_NAME.$NUM_SAMPLES-samples.$i.time 1> $OUT_DIR/simulate.$EXP_NAME.$NUM_SAMPLES-samples.$i.out &
+     nohup python ../pathsim.py simulate --nsf_dir $NSF_DIR --num_samples $NUM_SAMPLES --trace_file $TRACEFILE --user_model $USERMODEL --format $OUTPUT --adv_guard_cons_bw $ADV_GUARD_CONS_BW --adv_exit_cons_bw $ADV_EXIT_CONS_BW --adv_time $ADV_TIME --num_adv_guards $NUM_ADV_GUARDS --num_adv_exits $NUM_ADV_EXITS --custom_guard_cons_bw $CUSTOM_GUARD_CONS_BW --custom_exit_cons_bw $CUSTOM_EXIT_CONS_BW --custom_time $CUSTOM_TIME --num_custom_guards $NUM_CUSTOM_GUARDS --num_custom_exits $NUM_CUSTOM_EXITS --num_guards $NUM_GUARDS --guard_expiration $GUARD_EXPIRATION --loglevel $LOGLEVEL $PATH_ALG 2> $OUT_DIR/simulate.$EXP_NAME.$NUM_SAMPLES-samples.$i.error 1> $OUT_DIR/simulate.$EXP_NAME.$NUM_SAMPLES-samples.$i.out &
   i=$(($i+1))
   done
-
 done
