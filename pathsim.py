@@ -2005,11 +2005,11 @@ pathsim, and pickle it. The pickled object is input to the simulate command')
         network_state_files.sort(key = lambda x: os.path.basename(x))
         network_state_files = pad_network_state_files(network_state_files)
 
-        # create object that will add diversity relays into network
+        # create object that will add adversary relays into network
         adv_insertion = network_modifiers.AdversaryInsertion(args, _testing)
         network_modifications = [adv_insertion]
 
-        # create object that will add adversarial relays into network
+        # create object that will add diversity relays into network
         diversity_insertion = network_modifiers.CustomInsertion(args, _testing)
         network_modifications.append(diversity_insertion)
 

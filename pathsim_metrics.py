@@ -8,7 +8,7 @@ import math
 def consensusname(log_file):
   return log_file.split('.')[1]
 
-def build_prob_matrix(log_file):
+def build_prob_matrix(log_files):
 
   prob_matrix = {}
   exits = {}
@@ -16,40 +16,41 @@ def build_prob_matrix(log_file):
   counter_line = 0.0
   from collections import defaultdict
   previous_node = defaultdict(dict)
-  with open(log_file, 'r') as lf:
-    lf.readline() #skip header
-    for line in lf:
-      line = line[0:-1]
-      line_fields = line.split('\t')
-      sample = int(line_fields[0])
-      guard_ip = line_fields[2]
-      exit_ip = line_fields[4]
-      if guard_ip not in guards :
-        guards[guard_ip] = 0
-      if exit_ip not in exits:
-        exits[exit_ip] = 0
 
-      if guard_ip not in prob_matrix:
-        prob_matrix[guard_ip] = {}
-        prob_matrix[guard_ip][exit_ip] = 1
-      elif exit_ip not in prob_matrix[guard_ip]:
-        prob_matrix[guard_ip][exit_ip] = 1
-      else:
-        prob_matrix[guard_ip][exit_ip] += 1
-      exits[exit_ip] += 1
-      guards[guard_ip]+= 1
+  for log_file in log_files:
+    with open(log_file, 'r') as lf:
+      lf.readline() #skip header
+      for line in lf:
+        line = line[0:-1]
+        line_fields = line.split('\t')
+        sample = int(line_fields[0])
+        guard_ip = line_fields[2]
+        exit_ip = line_fields[4]
+        if guard_ip not in guards :
+          guards[guard_ip] = 0
+        if exit_ip not in exits:
+          exits[exit_ip] = 0
 
-      counter_line +=1.0
-      #if int(counter_line) % 100000 == 0:
-      #print counter_line
+        if guard_ip not in prob_matrix:
+          prob_matrix[guard_ip] = {}
+          prob_matrix[guard_ip][exit_ip] = 1
+        elif exit_ip not in prob_matrix[guard_ip]:
+          prob_matrix[guard_ip][exit_ip] = 1
+        else:
+          prob_matrix[guard_ip][exit_ip] += 1
+        exits[exit_ip] += 1
+        guards[guard_ip]+= 1
 
+        counter_line +=1.0
+        #if int(counter_line) % 100000 == 0:
+        #print counter_line
 
   return (counter_line, prob_matrix, guards, exits)
 
 
-def guessing_entropy(log_file):
+def guessing_entropy(log_files):
 
-  (counter_lines, prob_matrix, guards, exits) = build_prob_matrix(log_file)
+  (counter_lines, prob_matrix, guards, exits) = build_prob_matrix(log_files)
 
   all_nodes = len(guards)
   for exit in exits:
@@ -291,19 +292,30 @@ def compute_effective_set_anonymity(node_list):
 
 if __name__ == "__main__":
 
-  usage = "" #todo
-
+  usage = 'Usage: pathsim_metrics.py [command] [in_dir]: Commands:\n \
+  \t guessing-entropy: Computes the Guessing entropy all the logs stored \
+  in the log files in in_dir \
+  \t degree-uniformity: Computes the Shannon entropy all the logs stored \
+  in the log files in in_dir'
   if len(sys.argv) < 2 :
     print(usage)
     sys.exit(1)
 
   command = sys.argv[1]
+  in_dir = sys.argv[2]
+
+  log_files = []
+  for dirpath, dirnames, filenames in os.walk(in_dir, followlinks=True):
+    for filename in filenames:
+      if (filename[0] != '.'):
+        log_files.append(os.path.join(dirpath,filename))
+  log_files.sort(key = lambda x: os.path.basename(x))
 
   if command != 'guessing-entropy' and command != "degree-uniformity":
     print(usage)
   elif command == 'guessing-entropy':
-    log_file = sys.argv[2]
-    print "{0} {1}".format(consensusname(log_file), guessing_entropy(log_file))
+    #log_file = sys.argv[2]
+    print "{0} {1}".format(consensusname(log_files[0]), guessing_entropy(log_files))
   elif command == 'degree-uniformity':
-    log_file = sys.argv[2]
-    print "{0} {1}".format(consensusname(log_file), degree_uniformity_in_circuit(log_file))
+    #log_file = sys.argv[2]
+    print "{0} {1}".format(consensusname(log_files[0]), degree_uniformity_in_circuit(log_files))

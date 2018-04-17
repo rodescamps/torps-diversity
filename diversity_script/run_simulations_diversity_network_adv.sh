@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Example: sh run_simulations_diversity.sh ../.. typical tor ../../out network-adv
+# Example: sh run_simulations_diversity_network_adv.sh ../.. typical tor ../../out network-adv
 
 BASE_DIR=$1
 USERMODEL=$2

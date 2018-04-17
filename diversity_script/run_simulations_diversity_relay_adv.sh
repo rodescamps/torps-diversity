@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Example: sh run_simulations_vanilla_relay_adv.sh ../.. typical tor ../../out/network-states 50000 50000 0 5 5 5000 15000 0 1 3 1 270
+# Example: sh run_simulations_diversity_relay_adv.sh ../.. typical tor ../../out/network-states 50000 50000 0 5 5 5000 15000 0 1 3 1 270
 
 BASE_DIR=$1
 USERMODEL=$2
@@ -21,7 +21,7 @@ NUM_GUARDS=${15}
 GUARD_EXPIRATION=${16}
 
 OUTPUT="relay-adv"
-NUM_SAMPLES=2500
+NUM_SAMPLES=50
 TRACEFILE=$BASE_DIR/in/users2-processed.traces.pickle
 LOGLEVEL="INFO"
 
@@ -34,11 +34,11 @@ for DIR in $DIRS
 do
   EXP_NAME=$USERMODEL.${DIR}
   NSF_DIR=$NSF_ROOT_DIR/${DIR}
-  OUT_DIR=$BASE_DIR/out/simulate/$PATH_ALG/$EXP_NAME/$OUTPUT/out
+  OUT_DIR=$BASE_DIR/out/simulate/$PATH_ALG/$EXP_NAME/$OUTPUT-diversity/out
   mkdir -p $OUT_DIR
   while [ $i -lt $PARALLEL_PROCESS ]
   do
-     nohup python ../pathsim.py simulate --nsf_dir $NSF_DIR --num_samples $NUM_SAMPLES --trace_file $TRACEFILE --user_model $USERMODEL --format $OUTPUT --adv_guard_cons_bw $ADV_GUARD_CONS_BW --adv_exit_cons_bw $ADV_EXIT_CONS_BW --adv_time $ADV_TIME --num_adv_guards $NUM_ADV_GUARDS --num_adv_exits $NUM_ADV_EXITS --custom_guard_cons_bw $CUSTOM_GUARD_CONS_BW --custom_exit_cons_bw $CUSTOM_EXIT_CONS_BW --custom_time $CUSTOM_TIME --num_custom_guards $NUM_CUSTOM_GUARDS --num_custom_exits $NUM_CUSTOM_EXITS --num_guards $NUM_GUARDS --guard_expiration $GUARD_EXPIRATION --loglevel $LOGLEVEL $PATH_ALG 2> $OUT_DIR/simulate.$EXP_NAME.$NUM_SAMPLES-samples.$i.error 1> $OUT_DIR/simulate.$EXP_NAME.$NUM_SAMPLES-samples.$i.out &
+     nohup python ../pathsim.py simulate --nsf_dir $NSF_DIR --num_samples $NUM_SAMPLES --trace_file $TRACEFILE --user_model $USERMODEL --format $OUTPUT --adv_guard_cons_bw $ADV_GUARD_CONS_BW --adv_exit_cons_bw $ADV_EXIT_CONS_BW --adv_time $ADV_TIME --num_adv_guards $NUM_ADV_GUARDS --num_adv_exits $NUM_ADV_EXITS --custom_guard_cons_bw $CUSTOM_GUARD_CONS_BW --custom_exit_cons_bw $CUSTOM_EXIT_CONS_BW --custom_time $CUSTOM_TIME --num_custom_guards $NUM_CUSTOM_GUARDS --num_custom_exits $NUM_CUSTOM_EXITS --num_guards $NUM_GUARDS --guard_expiration $GUARD_EXPIRATION --loglevel $LOGLEVEL $PATH_ALG 2> $OUT_DIR/simulate.$EXP_NAME.$NUM_SAMPLES-samples.error 1> $OUT_DIR/simulate.$EXP_NAME.$NUM_SAMPLES-samples.$i.out &
   i=$(($i+1))
   done
 done

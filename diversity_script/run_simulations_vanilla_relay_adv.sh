@@ -16,7 +16,7 @@ NUM_GUARDS=${10}
 GUARD_EXPIRATION=${11}
 
 OUTPUT="relay-adv"
-NUM_SAMPLES=2500
+NUM_SAMPLES=50
 TRACEFILE=$BASE_DIR/in/users2-processed.traces.pickle
 LOGLEVEL="INFO"
 
@@ -33,7 +33,7 @@ do
   mkdir -p $OUT_DIR
   while [ $i -lt $PARALLEL_PROCESS ]
   do
-     nohup python ../pathsim.py simulate --nsf_dir $NSF_DIR --num_samples $NUM_SAMPLES --trace_file $TRACEFILE --user_model $USERMODEL --format $OUTPUT --adv_guard_cons_bw $ADV_GUARD_CONS_BW --adv_exit_cons_bw $ADV_EXIT_CONS_BW --adv_time $ADV_TIME --num_adv_guards $NUM_ADV_GUARDS --num_adv_exits $NUM_ADV_EXITS --num_guards $NUM_GUARDS --guard_expiration $GUARD_EXPIRATION --loglevel $LOGLEVEL $PATH_ALG 2> $OUT_DIR/simulate.$EXP_NAME.$NUM_SAMPLES-samples.$i.error 1> $OUT_DIR/simulate.$EXP_NAME.$NUM_SAMPLES-samples.$i.out &
+     nohup python ../pathsim.py simulate --nsf_dir $NSF_DIR --num_samples $NUM_SAMPLES --trace_file $TRACEFILE --user_model $USERMODEL --format $OUTPUT --adv_guard_cons_bw $ADV_GUARD_CONS_BW --adv_exit_cons_bw $ADV_EXIT_CONS_BW --adv_time $ADV_TIME --num_adv_guards $NUM_ADV_GUARDS --num_adv_exits $NUM_ADV_EXITS --num_guards $NUM_GUARDS --guard_expiration $GUARD_EXPIRATION --loglevel $LOGLEVEL $PATH_ALG 2> $OUT_DIR/simulate.$EXP_NAME.$NUM_SAMPLES-samples.error 1> $OUT_DIR/simulate.$EXP_NAME.$NUM_SAMPLES-samples.$i.out &
   i=$(($i+1))
   done
 done
