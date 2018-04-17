@@ -68,9 +68,9 @@ def ip_in_country(ip, subnets):
     return False
 
 if __name__ == '__main__':
-    usage = 'Usage: as_inference.py [Country code] [logs_in_dir] [results_out_dir] \n\
-            Extracts the guard/exit IPs contained in [logs_in_dir] belonging to the country [Country code], and writes them in\
-            [results_out_dir/[Country code]_guards] (guard IPs) and [results_out_dir/[Country code]_exits] (exit IPs)'
+    usage = 'Usage: as_inference.py [country code] [logs_in_dir] [results_out_dir] \n\
+            Extracts the guard/exit IPs contained in [logs_in_dir] belonging to the country [country code], and writes them in\
+            [results_out_dir/[country code]_guards] (guard IPs) and [results_out_dir/[country code]_exits] (exit IPs)'
 
     if (len(sys.argv) < 4):
         print(usage)
@@ -87,12 +87,12 @@ if __name__ == '__main__':
     log_files.sort(key = lambda x: os.path.basename(x))
 
     # Prepare the country subnets in DictReader
-    subnets_as_file = urllib.URLopener()
-    subnets_as_file.retrieve("https://iptoasn.com/data/ip2country-v4.tsv.gz", "ip2country-v4.tsv.gz")
+    subnets_country_file = urllib.URLopener()
+    subnets_country_file.retrieve("https://iptoasn.com/data/ip2country-v4.tsv.gz", "ip2country-v4.tsv.gz")
     subnets = []
     with gzip.open('ip2country-v4.tsv.gz', 'rb') as csvfile:
-        asreader = csv.DictReader(csvfile, ['range_start', 'range_end', 'country_code'], dialect='excel-tab')
-        for row in asreader:
+        countryreader = csv.DictReader(csvfile, ['range_start', 'range_end', 'country_code'], dialect='excel-tab')
+        for row in countryreader:
             if row['country_code'] == searched_country_code:
                 subnets.append(row['range_start']+','+row['range_end'])
 
@@ -112,10 +112,10 @@ if __name__ == '__main__':
                 exit_ip = line_fields[3]
 
                 if guard_ip not in country_guards:
-                    if ip_in_as(guard_ip, subnets):
+                    if ip_in_country(guard_ip, subnets):
                         country_guards.append(guard_ip)
                 if exit_ip not in country_exits:
-                    if ip_in_as(exit_ip, subnets):
+                    if ip_in_country(exit_ip, subnets):
                         country_exits.append(exit_ip)
         lf.close()
         i += 1
@@ -123,11 +123,11 @@ if __name__ == '__main__':
     guards_file = os.path.join(out_dir,searched_country_code+"_guards")
     exits_file = os.path.join(out_dir,searched_country_code+"_exits")
     with open(guards_file, 'w') as gf, open(exits_file, 'w') as ef:
-        # Write all the AS IPs to the specified files
-        for as_guard in country_guards:
-            gf.write("%s\n" % as_guard)
-        for as_exit in country_exits:
-            ef.write("%s\n" % as_exit)
+        # Write all the Country IPs to the specified files
+        for country_guard in country_guards:
+            gf.write("%s\n" % country_guard)
+        for country_exit in country_exits:
+            ef.write("%s\n" % country_exit)
     gf.close()
     ef.close()
     csvfile.close()
