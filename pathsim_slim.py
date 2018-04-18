@@ -2,7 +2,7 @@ import datetime
 import os
 import os.path
 from stem import Flag
-from stem.exit_policy import ExitPolicy
+from pathsim_metrics_nsf import *
 from random import random, randint, choice
 import sys
 import collections
@@ -10,7 +10,6 @@ import cPickle as pickle
 import argparse
 from models import *
 import congestion_aware_pathsim
-#import vcs_pathsim
 import process_consensuses
 import re
 import network_modifiers
@@ -19,6 +18,8 @@ import event_callbacks
 import importlib
 import logging
 import pdb
+import multiprocessing
+import itertools
 
 logger = logging.getLogger(__name__)
 _testing = False#True
@@ -117,7 +118,7 @@ class ServerDescriptor:
     Slim version of stem.descriptor.server_descriptor.ServerDescriptor combined
     with stem.descriptor.server_descriptor.RelayDescriptor.
     """
-    def __init__(self, fingerprint, address):
+    def __init__(self, fingerprint, hibernating, address):
         self.fingerprint = fingerprint
         self.hibernating = hibernating
         self.address = address
@@ -1804,6 +1805,80 @@ def apply_water_filling(cons_rel_stats, descriptors, weights, bw_weights, weight
                 raise ValueError("Not recognized weight {0}".format(w))
     return (pivots, bwws_remaining)
 
+def compute_guards_probabilities(network_states, guard_to_send):
+    guards = []
+    guards_bandwidths = dict()
+    guards_total_bandwidth = 0
+
+    network_states_size = 24*31
+    i = 1
+
+    for network_state in network_states:
+        for consensus in network_state.cons_rel_stats:
+            if Flag.GUARD in network_state.cons_rel_stats[consensus].flags:
+                address = network_state.descriptors[consensus].address
+                bandwidth = network_state.cons_rel_stats[consensus].bandwidth
+                if address not in guards:
+                    guards.append(address)
+                    guards_bandwidths[address] = [bandwidth, 1]
+                else:
+                    old_bandwidth_details = guards_bandwidths[address]
+                    total_bandwidth = old_bandwidth_details[0]
+                    old_counter = old_bandwidth_details[1]
+                    guards_bandwidths[address] = [total_bandwidth+bandwidth, old_counter+1]
+        print('[{}/{}]'.format(i, network_states_size))
+        i += 1
+    for address in guards:
+        bandwidth_details = guards_bandwidths[address]
+        # Computes the average of the node bandwidth on the analyzed period
+        average_bandwidth = bandwidth_details[0]/bandwidth_details[1]
+        guards_bandwidths[address] = average_bandwidth
+        # Added to the total bandwidth of the network
+        guards_total_bandwidth += average_bandwidth
+    print(guards_total_bandwidth)
+
+    for address in guards:
+        average_bandwidth = guards_bandwidths[address]
+        guards_to_send['address'] = address
+        guards_to_send['probability'] = average_bandwidth/float(guards_total_bandwidth)
+
+def compute_exits_probabilities(network_states, exits_to_send):
+    exits = []
+    exits_bandwidths = dict()
+    exits_total_bandwidth = 0
+
+    network_states_size = 24*31
+    i = 1
+
+    for network_state in network_states:
+        for consensus in network_state.cons_rel_stats:
+            if Flag.EXIT in network_state.cons_rel_stats[consensus].flags:
+                address = network_state.descriptors[consensus].address
+                bandwidth = network_state.cons_rel_stats[consensus].bandwidth
+                if address not in exits:
+                    exits.append(address)
+                    exits_bandwidths[address] = [bandwidth, 1]
+                else:
+                    old_bandwidth_details = exits_bandwidths[address]
+                    total_bandwidth = old_bandwidth_details[0]
+                    old_counter = old_bandwidth_details[1]
+                    exits_bandwidths[address] = [total_bandwidth+bandwidth, old_counter+1]
+        print('[{}/{}]'.format(i, network_states_size))
+        i += 1
+    for address in exits:
+        bandwidth_details = exits_bandwidths[address]
+        # Computes the average of the node bandwidth on the analyzed period
+        average_bandwidth = bandwidth_details[0]/bandwidth_details[1]
+        exits_bandwidths[address] = average_bandwidth
+        # Added to the total bandwidth of the network
+        exits_total_bandwidth += average_bandwidth
+    print(exits_total_bandwidth)
+
+    for address in exits:
+        average_bandwidth = exits_bandwidths[address]
+        exits_to_send['address'] = address
+        exits_to_send['probability'] = average_bandwidth/float(exits_total_bandwidth)
+
 if __name__ == '__main__':
     import argparse
 
@@ -1838,98 +1913,19 @@ ServerDescriptor) instead of the analagous stem classes')
     process_parser.add_argument('--initial_descriptor_dir', default=None,
         help='Directory containing descriptors to initialize consensus processing. Needed to provide first consensuses in a month with descriptors only contained in archive from previous month. If omitted, first 24 hours of network state files will likely omit relays due to missing descriptors.')
 
-
-    simulate_parser = subparsers.add_parser('simulate',
-        help='Do simulated path selections.')
-    simulate_parser.add_argument('--nsf_dir', default='out/network-state-files',
-        help='stores the network state files to use')
-    simulate_parser.add_argument('--num_samples', type=int, default=1,
-        help='number of simulations to execute')
-    simulate_parser.add_argument('--trace_file', default=None,
-        help='name of files containing the user traces')
-    simulate_parser.add_argument('--user_model', default='simple=600',
-        help='user model to build out of traces, with standard trace file one \
-of "facebook", "gmailgchat", "gcalgdocs", "websearch", "irc", "bittorrent", \
-"typical", "best", "worst", "simple=[seconds/request]"')
-    simulate_parser.add_argument('--output_class',
-        default='event_callbacks.PrintStreamAssignments',
-        help='class implementing callbacks on circuit and stream creation, e.g. for producing simulation output')
-    simulate_parser.add_argument('--format', default='normal',
-        help='argument sent to output_class, e.g. specifying the format of simulation output, choices for default PrintStreamAssignments class are "normal", "testing", "relay-adv", "network-adv"')
-    simulate_parser.add_argument('--adv_guard_cons_bw', type=float, default=0,
-        help='consensus bandwidth of each adversarial guard to add')
-    simulate_parser.add_argument('--adv_exit_cons_bw', type=float, default=0,
-        help='consensus bandwidth of each adversarial exit to add')
-    simulate_parser.add_argument('--adv_time', type=int, default=0,
-        help='indicates timestamp after which to add adversarial relays to \
-consensuses')
-    simulate_parser.add_argument('--num_adv_guards', type=int, default=0,
-        help='indicates the number of adversarial guards to add')
-    simulate_parser.add_argument('--num_adv_exits', type=int, default=0,
-        help='indicates the number of adversarial exits to add')
-    simulate_parser.add_argument('--custom_guard_cons_bw', type=float, default=0,
-        help='consensus bandwidth of each diversity guard to add')
-    simulate_parser.add_argument('--custom_exit_cons_bw', type=float, default=0,
-        help='consensus bandwidth of each diversity exit to add')
-    simulate_parser.add_argument('--custom_time', type=int, default=0,
-        help='indicates timestamp after which to add diversity relays to \
-consensuses')
-    simulate_parser.add_argument('--num_custom_guards', type=int, default=0,
-        help='indicates the number of diversity guards to add')
-    simulate_parser.add_argument('--num_custom_exits', type=int, default=0,
-        help='indicates the number of diversity exits to add')
-    simulate_parser.add_argument('--other_network_modifier', default=None,
-        help='class to modify network, argument syntax: module.class-argstring')
-    simulate_parser.add_argument('--num_guards', type=int, default=3,
-        help='indicates size of client guard list')
-    simulate_parser.add_argument('--guard_expiration', type=int, default=60,
-        help='indicates time in days until one-month period during which guard\
-may expire, with 0 indicating no guard expiration')
-    simulate_parser.add_argument('--loglevel', choices=['DEBUG', 'INFO',
-        'WARNING', 'ERROR', 'CRITICAL'],
-        help='set level of log messages to send to stdout, DEBUG produces testing output, quiet at all other levels', default='INFO')
-        
-    simulate_parser.add_argument('--wf_optimal', help='Recompute bwweights from dir-spec.txt\
-            in a way that waterfilling would then be optimal', action='store_true')
-    pathalg_subparsers = simulate_parser.add_subparsers(help='simulate\
+    score_parser = subparsers.add_parser('score',
+        help='Computes diversity score.')
+    score_parser.add_argument('--nsf_dir', default='out/network-state-files',
+                                 help='stores the network state files to use')
+    pathalg_subparsers = score_parser.add_subparsers(help='score\
 commands', dest='pathalg_subparser')
     tor_simulate_parser = pathalg_subparsers.add_parser('tor',
-        help='use vanilla Tor path selection')    
+        help='use vanilla Tor path selection')
     tor_simulate_parser = pathalg_subparsers.add_parser('tor-wf',
         help='use water_filling weights during path selection')
-    cat_simulate_parser = pathalg_subparsers.add_parser('cat',
-        help='use congestion-aware tor (Wang et al., FC12)')
-    cat_simulate_parser.add_argument('--congfile', default=None,
-        help='name of input congestion file')
-    vcs_simulate_parser = pathalg_subparsers.add_parser('vcs',
-        help='use virtual-coordinate-system path selection (Sherr, PhD 2009)')
-    vcs_simulate_parser.add_argument('--congfile', default=None,
-        help='name of input congestion file')
-    vcs_simulate_parser.add_argument('--pdelfile', default=None,
-        help='name of input propagation-delay file')
-    
-    concattraces_parser = subparsers.add_parser('concattraces',
-        help='Combine user session traces into a single object used by \
-pathsim, and pickle it. The pickled object is input to the simulate command')    
-    concattraces_parser.add_argument('--out_name', default='outfilename.pickle',
-        help='filename of output file')
-    concattraces_parser.add_argument('--facebook_filename', 
-        default='facebook.log',
-        help='name of file with facebook trace')
-    concattraces_parser.add_argument('--gmailchat_filename', 
-        default='gmailgchat.log',
-        help='name of file with gmail/gchat trace')
-    concattraces_parser.add_argument('--gcalgdocs_filename', 
-        default='gcalgdocs.log',
-        help='name of file with gcal/gdocs trace')
-    concattraces_parser.add_argument('--websearch_filename', 
-        default='websearch.log',
-        help='name of file with Web search trace')
-    concattraces_parser.add_argument('--irc_filename', default='irc.log',
-        help='name of file with IRC trace')
-    concattraces_parser.add_argument('--bittorrent_filename',
-        default='bittorrent.log',
-        help='name of file with BitTorrent trace')
+    score_parser.add_argument('--loglevel', choices=['DEBUG', 'INFO',
+                                                        'WARNING', 'ERROR', 'CRITICAL'],
+        help='set level of log messages to send to stdout, DEBUG produces testing output, quiet at all other levels', default='INFO')
 
     args = parser.parse_args()
 
@@ -1988,6 +1984,8 @@ pathsim, and pickle it. The pickled object is input to the simulate command')
         network_state_files.sort(key = lambda x: os.path.basename(x))
         network_state_files = pad_network_state_files(network_state_files)
 
+        network_modifications = []
+        """
         # create object that will add adversary relays into network
         adv_insertion = network_modifiers.AdversaryInsertion(args, _testing)
         network_modifications = [adv_insertion]
@@ -2010,10 +2008,21 @@ pathsim, and pickle it. The pickled object is input to the simulate command')
             network_modifications.append(other_network_modifier)
         if (args.wf_optimal):
             network_modifications.insert(0, Bwweights(True))
+        """
 
         # create iterator that applies network modifiers to nsf list
         network_states = get_network_states(network_state_files,
             network_modifications)
+
+        """
+        NetworkState(cons_valid_after, cons_fresh_until, cons_bw_weights,
+                     cons_bwweightscale, cons_rel_stats, hibernating_statuses,
+                     new_descriptors)
+                     
+        RouterStatusEntry(fingerprint, nickname, flags, bandwidth, water_filling=False)
+        
+        ServerDescriptor(fingerprint, hibernating, nickname, family, address, exit_policy, ntor_onion_key)
+        """
 
         # determine start and end times
         start_time = None
@@ -2029,17 +2038,46 @@ pathsim, and pickle it. The pickled object is input to the simulate command')
         # set parameters and substitute simulation functions
         water_filling = False
         if (args.pathalg_subparser == 'tor'):
+
+            #network_states_it1, network_states_it2 = itertools.tee(network_states, 1)
+            network_states_list = list(network_states)
+
+            manager = multiprocessing.Manager()
+            guards_to_send = manager.dict()
+            exits_to_send = manager.dict()
+            ps = []
+            p1 = multiprocessing.Process(target=compute_guards_probabilities, args=(network_states_list, guards_to_send))
+            p1.start()
+            ps.append(p1)
+            p2 = multiprocessing.Process(target=compute_exits_probabilities, args=(network_states_list, exits_to_send))
+            p2.start()
+            ps.append(p2)
+            i = 1
+            for p in ps:
+                print('Waiting for process')
+                p.join()
+                print('Process {0} returned.'.format(i))
+                i += 1
+
+            build_prob_matrix(guards_to_send, exits_to_send)
+
+            #guessing_entropy = guessing_entropy(guards_to_send, exits_to_send)
+            guessing_entropy = 1.5
+
+            # TODO
+            paths_compromised = 97
+
+            # TODO
+            first_compromise = 5.5
+
+            score_file = os.path.join(args.nsf_dir+"/..","score")
+            with open(score_file, 'w') as sf:
+                sf.write("%s\t%s\t%s" % (guessing_entropy, paths_compromised, first_compromise))
+            sf.close()
+
             print("tor")
-            congfilename = None
-            pdelfilename = None
+
         elif (args.pathalg_subparser == 'tor-wf'):
+
             print("tor-wf")
             water_filling = True
-            congfilename = None
-            pdelfilename = None
-
-    elif (args.subparser == 'concattraces'):
-        ut = UserTraces(args.facebook_filename, args.gmailchat_filename,
-            args.gcalgdocs_filename, args.websearch_filename,
-            args.irc_filename, args.bittorrent_filename)
-        ut.save_pickle(args.out_name)
