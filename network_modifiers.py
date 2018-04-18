@@ -313,21 +313,13 @@ class CustomInsertion(object):
             # create consensus
             num_str = str(i+1)
             fingerprint = 'E' * (40-len(num_str)) + num_str
-            nickname = 'DiversityExit' + num_str
-            flags = [Flag.FAST, Flag.EXIT, Flag.RUNNING, Flag.STABLE,
-                     Flag.VALID]
-            self.custom_relays[fingerprint] = pathsim.RouterStatusEntry(fingerprint,
-                                                                     nickname, flags, bandwidth, water_filling)
+            flags = [Flag.EXIT]
+            self.custom_relays[fingerprint] = pathsim.RouterStatusEntry(fingerprint, flags, bandwidth, water_filling)
 
             # create descriptor
             hibernating = False
-            family = {}
             address = '10.'+str(num_custom_guards+i+1)+'.0.0' # avoid /16 conflicts
-            exit_policy = ExitPolicy('accept *:*')
-            ntor_onion_key = num_str # indicate ntor support w/ val != None
-            self.descriptors[fingerprint] = pathsim.ServerDescriptor(fingerprint,
-                                                                         hibernating, nickname, family, address, exit_policy,
-                                                                         ntor_onion_key)
+            self.descriptors[fingerprint] = pathsim.ServerDescriptor(fingerprint, hibernating, address)
 
 
 
