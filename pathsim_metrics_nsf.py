@@ -8,20 +8,33 @@ import math
 def consensusname(log_file):
   return log_file.split('.')[1]
 
-def build_prob_matrix(guards, exits):
+def build_prob_matrix(guards_probabilities, exits_probabilities):
 
   prob_matrix = {}
+  guards = {}
+  exits = {}
 
   i = 1
   total = 0.0
-  for guard_address in guards:
-    for exit_address in exits:
-      path_probability = guards[guard_address] * exits[exit_address]
-      prob_matrix[guards[guard_address]][exits[exit_address]] = path_probability
+  for guard_address, guard_probability in guards_probabilities.items():
+    for exit_address, exit_probability in exits_probabilities.items():
+
+      if guard_address not in guards :
+        guards[guard_address] = 0
+      if exit_address not in exits:
+        exits[exit_address] = 0
+      guards[guard_address] += 1
+      exits[exit_address] += 1
+
+      path_probability = guard_probability * exit_probability
+      if guard_address not in prob_matrix:
+        prob_matrix[guard_address] = {}
+        prob_matrix[guard_address][exit_address] = path_probability
+      else:
+        prob_matrix[guard_address][exit_address] = path_probability
       total += path_probability
-    print('[{}/{}]'.format(i, len(guards)))
     i += 1
-  print("Total = "+ str(total))
+  print("Matrix prob total = "+ str(total))
 
   """
   #exits = {}
@@ -57,7 +70,7 @@ def build_prob_matrix(guards, exits):
         #if int(counter_line) % 100000 == 0:
         #print counter_line
   """
-  return (prob_matrix, guards, exits)
+  return prob_matrix, guards, exits
 
 
 def guessing_entropy(guards_prob, exits_prob):
@@ -113,6 +126,7 @@ def guessing_entropy(guards_prob, exits_prob):
     elif node_ip in guards:
       counter_guards +=1
     i+=1
+    print('[{}/{}]'.format(i, all_nodes))
 
   guessing_entropy = 0
   i = 1
@@ -121,6 +135,7 @@ def guessing_entropy(guards_prob, exits_prob):
   while i < all_nodes:
     guessing_entropy += (i)*prob_list[i-1]
     i+=1
+    print('[{}/{}]'.format(i, all_nodes))
 
   #print "number of nodes compromised only flagged guards {0}".format(counter_guards)
   #print "number of nodes compromised only flagged exits {0}".format(counter_exits)
