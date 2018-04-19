@@ -3,6 +3,7 @@ import os
 import os.path
 from stem import Flag
 from pathsim_metrics_nsf import *
+from as_inference import ip_in_as
 from random import random, randint, choice
 import sys
 import collections
@@ -1805,10 +1806,9 @@ def apply_water_filling(cons_rel_stats, descriptors, weights, bw_weights, weight
                 raise ValueError("Not recognized weight {0}".format(w))
     return (pivots, bwws_remaining)
 
-def compute_guards_probabilities(network_states, guard_to_send):
+def compute_guards_probabilities(network_states, guards_to_send, guards_number, guards_total_bandwidth):
     guards = []
     guards_bandwidths = dict()
-    guards_total_bandwidth = 0
 
     network_states_size = 24*31
     i = 1
@@ -1835,6 +1835,7 @@ def compute_guards_probabilities(network_states, guard_to_send):
         guards_bandwidths[address] = average_bandwidth
         # Added to the total bandwidth of the network
         guards_total_bandwidth += average_bandwidth
+        guards_number += 1
     print(guards_total_bandwidth)
 
     for address in guards:
@@ -1842,10 +1843,9 @@ def compute_guards_probabilities(network_states, guard_to_send):
         guards_to_send['address'] = address
         guards_to_send['probability'] = average_bandwidth/float(guards_total_bandwidth)
 
-def compute_exits_probabilities(network_states, exits_to_send):
+def compute_exits_probabilities(network_states, exits_to_send, exits_number, exits_total_bandwidth):
     exits = []
     exits_bandwidths = dict()
-    exits_total_bandwidth = 0
 
     network_states_size = 24*31
     i = 1
@@ -1872,12 +1872,58 @@ def compute_exits_probabilities(network_states, exits_to_send):
         exits_bandwidths[address] = average_bandwidth
         # Added to the total bandwidth of the network
         exits_total_bandwidth += average_bandwidth
+        exits_number += 1
     print(exits_total_bandwidth)
 
     for address in exits:
         average_bandwidth = exits_bandwidths[address]
         exits_to_send['address'] = address
         exits_to_send['probability'] = average_bandwidth/float(exits_total_bandwidth)
+
+def paths_compromised(guards_probabilities, exits_probabilities, path_alg):
+    usage = 'Usage: as_inference.py [AS number] [logs_in_dir] [results_out_dir] \n\
+            Extracts the guard/exit IPs contained in [logs_in_dir] belonging to AS[AS number], and writes them in\
+            [results_out_dir/[AS number]_guards] (guard IPs) and [results_out_dir/[AS number]_exits] (exit IPs)'
+
+    # Top AS is 16276 (OVH)
+    searched_as_number = '16276'
+
+    # Prepare the AS subnets in DictReader
+    subnets_as_file = urllib.URLopener()
+    subnets_as_file.retrieve("https://iptoasn.com/data/ip2asn-v4.tsv.gz", "ip2asn-v4.tsv.gz")
+    subnets = []
+    with gzip.open('ip2asn-v4.tsv.gz', 'rb') as csvfile:
+        asreader = csv.DictReader(csvfile, ['range_start', 'range_end', 'AS_number', 'country_code', 'AS_description'], dialect='excel-tab')
+        for row in asreader:
+            if row['AS_number'] == searched_as_number:
+                subnets.append(row['range_start']+','+row['range_end'])
+
+    # Searches the compromised address, and computes part of the network controlled by AS
+    as_guards_probability = 0.0
+    for address in guards_probabilities:
+        # Calls method from as_inference.py
+        if ip_in_as(address, subnets):
+            as_guards_probability += guards_probabilities['probability']
+
+    as_exits_probability = 0.0
+    for address in exits_probabilities:
+        # Calls method from as_inference.py
+        if ip_in_as(address, subnets):
+            as_exits_probability += exits_probabilities['probability']
+
+    # Period is one month, and circuits change every 10min
+    period = 31*24*60
+    circuits = period/10
+    number_paths_compromised = 0.0
+    for i in range(circuits):
+        number_paths_compromised += (as_guards_probability*as_exits_probability)
+
+    return number_paths_compromised
+
+def first_compromise(guards_number, exits_number,
+                     guards_total_bandwidth, exits_total_bandwidth,
+                     guards_probabilities, exits_probabilities, path_alg):
+    return 5.5
 
 if __name__ == '__main__':
     import argparse
@@ -2043,13 +2089,22 @@ commands', dest='pathalg_subparser')
             network_states_list = list(network_states)
 
             manager = multiprocessing.Manager()
-            guards_to_send = manager.dict()
-            exits_to_send = manager.dict()
+            guards_probabilities = manager.dict()
+            exits_probabilities = manager.dict()
+            guards_number = manager.int()
+            exits_number = manager.int()
+            guards_total_bandwidth = manager.int()
+            exits_total_bandwidth = manager.int()
+
             ps = []
-            p1 = multiprocessing.Process(target=compute_guards_probabilities, args=(network_states_list, guards_to_send))
+            p1 = multiprocessing.Process(target=compute_guards_probabilities,
+                                         args=(network_states_list, guards_probabilities,
+                                               guards_number, guards_total_bandwidth))
             p1.start()
             ps.append(p1)
-            p2 = multiprocessing.Process(target=compute_exits_probabilities, args=(network_states_list, exits_to_send))
+            p2 = multiprocessing.Process(target=compute_exits_probabilities,
+                                         args=(network_states_list, exits_probabilities,
+                                               exits_number, exits_total_bandwidth))
             p2.start()
             ps.append(p2)
             i = 1
@@ -2059,16 +2114,20 @@ commands', dest='pathalg_subparser')
                 print('Process {0} returned.'.format(i))
                 i += 1
 
-            build_prob_matrix(guards_to_send, exits_to_send)
+            build_prob_matrix(guards_probabilities, exits_probabilities)
 
             #guessing_entropy = guessing_entropy(guards_to_send, exits_to_send)
             guessing_entropy = 1.5
 
-            # TODO
-            paths_compromised = 97
+            as_paths_compromised = paths_compromised(guards_probabilities, exits_probabilities,
+                                                  args.pathalg_subparser)
 
-            # TODO
-            first_compromise = 5.5
+            as_first_compromise = first_compromise(guards_number, exits_number,
+                                                guards_total_bandwidth, exits_total_bandwidth,
+                                                guards_probabilities, exits_probabilities,
+                                                args.pathalg_subparser)
+
+            print("Scores: %s\t%s\t%s" % (guessing_entropy, paths_compromised, first_compromise))
 
             score_file = os.path.join(args.nsf_dir+"/..","score")
             with open(score_file, 'w') as sf:
