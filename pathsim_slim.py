@@ -1880,10 +1880,7 @@ def compute_exits_probabilities(network_states, exits_to_send, exits_number, exi
         exits_to_send['address'] = address
         exits_to_send['probability'] = average_bandwidth/float(exits_total_bandwidth)
 
-def paths_compromised(guards_probabilities, exits_probabilities, path_alg):
-    usage = 'Usage: as_inference.py [AS number] [logs_in_dir] [results_out_dir] \n\
-            Extracts the guard/exit IPs contained in [logs_in_dir] belonging to AS[AS number], and writes them in\
-            [results_out_dir/[AS number]_guards] (guard IPs) and [results_out_dir/[AS number]_exits] (exit IPs)'
+def as_compromise_path(guards_probabilities, exits_probabilities, path_alg):
 
     # Top AS is 16276 (OVH)
     searched_as_number = '16276'
@@ -1913,17 +1910,19 @@ def paths_compromised(guards_probabilities, exits_probabilities, path_alg):
 
     # Period is one month, and circuits change every 10min
     period = 31*24*60
-    circuits = period/10
+    circuits_total = period/10
     number_paths_compromised = 0.0
-    for i in range(circuits):
+    first_path_compromised = False
+    time_to_first_path_compromised = 0
+
+    for i in range(circuits_total):
         number_paths_compromised += (as_guards_probability*as_exits_probability)
+        if not first_path_compromised:
+            if number_paths_compromised >= 1.0:
+                time_to_first_path_compromised = i * 10
+                first_path_compromised = True
 
-    return number_paths_compromised
-
-def first_compromise(guards_number, exits_number,
-                     guards_total_bandwidth, exits_total_bandwidth,
-                     guards_probabilities, exits_probabilities, path_alg):
-    return 5.5
+    return number_paths_compromised, time_to_first_path_compromised
 
 if __name__ == '__main__':
     import argparse
@@ -2119,19 +2118,16 @@ commands', dest='pathalg_subparser')
             #guessing_entropy = guessing_entropy(guards_to_send, exits_to_send)
             guessing_entropy = 1.5
 
-            as_paths_compromised = paths_compromised(guards_probabilities, exits_probabilities,
-                                                  args.pathalg_subparser)
+            (as_paths_compromised, as_first_compromise) = as_compromise_path(guards_probabilities,
+                                                                          exits_probabilities,
+                                                                          args.pathalg_subparser)
 
-            as_first_compromise = first_compromise(guards_number, exits_number,
-                                                guards_total_bandwidth, exits_total_bandwidth,
-                                                guards_probabilities, exits_probabilities,
-                                                args.pathalg_subparser)
-
-            print("Scores: %s\t%s\t%s" % (guessing_entropy, paths_compromised, first_compromise))
+            print("Scores AS: %s\t%s\t%s" % (guessing_entropy, as_paths_compromised, as_first_compromise))
+            #print("Scores Country: %s\t%s\t%s" % (guessing_entropy, country_paths_compromised, country_first_compromise))
 
             score_file = os.path.join(args.nsf_dir+"/..","score")
             with open(score_file, 'w') as sf:
-                sf.write("%s\t%s\t%s" % (guessing_entropy, paths_compromised, first_compromise))
+                sf.write("%s\t%s\t%s" % (guessing_entropy, as_paths_compromised, as_first_compromise))
             sf.close()
 
             print("tor")
