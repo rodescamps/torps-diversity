@@ -1807,9 +1807,19 @@ def apply_water_filling(cons_rel_stats, descriptors, weights, bw_weights, weight
                 raise ValueError("Not recognized weight {0}".format(w))
     return (pivots, bwws_remaining)
 
-def compute_guards_probabilities(network_states, guards_to_send, guards_number, guards_total_bandwidth, water_filling):
+def compute_probabilities(network_states, water_filling):
     guards = []
     guards_bandwidths = dict()
+    exits = []
+    exits_bandwidths = dict()
+
+    guards_probabilities = dict()
+    exits_probabilities = dict()
+    guards_number = 0
+    exits_number = 0
+    guards_total_bandwidth = 0
+    exits_total_bandwidth = 0
+
 
     network_states_size = 24*31
     i = 1
@@ -1821,16 +1831,19 @@ def compute_guards_probabilities(network_states, guards_to_send, guards_number, 
             apply_water_filling(network_state.cons_rel_stats, network_state.descriptors, weights,
                                 network_state.cons_bw_weights, network_state.cons_bwweightscale)
 
-        weights = get_position_weights(network_state.cons_rel_stats, network_state.cons_rel_stats, 'g',
+        guards_weights = get_position_weights(network_state.cons_rel_stats, network_state.cons_rel_stats, 'g',
                                        network_state.cons_bw_weights, network_state.cons_bwweightscale,
                                        water_filling)
+        exits_weights = get_position_weights(network_state.cons_rel_stats, network_state.cons_rel_stats, 'e',
+                                              network_state.cons_bw_weights, network_state.cons_bwweightscale,
+                                              water_filling)
 
         for consensus in network_state.cons_rel_stats:
             if Flag.GUARD in network_state.cons_rel_stats[consensus].flags:
                 address = network_state.descriptors[consensus].address
                 #bandwidth = network_state.cons_rel_stats[consensus].bandwidth
                 # Takes bandwidth proportion for exit allocated by the network
-                bandwidth = weights[consensus]
+                bandwidth = guards_weights[consensus]
                 hibernating = network_state.descriptors[consensus].hibernating
                 # If node is hibernating (not running), it is not taken into account
                 if not hibernating:
@@ -1842,42 +1855,11 @@ def compute_guards_probabilities(network_states, guards_to_send, guards_number, 
                         total_bandwidth = old_bandwidth_details[0]
                         old_counter = old_bandwidth_details[1]
                         guards_bandwidths[address] = [total_bandwidth+bandwidth, old_counter+1]
-        print('[{}/{}]'.format(i, network_states_size))
-        i += 1
-        #if i == 10: break
-    for address in guards:
-        bandwidth_details = guards_bandwidths[address]
-        # Computes the average of the node bandwidth on the analyzed period
-        average_bandwidth = bandwidth_details[0]/bandwidth_details[1]
-        guards_bandwidths[address] = average_bandwidth
-        # Added to the total bandwidth of the network
-        guards_total_bandwidth.value += average_bandwidth
-        guards_number.value += 1
-    print(guards_total_bandwidth.value)
-
-    for address in guards:
-        average_bandwidth = guards_bandwidths[address]
-        guards_to_send[address] = average_bandwidth/float(guards_total_bandwidth.value)
-
-def compute_exits_probabilities(network_states, exits_to_send, exits_number, exits_total_bandwidth, water_filling):
-    exits = []
-    exits_bandwidths = dict()
-
-    network_states_size = 24*31
-    i = 1
-
-    for network_state in network_states:
-
-        weights = get_position_weights(network_state.cons_rel_stats, network_state.cons_rel_stats, 'e',
-                                       network_state.cons_bw_weights, network_state.cons_bwweightscale,
-                                       water_filling)
-
-        for consensus in network_state.cons_rel_stats:
             if Flag.EXIT in network_state.cons_rel_stats[consensus].flags:
                 address = network_state.descriptors[consensus].address
                 #bandwidth = network_state.cons_rel_stats[consensus].bandwidth
                 # Takes bandwidth proportion for exit allocated by the network
-                bandwidth = weights[consensus]
+                bandwidth = exits_weights[consensus]
                 hibernating = network_state.descriptors[consensus].hibernating
                 # If node is hibernating (not running), it is not taken into account
                 if not hibernating:
@@ -1891,6 +1873,21 @@ def compute_exits_probabilities(network_states, exits_to_send, exits_number, exi
                         exits_bandwidths[address] = [total_bandwidth+bandwidth, old_counter+1]
         print('[{}/{}]'.format(i, network_states_size))
         i += 1
+        #if i == 10: break
+    for address in guards:
+        bandwidth_details = guards_bandwidths[address]
+        # Computes the average of the node bandwidth on the analyzed period
+        average_bandwidth = bandwidth_details[0]/bandwidth_details[1]
+        guards_bandwidths[address] = average_bandwidth
+        # Added to the total bandwidth of the network
+        guards_total_bandwidth += average_bandwidth
+        guards_number += 1
+    print(guards_total_bandwidth)
+
+    for address in guards:
+        average_bandwidth = guards_bandwidths[address]
+        guards_probabilities[address] = average_bandwidth/float(guards_total_bandwidth)
+
     for address in exits:
         bandwidth_details = exits_bandwidths[address]
         # Computes the average of the node bandwidth on the analyzed period
@@ -1903,8 +1900,11 @@ def compute_exits_probabilities(network_states, exits_to_send, exits_number, exi
 
     for address in exits:
         average_bandwidth = exits_bandwidths[address]
-        exits_to_send['address'] = address
-        exits_to_send['probability'] = average_bandwidth/float(exits_total_bandwidth)
+        exits_probabilities[address] = average_bandwidth/float(exits_total_bandwidth)
+
+    return guards_probabilities, exits_probabilities, \
+           guards_number, exits_number, \
+           guards_total_bandwidth, exits_total_bandwidth
 
 def as_compromise_path(guards_probabilities, exits_probabilities, as_number):
 
@@ -1928,7 +1928,6 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_number):
         # Calls method from as_inference.py
         if ip_in_as(guard_address, subnets):
             as_guards_probability += guard_probability
-        print('[{}/{}]'.format(i, len(guards_probabilities)))
         i += 1
 
     as_exits_probability = 0.0
@@ -1976,7 +1975,6 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
         # Calls method from as_inference.py
         if ip_in_as(guard_address, subnets):
             country_guards_probability += guard_probability
-        print('[{}/{}]'.format(i, len(guards_probabilities)))
         i += 1
 
     country_exits_probability = 0.0
@@ -2158,44 +2156,18 @@ commands', dest='pathalg_subparser')
         # set parameters and substitute simulation functions
         water_filling = False
         if args.pathalg_subparser == 'tor-wf':
-            print("score according to waterfilling...")
+            print("Score according to waterfilling...")
             water_filling = True
 
         #network_states_it1, network_states_it2 = itertools.tee(network_states, 1)
         #network_states_list = list(network_states)
 
-        manager = multiprocessing.Manager()
-        guards_probabilities = manager.dict()
-        exits_probabilities = manager.dict()
-        guards_number = manager.Value('i', 0)
-        exits_number = manager.Value('i', 0)
-        guards_total_bandwidth = manager.Value('i', 0)
-        exits_total_bandwidth = manager.Value('i', 0)
-
-        ps = []
-        p1 = multiprocessing.Process(target=compute_guards_probabilities,
-                                     args=(network_states, guards_probabilities,
-                                           guards_number, guards_total_bandwidth,
-                                           water_filling))
-        p1.start()
-        ps.append(p1)
-        """
-        p2 = multiprocessing.Process(target=compute_exits_probabilities,
-                                     args=(network_states_list, exits_probabilities,
-                                           exits_number, exits_total_bandwidth,
-                                           water_filling))
-        p2.start()
-        ps.append(p2)
-        """
-        i = 1
-        for p in ps:
-            print('Waiting for process')
-            p.join()
-            print('Process {0} returned.'.format(i))
-            i += 1
+        (guards_probabilities, exits_probabilities,
+        guards_number, exits_number,
+        guards_total_bandwidth, exits_total_bandwidth) = compute_probabilities(network_states, water_filling)
 
         #guessing_entropy = 1.5
-        guessing_entropy_result = guessing_entropy(guards_probabilities, guards_probabilities)
+        guessing_entropy_result = guessing_entropy(guards_probabilities, exits_probabilities)
 
         # Top AS is 16276 (OVH)
         top_as_number = 16276
@@ -2203,11 +2175,11 @@ commands', dest='pathalg_subparser')
         top_country_code = 'DE'
 
         (as_paths_compromised, as_first_compromise) = as_compromise_path(guards_probabilities,
-                                                                         guards_probabilities,
+                                                                         exits_probabilities,
                                                                          top_as_number)
 
         (country_paths_compromised, country_first_compromise) = country_compromise_path(guards_probabilities,
-                                                                                        guards_probabilities,
+                                                                                        exits_probabilities,
                                                                                         top_country_code)
 
         print("Scores AS: %s\t%s\t%s" % (guessing_entropy_result, as_paths_compromised, as_first_compromise))
