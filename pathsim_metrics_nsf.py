@@ -127,6 +127,7 @@ def guessing_entropy(guards_prob, exits_prob):
       counter_guards +=1
     i+=1
     print('[{}/{}]'.format(i, all_nodes))
+    #if i == 10: break
 
   guessing_entropy = 0
   i = 1
@@ -135,7 +136,7 @@ def guessing_entropy(guards_prob, exits_prob):
   while i < all_nodes:
     guessing_entropy += (i)*prob_list[i-1]
     i+=1
-    print('[{}/{}]'.format(i, all_nodes))
+    #if i == 10: break
 
   #print "number of nodes compromised only flagged guards {0}".format(counter_guards)
   #print "number of nodes compromised only flagged exits {0}".format(counter_exits)

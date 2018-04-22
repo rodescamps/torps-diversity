@@ -13,8 +13,8 @@ from models import *
 import congestion_aware_pathsim
 import process_consensuses_slim
 import re
-import network_modifiers
-from network_modifiers import *
+import network_modifiers_slim
+from network_modifiers_slim import *
 import event_callbacks
 import importlib
 import logging
@@ -1807,6 +1807,35 @@ def apply_water_filling(cons_rel_stats, descriptors, weights, bw_weights, weight
                 raise ValueError("Not recognized weight {0}".format(w))
     return (pivots, bwws_remaining)
 
+def compute_average(network_states):
+
+    network_states_size = 24*31
+
+    averages = []
+    i = 1
+
+    for network_state in network_states:
+        nodes_number = 0
+        bandwidth_total = 0
+        for consensus in network_state.cons_rel_stats:
+            if Flag.GUARD in network_state.cons_rel_stats[consensus].flags or \
+               Flag.EXIT in network_state.cons_rel_stats[consensus].flags:
+                bandwidth = network_state.cons_rel_stats[consensus].bandwidth
+                hibernating = network_state.descriptors[consensus].hibernating
+                # If node is hibernating (not running), it is not taken into account
+                if not hibernating:
+                    nodes_number += 1
+                    bandwidth_total += bandwidth
+        averages.append(bandwidth_total/float(nodes_number))
+        print('[{}/{}]'.format(i, network_states_size))
+        i += 1
+        #if i == 10: break
+
+    general_average = 0.0
+    for average in averages:
+        general_average += average
+    return general_average/float(len(averages))
+
 def compute_probabilities(network_states, water_filling):
     guards = []
     guards_bandwidths = dict()
@@ -1877,12 +1906,13 @@ def compute_probabilities(network_states, water_filling):
     for address in guards:
         bandwidth_details = guards_bandwidths[address]
         # Computes the average of the node bandwidth on the analyzed period
-        average_bandwidth = bandwidth_details[0]/bandwidth_details[1]
+        average_bandwidth = bandwidth_details[0]/float(network_states_size)
         guards_bandwidths[address] = average_bandwidth
         # Added to the total bandwidth of the network
         guards_total_bandwidth += average_bandwidth
         guards_number += 1
     print(guards_total_bandwidth)
+    print(len(guards))
 
     for address in guards:
         average_bandwidth = guards_bandwidths[address]
@@ -1891,12 +1921,13 @@ def compute_probabilities(network_states, water_filling):
     for address in exits:
         bandwidth_details = exits_bandwidths[address]
         # Computes the average of the node bandwidth on the analyzed period
-        average_bandwidth = bandwidth_details[0]/bandwidth_details[1]
+        average_bandwidth = bandwidth_details[0]/float(network_states_size)
         exits_bandwidths[address] = average_bandwidth
         # Added to the total bandwidth of the network
         exits_total_bandwidth += average_bandwidth
         exits_number += 1
     print(exits_total_bandwidth)
+    print(len(exits))
 
     for address in exits:
         average_bandwidth = exits_bandwidths[address]
@@ -1919,7 +1950,6 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_number):
         for row in asreader:
             if row['AS_number'] == searched_as_number:
                 subnets.append(row['range_start']+','+row['range_end'])
-    print(len(subnets))
 
     # Searches the compromised address, and computes part of the network controlled by AS
     as_guards_probability = 0.0
@@ -1947,10 +1977,16 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_number):
         number_paths_compromised += (as_guards_probability*as_exits_probability)
         if not first_path_compromised:
             if number_paths_compromised >= 1.0:
+                # Computes when we compromise one circuit exactly (hypothetically between two constructed circuits)
+                number_paths_compromised_previously = number_paths_compromised - (as_guards_probability*as_exits_probability)
+                number_paths_compromised_to_reach_first = 1.0 - number_paths_compromised_previously
+                marginal_average_circuit_to_add = number_paths_compromised_to_reach_first/(as_guards_probability*as_exits_probability)
+                marginal_time_to_add = marginal_average_circuit_to_add * 10
                 # Time in hours
-                time_to_first_path_compromised = (i * 10)/60.0
+                time_to_first_path_compromised = (((i-1) * 10)+marginal_time_to_add)/60.0
                 first_path_compromised = True
 
+    print('AS Guards Prob: {}/ Exits Prob: {}'.format(as_guards_probability, as_exits_probability))
     return number_paths_compromised, time_to_first_path_compromised
 
 def country_compromise_path(guards_probabilities, exits_probabilities, country_code):
@@ -1966,7 +2002,6 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
         for row in countryreader:
             if row['country_code'] == searched_country_code:
                 subnets.append(row['range_start']+','+row['range_end'])
-    print(len(subnets))
 
     # Searches the compromised address, and computes part of the network controlled by AS
     country_guards_probability = 0.0
@@ -1994,10 +2029,16 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
         number_paths_compromised += (country_guards_probability*country_exits_probability)
         if not first_path_compromised:
             if number_paths_compromised >= 1.0:
+                # Computes when we compromise one circuit exactly (hypothetically between two constructed circuits)
+                number_paths_compromised_previously = number_paths_compromised - (country_guards_probability*country_exits_probability)
+                number_paths_compromised_to_reach_first = 1.0 - number_paths_compromised_previously
+                marginal_average_circuit_to_add = number_paths_compromised_to_reach_first/(country_guards_probability*country_exits_probability)
+                marginal_time_to_add = marginal_average_circuit_to_add * 10
                 # Time in hours
-                time_to_first_path_compromised = (i * 10)/60.0
+                time_to_first_path_compromised = (((i-1) * 10)+marginal_time_to_add)/60.0
                 first_path_compromised = True
 
+    print('Country Guards Prob: {}/ Exits Prob: {}'.format(country_guards_probability, country_exits_probability))
     return number_paths_compromised, time_to_first_path_compromised
 
 if __name__ == '__main__':
@@ -2031,15 +2072,44 @@ directories are located')
     process_parser.add_argument('--initial_descriptor_dir', default=None,
         help='Directory containing descriptors to initialize consensus processing. Needed to provide first consensuses in a month with descriptors only contained in archive from previous month. If omitted, first 24 hours of network state files will likely omit relays due to missing descriptors.')
 
+    average_parser = subparsers.add_parser('average',
+                                         help='Computes average of nodes bandwidths in the network.')
+    average_parser.add_argument('--nsf_dir', default='out/network-state-files',
+                              help='stores the network state files to use')
+
     score_parser = subparsers.add_parser('score',
         help='Computes diversity score.')
     score_parser.add_argument('--nsf_dir', default='out/network-state-files',
                                  help='stores the network state files to use')
+    score_parser.add_argument('--adv_guard_cons_bw', type=float, default=0,
+                                 help='consensus bandwidth of each adversarial guard to add')
+    score_parser.add_argument('--adv_exit_cons_bw', type=float, default=0,
+                                 help='consensus bandwidth of each adversarial exit to add')
+    score_parser.add_argument('--adv_time', type=int, default=0,
+                                 help='indicates timestamp after which to add adversarial relays to \
+consensuses')
+    score_parser.add_argument('--num_adv_guards', type=int, default=0,
+                                 help='indicates the number of adversarial guards to add')
+    score_parser.add_argument('--num_adv_exits', type=int, default=0,
+                                 help='indicates the number of adversarial exits to add')
+    score_parser.add_argument('--custom_guard_cons_bw', type=float, default=0,
+                                 help='consensus bandwidth of each diversity guard to add')
+    score_parser.add_argument('--custom_exit_cons_bw', type=float, default=0,
+                                 help='consensus bandwidth of each diversity exit to add')
+    score_parser.add_argument('--custom_time', type=int, default=0,
+                                 help='indicates timestamp after which to add diversity relays to \
+consensuses')
+    score_parser.add_argument('--num_custom_guards', type=int, default=0,
+                                 help='indicates the number of diversity guards to add')
+    score_parser.add_argument('--num_custom_exits', type=int, default=0,
+                                 help='indicates the number of diversity exits to add')
+    score_parser.add_argument('--wf_optimal', help='Recompute bwweights from dir-spec.txt\
+            in a way that waterfilling would then be optimal', action='store_true')
     pathalg_subparsers = score_parser.add_subparsers(help='score\
 commands', dest='pathalg_subparser')
-    tor_simulate_parser = pathalg_subparsers.add_parser('tor',
+    tor_score_parser = pathalg_subparsers.add_parser('tor',
         help='use vanilla Tor path selection')
-    tor_simulate_parser = pathalg_subparsers.add_parser('tor-wf',
+    tor_score_parser = pathalg_subparsers.add_parser('tor-wf',
         help='use water_filling weights during path selection')
     score_parser.add_argument('--loglevel', choices=['DEBUG', 'INFO',
                                                         'WARNING', 'ERROR', 'CRITICAL'],
@@ -2072,6 +2142,28 @@ commands', dest='pathalg_subparser')
             month = 1
         process_consensuses_slim.process_consensuses(in_dirs,
             args.initial_descriptor_dir)
+    elif (args.subparser == 'average'):
+        ## create iterator producing sequence of simulation network states ##
+        # obtain list of network state files contained in nsf_dir
+        network_state_files = []
+        for dirpath, dirnames, filenames in os.walk(args.nsf_dir,
+                                                    followlinks=True):
+            for filename in filenames:
+                if (filename[0] != '.'):
+                    network_state_files.append(os.path.join(dirpath,filename))
+        # insert gaps for missing time periods
+        network_state_files.sort(key = lambda x: os.path.basename(x))
+        network_state_files = pad_network_state_files(network_state_files)
+
+        network_modifications = []
+
+        # create iterator that applies network modifiers to nsf list
+        network_states = get_network_states(network_state_files,
+                                            network_modifications)
+
+        average = compute_average(network_states)
+        print(average)
+
     elif (args.subparser == 'score'):
         logging.basicConfig(stream=sys.stdout, level=getattr(logging,
             args.loglevel))    
@@ -2103,30 +2195,18 @@ commands', dest='pathalg_subparser')
         network_state_files = pad_network_state_files(network_state_files)
 
         network_modifications = []
-        """
+
         # create object that will add adversary relays into network
-        adv_insertion = network_modifiers.AdversaryInsertion(args, _testing)
+        adv_insertion = network_modifiers_slim.AdversaryInsertion(args, _testing)
         network_modifications = [adv_insertion]
 
         # create object that will add diversity relays into network
-        diversity_insertion = network_modifiers.CustomInsertion(args, _testing)
+        diversity_insertion = network_modifiers_slim.CustomInsertion(args, _testing)
         network_modifications.append(diversity_insertion)
 
-        # create other network modification object
-        if (args.other_network_modifier is not None):
-            # dynamically import module and obtain reference to class
-            full_classname, class_arg = args.other_network_modifier.split('-')
-            class_components = full_classname.split('.')
-            modulename = '.'.join(class_components[0:-1])
-            classname = class_components[-1]
-            network_modifier_module = importlib.import_module(modulename)
-            network_modifier_class = getattr(network_modifier_module, classname)
-            # create object of class
-            other_network_modifier = network_modifier_class(args, _testing)
-            network_modifications.append(other_network_modifier)
+        # Recompute Bwweights from specifications in a way that waterfilling is optimal
         if (args.wf_optimal):
             network_modifications.insert(0, Bwweights(True))
-        """
 
         # create iterator that applies network modifiers to nsf list
         network_states = get_network_states(network_state_files,
@@ -2166,7 +2246,6 @@ commands', dest='pathalg_subparser')
         guards_number, exits_number,
         guards_total_bandwidth, exits_total_bandwidth) = compute_probabilities(network_states, water_filling)
 
-        #guessing_entropy = 1.5
         guessing_entropy_result = guessing_entropy(guards_probabilities, exits_probabilities)
 
         # Top AS is 16276 (OVH)
@@ -2188,13 +2267,13 @@ commands', dest='pathalg_subparser')
         if water_filling:
             score_file = os.path.join(args.nsf_dir+"/..","score_wf")
             with open(score_file, 'w') as sf:
-                sf.write("Scores AS: %s\t%s\t%s" % (guessing_entropy_result, as_paths_compromised, as_first_compromise))
+                sf.write("Scores AS: %s\t%s\t%s\n" % (guessing_entropy_result, as_paths_compromised, as_first_compromise))
                 sf.write("Scores Country: %s\t%s\t%s" % (guessing_entropy_result, country_paths_compromised, country_first_compromise))
             sf.close()
         else:
             score_file = os.path.join(args.nsf_dir+"/..","score_tor")
             with open(score_file, 'w') as sf:
-                sf.write("Scores AS: %s\t%s\t%s" % (guessing_entropy_result, as_paths_compromised, as_first_compromise))
+                sf.write("Scores AS: %s\t%s\t%s\n" % (guessing_entropy_result, as_paths_compromised, as_first_compromise))
                 sf.write("Scores Country: %s\t%s\t%s" % (guessing_entropy_result, country_paths_compromised, country_first_compromise))
             sf.close()
 
