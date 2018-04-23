@@ -2081,6 +2081,10 @@ directories are located')
         help='Computes diversity score.')
     score_parser.add_argument('--nsf_dir', default='out/network-state-files',
                                  help='stores the network state files to use')
+    score_parser.add_argument('--top_as', default='16276',
+                              help='Top AS as network adversary to compute metrics')
+    score_parser.add_argument('--top_country', default='DE',
+                              help='Top country as network adversary to compute metrics')
     score_parser.add_argument('--adv_guard_cons_bw', type=float, default=0,
                                  help='consensus bandwidth of each adversarial guard to add')
     score_parser.add_argument('--adv_exit_cons_bw', type=float, default=0,
@@ -2248,10 +2252,10 @@ commands', dest='pathalg_subparser')
 
         guessing_entropy_result = guessing_entropy(guards_probabilities, exits_probabilities)
 
-        # Top AS is 16276 (OVH)
-        top_as_number = 16276
-        # Top country is DE (Germany)
-        top_country_code = 'DE'
+        # Top AS is 16276 (OVH) by default
+        top_as_number = int(args.top_as)
+        # Top country is DE (Germany) by default
+        top_country_code = args.top_country
 
         (as_paths_compromised, as_first_compromise) = as_compromise_path(guards_probabilities,
                                                                          exits_probabilities,
