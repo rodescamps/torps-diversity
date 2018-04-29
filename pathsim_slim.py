@@ -1902,7 +1902,7 @@ def compute_probabilities(network_states, water_filling):
                         exits_bandwidths[address] = [total_bandwidth+bandwidth, old_counter+1]
         print('[{}/{}]'.format(i, network_states_size))
         i += 1
-        #if i == 10: break
+        if i == 10: break
     for address in guards:
         bandwidth_details = guards_bandwidths[address]
         # Computes the average of the node bandwidth on the analyzed period
@@ -1986,7 +1986,7 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_number):
                 time_to_first_path_compromised = (((i-1) * 10)+marginal_time_to_add)/60.0
                 first_path_compromised = True
 
-    print('AS Guards Prob: {}/ Exits Prob: {}'.format(as_guards_probability, as_exits_probability))
+    print('AS Guards Prob: {} / Exits Prob: {}'.format(as_guards_probability, as_exits_probability))
     return number_paths_compromised, time_to_first_path_compromised
 
 def country_compromise_path(guards_probabilities, exits_probabilities, country_code):
@@ -2038,7 +2038,7 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
                 time_to_first_path_compromised = (((i-1) * 10)+marginal_time_to_add)/60.0
                 first_path_compromised = True
 
-    print('Country Guards Prob: {}/ Exits Prob: {}'.format(country_guards_probability, country_exits_probability))
+    print('Country Guards Prob: {} / Exits Prob: {}'.format(country_guards_probability, country_exits_probability))
     return number_paths_compromised, time_to_first_path_compromised
 
 if __name__ == '__main__':
@@ -2082,9 +2082,9 @@ directories are located')
     score_parser.add_argument('--nsf_dir', default='out/network-state-files',
                                  help='stores the network state files to use')
     score_parser.add_argument('--top_as', default='16276',
-                              help='Top AS as network adversary to compute metrics')
+                              help='top AS as network adversary to compute metrics')
     score_parser.add_argument('--top_country', default='DE',
-                              help='Top country as network adversary to compute metrics')
+                              help='top country as network adversary to compute metrics')
     score_parser.add_argument('--adv_guard_cons_bw', type=float, default=0,
                                  help='consensus bandwidth of each adversarial guard to add')
     score_parser.add_argument('--adv_exit_cons_bw', type=float, default=0,
@@ -2100,6 +2100,8 @@ consensuses')
                                  help='consensus bandwidth of each diversity guard to add')
     score_parser.add_argument('--custom_exit_cons_bw', type=float, default=0,
                                  help='consensus bandwidth of each diversity exit to add')
+    score_parser.add_argument('--custom_guardexit_cons_bw', type=float, default=0,
+                              help='consensus bandwidth of each diversity guard and exit to add')
     score_parser.add_argument('--custom_time', type=int, default=0,
                                  help='indicates timestamp after which to add diversity relays to \
 consensuses')
@@ -2107,6 +2109,11 @@ consensuses')
                                  help='indicates the number of diversity guards to add')
     score_parser.add_argument('--num_custom_exits', type=int, default=0,
                                  help='indicates the number of diversity exits to add')
+    score_parser.add_argument('--num_custom_guardsexits', type=int, default=0,
+                              help='indicates the number of diversity guard and exit nodes to add')
+    score_parser.add_argument('--location', default="AS16276",
+                              help='where to place the custom guards/exits: AS or country:\n \
+                                   Format: AS# or country code | Examples: "AS3356", "BE"')
     score_parser.add_argument('--wf_optimal', help='Recompute bwweights from dir-spec.txt\
             in a way that waterfilling would then be optimal', action='store_true')
     pathalg_subparsers = score_parser.add_subparsers(help='score\
@@ -2201,12 +2208,15 @@ commands', dest='pathalg_subparser')
         network_modifications = []
 
         # create object that will add adversary relays into network
-        adv_insertion = network_modifiers_slim.AdversaryInsertion(args, _testing)
-        network_modifications = [adv_insertion]
+        # adv_insertion = network_modifiers_slim.AdversaryInsertion(args, _testing)
+        # network_modifications = [adv_insertion]
+
+        #address = generate_address(args.location)
+        address = "8.8.8.8"
 
         # create object that will add diversity relays into network
-        diversity_insertion = network_modifiers_slim.CustomInsertion(args, _testing)
-        network_modifications.append(diversity_insertion)
+        diversity_insertion = network_modifiers_slim.CustomInsertion(args, address, _testing)
+        network_modifications = [diversity_insertion]
 
         # Recompute Bwweights from specifications in a way that waterfilling is optimal
         if (args.wf_optimal):
@@ -2240,7 +2250,6 @@ commands', dest='pathalg_subparser')
         # set parameters and substitute simulation functions
         water_filling = False
         if args.pathalg_subparser == 'tor-wf':
-            print("Score according to waterfilling...")
             water_filling = True
 
         #network_states_it1, network_states_it2 = itertools.tee(network_states, 1)
@@ -2250,36 +2259,70 @@ commands', dest='pathalg_subparser')
         guards_number, exits_number,
         guards_total_bandwidth, exits_total_bandwidth) = compute_probabilities(network_states, water_filling)
 
-        guessing_entropy_result = guessing_entropy(guards_probabilities, exits_probabilities)
+        probabilities_reduction = 1
+        guessing_entropy_result = guessing_entropy(guards_probabilities, exits_probabilities, probabilities_reduction)*probabilities_reduction
 
         # Top AS is 16276 (OVH) by default
         top_as_number = int(args.top_as)
         # Top country is DE (Germany) by default
         top_country_code = args.top_country
 
-        (as_paths_compromised, as_first_compromise) = as_compromise_path(guards_probabilities,
-                                                                         exits_probabilities,
-                                                                         top_as_number)
+        #(as_paths_compromised, as_first_compromise) = as_compromise_path(guards_probabilities,
+        #                                                                 exits_probabilities,
+        #                                                                 top_as_number)
 
-        (country_paths_compromised, country_first_compromise) = country_compromise_path(guards_probabilities,
-                                                                                        exits_probabilities,
-                                                                                        top_country_code)
+        #(country_paths_compromised, country_first_compromise) = country_compromise_path(guards_probabilities,
+        #                                                                                exits_probabilities,
+        #                                                                                top_country_code)
 
-        print("Scores AS: %s\t%s\t%s" % (guessing_entropy_result, as_paths_compromised, as_first_compromise))
-        print("Scores Country: %s\t%s\t%s" % (guessing_entropy_result, country_paths_compromised, country_first_compromise))
+        #print("Scores AS: %s\t%s\t%s" % (guessing_entropy_result, as_paths_compromised, as_first_compromise))
+        #print("Scores Country: %s\t%s\t%s" % (guessing_entropy_result, country_paths_compromised, country_first_compromise))
+
+        score_file = os.path.join(args.nsf_dir+"/../"+"guessing_entropy_"+args.pathalg_subparser)
+        if args.num_custom_guards != 0:
+            score_file = os.path.join(args.nsf_dir+"/../",
+                                      "guessing_entropy_"+args.pathalg_subparser+
+                                      "_"+str(args.num_custom_guards)+"guard"+str(args.custom_guard_cons_bw))
+        elif args.num_custom_exits != 0:
+            score_file = os.path.join(args.nsf_dir+"/../",
+                                      "guessing_entropy_"+args.pathalg_subparser+
+                                      "_"+str(args.num_custom_exits)+"exit"+str(args.custom_exit_cons_bw))
+        elif args.num_custom_guardsexits != 0:
+            score_file = os.path.join(args.nsf_dir+"/../",
+                                      "guessing_entropy_"+args.pathalg_subparser+
+                                      "_"+str(args.num_custom_guardsexits)+"guardexit"+str(args.custom_guardexit_cons_bw))
+        print(score_file)
+        print(guessing_entropy_result)
+        with open(score_file, 'w') as sf:
+            sf.write("%s" % (guessing_entropy_result))
+        sf.close()
+
+        """
+        if not os.path.exists(args.nsf_dir+"/.."+"AS"+top_as_number+"_"+top_country_code):
+            os.makedirs(args.nsf_dir+"/.."+"AS"+top_as_number+"_"+top_country_code)
 
         if water_filling:
-            score_file = os.path.join(args.nsf_dir+"/..","score_wf")
+            score_file = os.path.join(args.nsf_dir+"/.."+"AS"+top_as_number+"_"+top_country_code,
+                                      "score_added_"+args.adversary+"_wf")
             with open(score_file, 'w') as sf:
-                sf.write("Scores AS: %s\t%s\t%s\n" % (guessing_entropy_result, as_paths_compromised, as_first_compromise))
-                sf.write("Scores Country: %s\t%s\t%s" % (guessing_entropy_result, country_paths_compromised, country_first_compromise))
+                sf.write("Guard\t%s\t%s\t%s\t%s\t%s\t%s" % (args.location, guessing_entropy_result,
+                                                        as_paths_compromised, as_first_compromise,
+                                                        country_paths_compromised, country_first_compromise))
+                sf.write("Exit\t%s\t%s\t%s\t%s\t%s\t%s" % (args.location, guessing_entropy_result,
+                                                       as_paths_compromised, as_first_compromise,
+                                                       country_paths_compromised, country_first_compromise))
+                sf.write("GuardExit\t%s\t%s\t%s\t%s\t%s\t%s" % (args.location, guessing_entropy_result,
+                                                            as_paths_compromised, as_first_compromise,
+                                                            country_paths_compromised, country_first_compromise))
             sf.close()
         else:
-            score_file = os.path.join(args.nsf_dir+"/..","score_tor")
+            score_file = score_file = os.path.join(args.nsf_dir+"/.."+"AS"+top_as_number+"_"+top_country_code,
+                                                   "score_added_"+args.adversary+"tor")
             with open(score_file, 'w') as sf:
                 sf.write("Scores AS: %s\t%s\t%s\n" % (guessing_entropy_result, as_paths_compromised, as_first_compromise))
                 sf.write("Scores Country: %s\t%s\t%s" % (guessing_entropy_result, country_paths_compromised, country_first_compromise))
             sf.close()
 
         print("done")
+        """
 

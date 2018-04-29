@@ -8,16 +8,53 @@ import math
 def consensusname(log_file):
   return log_file.split('.')[1]
 
-def build_prob_matrix(guards_probabilities, exits_probabilities):
+def build_prob_matrix(guards_probabilities, exits_probabilities, probabilities_reduction):
 
   prob_matrix = {}
   guards = {}
   exits = {}
 
+  aggregated_guards_probabilities = {}
+
+  aggregated_probability = 0.0
+  aggregation_number = probabilities_reduction
+  count = 1
+  for guard_address, guard_probability in guards_probabilities.items():
+    aggregated_probability += guard_probability
+    if count == aggregation_number:
+      aggregated_guards_probabilities[guard_address] = aggregated_probability
+      count = 0
+      aggregated_probability = 0.0
+    count += 1
+
+  if aggregated_probability != 0.0:
+    probability_to_distribute = aggregated_probability/float(len(aggregated_guards_probabilities))
+    for guard_address in aggregated_guards_probabilities:
+      aggregated_guards_probabilities[guard_address] = aggregated_guards_probabilities[guard_address] + probability_to_distribute
+
+  #print(aggregated_guards_probabilities)
+  aggregated_exits_probabilities = {}
+
+  aggregated_probability = 0.0
+  aggregation_number = probabilities_reduction
+  count = 1
+  for exit_address, exit_probability in exits_probabilities.items():
+    aggregated_probability += exit_probability
+    if count == aggregation_number:
+      aggregated_exits_probabilities[exit_address] = aggregated_probability
+      count = 0
+      aggregated_probability = 0.0
+    count += 1
+
+  if aggregated_probability != 0.0:
+    probability_to_distribute = aggregated_probability/float(len(aggregated_exits_probabilities))
+    for exit_address in aggregated_exits_probabilities:
+      aggregated_exits_probabilities[exit_address] = aggregated_exits_probabilities[exit_address] + probability_to_distribute
+
   i = 1
   total = 0.0
-  for guard_address, guard_probability in guards_probabilities.items():
-    for exit_address, exit_probability in exits_probabilities.items():
+  for guard_address, guard_probability in aggregated_guards_probabilities.items():
+    for exit_address, exit_probability in aggregated_exits_probabilities.items():
 
       if guard_address not in guards :
         guards[guard_address] = 0
@@ -73,9 +110,9 @@ def build_prob_matrix(guards_probabilities, exits_probabilities):
   return prob_matrix, guards, exits
 
 
-def guessing_entropy(guards_prob, exits_prob):
+def guessing_entropy(guards_prob, exits_prob, probabilities_reduction):
 
-  (prob_matrix, guards, exits) = build_prob_matrix(guards_prob, exits_prob)
+  (prob_matrix, guards, exits) = build_prob_matrix(guards_prob, exits_prob, probabilities_reduction)
 
   all_nodes = len(guards)
   for exit in exits:
@@ -116,7 +153,7 @@ def guessing_entropy(guards_prob, exits_prob):
   while i < all_nodes:
     (node_ip, maximum) = get_max_marg_prob(prob_matrix, guards_controlled, \
                                            exits_controlled)
-    #print "{0}/{1} done".format(i, all_nodes)
+    print "{0}/{1} done".format(i, all_nodes)
 
     prob_list.append(maximum)
     if node_ip in guards and node_ip in exits:
@@ -126,7 +163,6 @@ def guessing_entropy(guards_prob, exits_prob):
     elif node_ip in guards:
       counter_guards +=1
     i+=1
-    print('[{}/{}]'.format(i, all_nodes))
     #if i == 10: break
 
   guessing_entropy = 0
@@ -138,9 +174,9 @@ def guessing_entropy(guards_prob, exits_prob):
     i+=1
     #if i == 10: break
 
-  #print "number of nodes compromised only flagged guards {0}".format(counter_guards)
-  #print "number of nodes compromised only flagged exits {0}".format(counter_exits)
-  #print "number of nodes compromised flagged both  {0}".format(counter_both)
+  print "number of nodes compromised only flagged guards {0}".format(counter_guards)
+  print "number of nodes compromised only flagged exits {0}".format(counter_exits)
+  print "number of nodes compromised flagged both  {0}".format(counter_both)
   return guessing_entropy
 
 def get_max_marg_prob(prob_matrix, guards, exits):

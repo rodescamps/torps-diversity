@@ -298,7 +298,7 @@ class CustomInsertion(object):
             self.descriptors[fingerprint] = pathsim_slim.ServerDescriptor(fingerprint, hibernating, address)
 
 
-    def add_custom_exits(self, num_custom_guards, num_custom_exits, bandwidth, water_filling=False):
+    def add_custom_exits(self, num_custom_guards, num_custom_exits, bandwidth, address, water_filling=False):
         """"Adds custom exits into self.add_relays and self.add_descriptors."""
         for i in xrange(num_custom_exits):
             # create consensus
@@ -312,15 +312,32 @@ class CustomInsertion(object):
             address = '10.'+str(num_custom_guards+i+1)+'.0.0' # avoid /16 conflicts
             self.descriptors[fingerprint] = pathsim_slim.ServerDescriptor(fingerprint, hibernating, address)
 
+    def add_custom_guardsexits(self, num_custom_guards, num_custom_exits, num_custom_guardsexits,
+                               bandwidth, address, water_filling=False):
+        """"Adds custom exits into self.add_relays and self.add_descriptors."""
+        for i in xrange(num_custom_guardsexits):
+            # create consensus
+            num_str = str(i+1)
+            fingerprint = 'X' * (40-len(num_str)) + num_str
+            flags = [Flag.GUARD, Flag.EXIT]
+            self.custom_relays[fingerprint] = pathsim_slim.RouterStatusEntry(fingerprint, flags, bandwidth, water_filling)
+
+            # create descriptor
+            hibernating = False
+            address = '10.'+str(num_custom_guards+num_custom_exits+i+1)+'.0.0' # avoid /16 conflicts
+            self.descriptors[fingerprint] = pathsim_slim.ServerDescriptor(fingerprint, hibernating, address)
 
 
-    def __init__(self, args, testing):
+
+    def __init__(self, args, address, testing):
         self.custom_time = args.custom_time
         self.custom_relays = {}
         self.descriptors = {}
         self.add_custom_guards(args.num_custom_guards, args.custom_guard_cons_bw, water_filling=True)
         self.add_custom_exits(args.num_custom_guards, args.num_custom_exits,
-                           args.custom_exit_cons_bw, water_filling=True)
+                           args.custom_exit_cons_bw, address, water_filling=True)
+        self.add_custom_guardsexits(args.num_custom_guards, args.num_custom_exits,
+                              args.num_custom_guardsexits, args.custom_guardexit_cons_bw, address, water_filling=True)
         self.testing = testing
         self.first_modification = True
         self.bww = Bwweights(args.wf_optimal)
