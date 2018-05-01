@@ -294,7 +294,8 @@ class CustomInsertion(object):
 
             # create descriptor
             hibernating = False
-            address = '10.'+num_str+'.0.0' # avoid /16 conflicts
+            if address is None:
+                address = '10.'+num_str+'.0.0' # avoid /16 conflicts
             self.descriptors[fingerprint] = pathsim_slim.ServerDescriptor(fingerprint, hibernating, address)
 
 
@@ -309,7 +310,8 @@ class CustomInsertion(object):
 
             # create descriptor
             hibernating = False
-            address = '10.'+str(num_custom_guards+i+1)+'.0.0' # avoid /16 conflicts
+            if address is None:
+                address = '10.'+str(num_custom_guards+i+1)+'.0.0' # avoid /16 conflicts
             self.descriptors[fingerprint] = pathsim_slim.ServerDescriptor(fingerprint, hibernating, address)
 
     def add_custom_guardsexits(self, num_custom_guards, num_custom_exits, num_custom_guardsexits,
@@ -324,7 +326,8 @@ class CustomInsertion(object):
 
             # create descriptor
             hibernating = False
-            address = '10.'+str(num_custom_guards+num_custom_exits+i+1)+'.0.0' # avoid /16 conflicts
+            if address is None:
+                address = '10.'+str(num_custom_guards+num_custom_exits+i+1)+'.0.0' # avoid /16 conflicts
             self.descriptors[fingerprint] = pathsim_slim.ServerDescriptor(fingerprint, hibernating, address)
 
 

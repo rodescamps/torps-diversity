@@ -1902,7 +1902,26 @@ def compute_probabilities(network_states, water_filling):
                         exits_bandwidths[address] = [total_bandwidth+bandwidth, old_counter+1]
         print('[{}/{}]'.format(i, network_states_size))
         i += 1
-        if i == 10: break
+        #if i == 10: break
+
+    customer_cone_subnets = dict()
+    guards_in_as = dict()
+    exits_in_as = dict()
+
+    customer_cone_files = []
+    for dirpath, dirnames, filenames in os.walk("../out/customer_cone_prefixes", followlinks=True):
+        for filename in filenames:
+            if (filename[0] != '.'):
+                customer_cone_files.append(os.path.join(dirpath,filename))
+    for customer_cone_file in customer_cone_files:
+        customer_cone_subnets[customer_cone_file] = []
+        guards_in_as[customer_cone_file] = 0.0
+        exits_in_as[customer_cone_file] = 0.0
+        with open(customer_cone_file, ) as ccf:
+            for line in ccf:
+                customer_cone_subnets[customer_cone_file].append(line)
+        ccf.close()
+
     for address in guards:
         bandwidth_details = guards_bandwidths[address]
         # Computes the average of the node bandwidth on the analyzed period
@@ -1914,9 +1933,16 @@ def compute_probabilities(network_states, water_filling):
     print(guards_total_bandwidth)
     print(len(guards))
 
+    i = 1
     for address in guards:
         average_bandwidth = guards_bandwidths[address]
         guards_probabilities[address] = average_bandwidth/float(guards_total_bandwidth)
+        for as_customer_cone, subnets in customer_cone_subnets.items():
+            if ip_in_as(address, subnets):
+                guards_in_as[as_customer_cone] += guards_probabilities[address]
+        print('guards: [{}/{}]'.format(i, len(guards)))
+        i += 1
+    print("guards: "+str(guards_in_as))
 
     for address in exits:
         bandwidth_details = exits_bandwidths[address]
@@ -1929,117 +1955,206 @@ def compute_probabilities(network_states, water_filling):
     print(exits_total_bandwidth)
     print(len(exits))
 
+    i = 1
     for address in exits:
         average_bandwidth = exits_bandwidths[address]
         exits_probabilities[address] = average_bandwidth/float(exits_total_bandwidth)
+        for as_customer_cone, subnets in customer_cone_subnets.items():
+            if ip_in_as(address, subnets):
+                exits_in_as[as_customer_cone] += exits_probabilities[address]
+        print('exits: [{}/{}]'.format(i, len(exits)))
+        i += 1
+    print("exits: "+str(exits_in_as))
+
+    # Top AS customer cone average
+    top_as_guards_total_probability = 0.0
+    for as_customer_cone, probability in guards_in_as.items():
+        top_as_guards_total_probability += probability
+
+    average_top_as_guards_probability = top_as_guards_total_probability / float(len(guards_in_as))
+
+    top_as_exits_total_probability = 0.0
+    for as_customer_cone, probability in exits_in_as.items():
+        top_as_exits_total_probability += probability
+
+    average_top_as_exits_probability = top_as_exits_total_probability / float(len(exits_in_as))
 
     return guards_probabilities, exits_probabilities, \
            guards_number, exits_number, \
-           guards_total_bandwidth, exits_total_bandwidth
+           guards_total_bandwidth, exits_total_bandwidth, \
+           average_top_as_guards_probability, average_top_as_exits_probability
 
-def as_compromise_path(guards_probabilities, exits_probabilities, as_number):
+def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers):
 
-    searched_as_number = str(as_number)
+    average_number_paths_compromised = 0.0
+    average_time_to_first_path_compromised = 0.0
+
+    as_list = []
 
     # Prepare the AS subnets in DictReader
     subnets_as_file = urllib.URLopener()
     subnets_as_file.retrieve("https://iptoasn.com/data/ip2asn-v4.tsv.gz", "ip2asn-v4.tsv.gz")
-    subnets = []
     with gzip.open('ip2asn-v4.tsv.gz', 'rb') as csvfile:
         asreader = csv.DictReader(csvfile, ['range_start', 'range_end', 'AS_number', 'country_code', 'AS_description'], dialect='excel-tab')
         for row in asreader:
+            as_list.append(row)
+    csvfile.close()
+
+    for as_number in as_numbers:
+
+        searched_as_number = str(as_number)
+
+        subnets = []
+        for row in as_list:
             if row['AS_number'] == searched_as_number:
                 subnets.append(row['range_start']+','+row['range_end'])
 
-    # Searches the compromised address, and computes part of the network controlled by AS
-    as_guards_probability = 0.0
-    i = 1
-    for guard_address, guard_probability in guards_probabilities.items():
-        # Calls method from as_inference.py
-        if ip_in_as(guard_address, subnets):
-            as_guards_probability += guard_probability
-        i += 1
+        # Searches the compromised address, and computes part of the network controlled by AS
+        as_guards_probability = 0.0
+        i = 1
+        for guard_address, guard_probability in guards_probabilities.items():
+            # Calls method from as_inference.py
+            if ip_in_as(guard_address, subnets):
+                as_guards_probability += guard_probability
+            i += 1
 
-    as_exits_probability = 0.0
-    for exit_address, exit_probability in exits_probabilities.items():
-        # Calls method from as_inference.py
-        if ip_in_as(exit_address, subnets):
-            as_exits_probability += exit_probability
+        as_exits_probability = 0.0
+        for exit_address, exit_probability in exits_probabilities.items():
+            # Calls method from as_inference.py
+            if ip_in_as(exit_address, subnets):
+                as_exits_probability += exit_probability
 
-    # Period is one month, and circuits change every 10min
-    period = 31*24*60
-    circuits_total = period/10
-    number_paths_compromised = 0.0
-    first_path_compromised = False
-    time_to_first_path_compromised = 0
+        # Period is one month, and circuits change every 10min
+        period = 31*24*60
+        circuits_total = period/10
+        number_paths_compromised = 0.0
+        first_path_compromised = False
+        time_to_first_path_compromised = 0
 
-    for i in range(circuits_total):
-        number_paths_compromised += (as_guards_probability*as_exits_probability)
-        if not first_path_compromised:
-            if number_paths_compromised >= 1.0:
-                # Computes when we compromise one circuit exactly (hypothetically between two constructed circuits)
-                number_paths_compromised_previously = number_paths_compromised - (as_guards_probability*as_exits_probability)
-                number_paths_compromised_to_reach_first = 1.0 - number_paths_compromised_previously
-                marginal_average_circuit_to_add = number_paths_compromised_to_reach_first/(as_guards_probability*as_exits_probability)
-                marginal_time_to_add = marginal_average_circuit_to_add * 10
-                # Time in hours
-                time_to_first_path_compromised = (((i-1) * 10)+marginal_time_to_add)/60.0
-                first_path_compromised = True
+        for i in range(circuits_total):
+            number_paths_compromised += (as_guards_probability*as_exits_probability)
+            if not first_path_compromised:
+                if number_paths_compromised >= 1.0:
+                    # Computes when we compromise one circuit exactly (hypothetically between two constructed circuits)
+                    number_paths_compromised_previously = number_paths_compromised - (as_guards_probability*as_exits_probability)
+                    number_paths_compromised_to_reach_first = 1.0 - number_paths_compromised_previously
+                    marginal_average_circuit_to_add = number_paths_compromised_to_reach_first/(as_guards_probability*as_exits_probability)
+                    marginal_time_to_add = marginal_average_circuit_to_add * 10
+                    # Time in hours
+                    time_to_first_path_compromised = (((i-1) * 10)+marginal_time_to_add)/60.0
+                    first_path_compromised = True
 
-    print('AS Guards Prob: {} / Exits Prob: {}'.format(as_guards_probability, as_exits_probability))
-    return number_paths_compromised, time_to_first_path_compromised
+        print('AS Guards Prob: {} / Exits Prob: {}'.format(as_guards_probability, as_exits_probability))
+        average_number_paths_compromised += number_paths_compromised
+        average_time_to_first_path_compromised += time_to_first_path_compromised
 
-def country_compromise_path(guards_probabilities, exits_probabilities, country_code):
+    return average_number_paths_compromised/len(as_numbers), average_time_to_first_path_compromised/len(as_numbers)
 
-    searched_country_code = country_code
+def country_compromise_path(guards_probabilities, exits_probabilities, country_codes):
+
+    average_number_paths_compromised = 0.0
+    average_time_to_first_path_compromised = 0.0
+
+    country_list = []
 
     # Prepare the country subnets in DictReader
     subnets_country_file = urllib.URLopener()
     subnets_country_file.retrieve("https://iptoasn.com/data/ip2country-v4.tsv.gz", "ip2country-v4.tsv.gz")
-    subnets = []
     with gzip.open('ip2country-v4.tsv.gz', 'rb') as csvfile:
         countryreader = csv.DictReader(csvfile, ['range_start', 'range_end', 'country_code'], dialect='excel-tab')
         for row in countryreader:
+            country_list.append(row)
+    csvfile.close()
+
+    for country_code in country_codes:
+
+        searched_country_code = country_code
+
+        subnets = []
+        for row in country_list:
             if row['country_code'] == searched_country_code:
                 subnets.append(row['range_start']+','+row['range_end'])
 
-    # Searches the compromised address, and computes part of the network controlled by AS
-    country_guards_probability = 0.0
-    i = 1
-    for guard_address, guard_probability in guards_probabilities.items():
-        # Calls method from as_inference.py
-        if ip_in_as(guard_address, subnets):
-            country_guards_probability += guard_probability
-        i += 1
+        # Searches the compromised address, and computes part of the network controlled by AS
+        country_guards_probability = 0.0
+        i = 1
+        for guard_address, guard_probability in guards_probabilities.items():
+            # Calls method from as_inference.py
+            if ip_in_as(guard_address, subnets):
+                country_guards_probability += guard_probability
+            i += 1
 
-    country_exits_probability = 0.0
-    for exit_address, exit_probability in exits_probabilities.items():
-        # Calls method from as_inference.py
-        if ip_in_as(exit_address, subnets):
-            country_exits_probability += exit_probability
+        country_exits_probability = 0.0
+        for exit_address, exit_probability in exits_probabilities.items():
+            # Calls method from as_inference.py
+            if ip_in_as(exit_address, subnets):
+                country_exits_probability += exit_probability
 
-    # Period is one month, and circuits change every 10min
-    period = 31*24*60
-    circuits_total = period/10
-    number_paths_compromised = 0.0
-    first_path_compromised = False
-    time_to_first_path_compromised = 0
+        # Period is one month, and circuits change every 10min
+        period = 31*24*60
+        circuits_total = period/10
+        number_paths_compromised = 0.0
+        first_path_compromised = False
+        time_to_first_path_compromised = 0
 
-    for i in range(circuits_total):
-        number_paths_compromised += (country_guards_probability*country_exits_probability)
-        if not first_path_compromised:
-            if number_paths_compromised >= 1.0:
-                # Computes when we compromise one circuit exactly (hypothetically between two constructed circuits)
-                number_paths_compromised_previously = number_paths_compromised - (country_guards_probability*country_exits_probability)
-                number_paths_compromised_to_reach_first = 1.0 - number_paths_compromised_previously
-                marginal_average_circuit_to_add = number_paths_compromised_to_reach_first/(country_guards_probability*country_exits_probability)
-                marginal_time_to_add = marginal_average_circuit_to_add * 10
-                # Time in hours
-                time_to_first_path_compromised = (((i-1) * 10)+marginal_time_to_add)/60.0
-                first_path_compromised = True
+        for i in range(circuits_total):
+            number_paths_compromised += (country_guards_probability*country_exits_probability)
+            if not first_path_compromised:
+                if number_paths_compromised >= 1.0:
+                    # Computes when we compromise one circuit exactly (hypothetically between two constructed circuits)
+                    number_paths_compromised_previously = number_paths_compromised - (country_guards_probability*country_exits_probability)
+                    number_paths_compromised_to_reach_first = 1.0 - number_paths_compromised_previously
+                    marginal_average_circuit_to_add = number_paths_compromised_to_reach_first/(country_guards_probability*country_exits_probability)
+                    marginal_time_to_add = marginal_average_circuit_to_add * 10
+                    # Time in hours
+                    time_to_first_path_compromised = (((i-1) * 10)+marginal_time_to_add)/60.0
+                    first_path_compromised = True
 
-    print('Country Guards Prob: {} / Exits Prob: {}'.format(country_guards_probability, country_exits_probability))
-    return number_paths_compromised, time_to_first_path_compromised
+        print('Country Guards Prob: {} / Exits Prob: {}'.format(country_guards_probability, country_exits_probability))
+        average_number_paths_compromised += number_paths_compromised
+        average_time_to_first_path_compromised += time_to_first_path_compromised
+
+    return average_number_paths_compromised/len(country_codes), average_time_to_first_path_compromised/len(country_codes)
+
+def generate_address(location):
+
+    subnets = []
+
+    if location.startswith('AS'):
+        searched_as_number = location[2:]
+
+        # Prepare the AS subnets in DictReader
+        subnets_as_file = urllib.URLopener()
+        subnets_as_file.retrieve("https://iptoasn.com/data/ip2asn-v4.tsv.gz", "ip2asn-v4.tsv.gz")
+        with gzip.open('ip2asn-v4.tsv.gz', 'rb') as csvfile:
+            asreader = csv.DictReader(csvfile, ['range_start', 'range_end', 'AS_number', 'country_code', 'AS_description'], dialect='excel-tab')
+            for row in asreader:
+                if row['AS_number'] == searched_as_number:
+                    subnets.append(row['range_start']+','+row['range_end'])
+    else:
+        searched_country_code = location
+
+        # Prepare the country subnets in DictReader
+        subnets_country_file = urllib.URLopener()
+        subnets_country_file.retrieve("https://iptoasn.com/data/ip2country-v4.tsv.gz", "ip2country-v4.tsv.gz")
+        with gzip.open('ip2country-v4.tsv.gz', 'rb') as csvfile:
+            countryreader = csv.DictReader(csvfile, ['range_start', 'range_end', 'country_code'], dialect='excel-tab')
+            for row in countryreader:
+                if row['country_code'] == searched_country_code:
+                    subnets.append(row['range_start']+','+row['range_end'])
+
+    random_subnet = choice(subnets)
+    range_start_full, range_end_full = random_subnet.split(',')
+    range_start = [int(n) for n in range_start_full.split('.')]
+    range_end = [int(n) for n in range_end_full.split('.')]
+    if range_start[0] != range_end[0]:
+        return str(randint(range_start[0], range_end[0]))+"."+str(randint(0, 255))+"."+str(randint(0, 255))+"."+str(randint(0, 255))
+    elif range_start[1] != range_end[1]:
+        return str(range_start[0])+"."+str(randint(range_start[1], range_end[1]))+"."+str(randint(0, 255))+"."+str(randint(0, 255))
+    elif range_start[2] != range_end[2]:
+        return str(range_start[0])+"."+str(range_start[1])+"."+str(randint(range_start[2], range_end[2]))+"."+str(randint(0, 255))
+    else:
+        return str(range_start[0])+"."+str(range_start[1])+"."+str(range_start[2])+"."+str(randint(range_start[3], range_end[3]))
 
 if __name__ == '__main__':
     import argparse
@@ -2077,13 +2192,55 @@ directories are located')
     average_parser.add_argument('--nsf_dir', default='out/network-state-files',
                               help='stores the network state files to use')
 
+    guessing_entropy_parser = subparsers.add_parser('score',
+                                         help='Computes diversity score.')
+    guessing_entropy_parser.add_argument('--nsf_dir', default='out/network-state-files',
+                              help='stores the network state files to use')
+    guessing_entropy_parser.add_argument('--adv_guard_cons_bw', type=float, default=0,
+                              help='consensus bandwidth of each adversarial guard to add')
+    guessing_entropy_parser.add_argument('--adv_exit_cons_bw', type=float, default=0,
+                              help='consensus bandwidth of each adversarial exit to add')
+    guessing_entropy_parser.add_argument('--adv_time', type=int, default=0,
+                              help='indicates timestamp after which to add adversarial relays to \
+consensuses')
+    guessing_entropy_parser.add_argument('--num_adv_guards', type=int, default=0,
+                              help='indicates the number of adversarial guards to add')
+    guessing_entropy_parser.add_argument('--num_adv_exits', type=int, default=0,
+                              help='indicates the number of adversarial exits to add')
+    guessing_entropy_parser.add_argument('--custom_guard_cons_bw', type=float, default=0,
+                              help='consensus bandwidth of each diversity guard to add')
+    guessing_entropy_parser.add_argument('--custom_exit_cons_bw', type=float, default=0,
+                              help='consensus bandwidth of each diversity exit to add')
+    guessing_entropy_parser.add_argument('--custom_guardexit_cons_bw', type=float, default=0,
+                              help='consensus bandwidth of each diversity guard and exit to add')
+    guessing_entropy_parser.add_argument('--custom_time', type=int, default=0,
+                              help='indicates timestamp after which to add diversity relays to \
+consensuses')
+    guessing_entropy_parser.add_argument('--num_custom_guards', type=int, default=0,
+                              help='indicates the number of diversity guards to add')
+    guessing_entropy_parser.add_argument('--num_custom_exits', type=int, default=0,
+                              help='indicates the number of diversity exits to add')
+    guessing_entropy_parser.add_argument('--num_custom_guardsexits', type=int, default=0,
+                              help='indicates the number of diversity guard and exit nodes to add')
+    guessing_entropy_parser.add_argument('--wf_optimal', help='Recompute bwweights from dir-spec.txt\
+            in a way that waterfilling would then be optimal', action='store_true')
+    pathalg_subparsers = guessing_entropy_parser.add_subparsers(help='score\
+commands', dest='pathalg_subparser')
+    tor_score_parser = pathalg_subparsers.add_parser('tor',
+                                                     help='use vanilla Tor path selection')
+    tor_score_parser = pathalg_subparsers.add_parser('tor-wf',
+                                                     help='use water_filling weights during path selection')
+    guessing_entropy_parser.add_argument('--loglevel', choices=['DEBUG', 'INFO',
+                                                     'WARNING', 'ERROR', 'CRITICAL'],
+                              help='set level of log messages to send to stdout, DEBUG produces testing output, quiet at all other levels', default='INFO')
+
     score_parser = subparsers.add_parser('score',
         help='Computes diversity score.')
     score_parser.add_argument('--nsf_dir', default='out/network-state-files',
                                  help='stores the network state files to use')
-    score_parser.add_argument('--top_as', default='16276',
+    score_parser.add_argument('--top_as',
                               help='top AS as network adversary to compute metrics')
-    score_parser.add_argument('--top_country', default='DE',
+    score_parser.add_argument('--top_country',
                               help='top country as network adversary to compute metrics')
     score_parser.add_argument('--adv_guard_cons_bw', type=float, default=0,
                                  help='consensus bandwidth of each adversarial guard to add')
@@ -2111,7 +2268,7 @@ consensuses')
                                  help='indicates the number of diversity exits to add')
     score_parser.add_argument('--num_custom_guardsexits', type=int, default=0,
                               help='indicates the number of diversity guard and exit nodes to add')
-    score_parser.add_argument('--location', default="AS16276",
+    score_parser.add_argument('--location',
                               help='where to place the custom guards/exits: AS or country:\n \
                                    Format: AS# or country code | Examples: "AS3356", "BE"')
     score_parser.add_argument('--wf_optimal', help='Recompute bwweights from dir-spec.txt\
@@ -2175,6 +2332,106 @@ commands', dest='pathalg_subparser')
         average = compute_average(network_states)
         print(average)
 
+    elif (args.subparser == 'guessing_entropy'):
+        logging.basicConfig(stream=sys.stdout, level=getattr(logging,
+                                                             args.loglevel))
+        if (logger.getEffectiveLevel() == logging.DEBUG):
+            logger.debug('DEBUG level detected')
+            _testing = True
+        else:
+            _testing = False
+
+        # long enough that guard should never expire
+        guard_expiration_min = int(100*365.25*24*60*60)
+
+        # use 1 guard that does not expire at the end of the month
+        TorOptions.num_guards = 1
+        TorOptions.min_num_guards = 1
+        TorOptions.guard_expiration_min = guard_expiration_min
+        TorOptions.guard_expiration_max = guard_expiration_min + 30*24*3600
+
+        ## create iterator producing sequence of simulation network states ##
+        # obtain list of network state files contained in nsf_dir
+        network_state_files = []
+        for dirpath, dirnames, filenames in os.walk(args.nsf_dir,
+                                                    followlinks=True):
+            for filename in filenames:
+                if (filename[0] != '.'):
+                    network_state_files.append(os.path.join(dirpath,filename))
+        # insert gaps for missing time periods
+        network_state_files.sort(key = lambda x: os.path.basename(x))
+        network_state_files = pad_network_state_files(network_state_files)
+
+        network_modifications = []
+
+        # create object that will add adversary relays into network
+        adv_insertion = network_modifiers_slim.AdversaryInsertion(args, _testing)
+        network_modifications = [adv_insertion]
+
+        # create object that will add diversity relays into network
+        diversity_insertion = network_modifiers_slim.CustomInsertion(args, None, _testing)
+        network_modifications = network_modifications.append(diversity_insertion)
+
+        # Recompute Bwweights from specifications in a way that waterfilling is optimal
+        if (args.wf_optimal):
+            network_modifications.insert(0, Bwweights(True))
+
+        # create iterator that applies network modifiers to nsf list
+        network_states = get_network_states(network_state_files,
+                                            network_modifications)
+
+        """
+        NetworkState(cons_valid_after, cons_fresh_until, cons_bw_weights,
+                     cons_bwweightscale, cons_rel_stats, hibernating_statuses,
+                     new_descriptors)
+                     
+        RouterStatusEntry(fingerprint, nickname, flags, bandwidth, water_filling=False)
+        
+        ServerDescriptor(fingerprint, hibernating, nickname, family, address, exit_policy, ntor_onion_key)
+        """
+
+        # determine start and end times
+        start_time = None
+        with open(network_state_files[0]) as nsf:
+            consensus = pickle.load(nsf)
+            start_time = timestamp(consensus.valid_after)
+        end_time = None
+        with open(network_state_files[-1]) as nsf:
+            consensus = pickle.load(nsf)
+            end_time = timestamp(consensus.fresh_until)
+
+        # for alternate path-selection algorithms
+        # set parameters and substitute simulation functions
+        water_filling = False
+        if args.pathalg_subparser == 'tor-wf':
+            water_filling = True
+
+        (guards_probabilities, exits_probabilities,
+         guards_number, exits_number,
+         guards_total_bandwidth, exits_total_bandwidth) = compute_probabilities(network_states, water_filling)
+
+        probabilities_reduction = 1
+        guessing_entropy_result = guessing_entropy(guards_probabilities, exits_probabilities, probabilities_reduction)*probabilities_reduction
+
+        score_file = os.path.join(args.nsf_dir+"/../"+"guessing_entropy_"+args.pathalg_subparser)
+        if args.num_custom_guards != 0:
+            score_file = os.path.join(args.nsf_dir+"/../",
+                                      "guessing_entropy_"+args.pathalg_subparser+
+                                      "_"+str(args.num_custom_guards)+"guard"+str(args.custom_guard_cons_bw))
+        elif args.num_custom_exits != 0:
+            score_file = os.path.join(args.nsf_dir+"/../",
+                                      "guessing_entropy_"+args.pathalg_subparser+
+                                      "_"+str(args.num_custom_exits)+"exit"+str(args.custom_exit_cons_bw))
+        elif args.num_custom_guardsexits != 0:
+            score_file = os.path.join(args.nsf_dir+"/../",
+                                      "guessing_entropy_"+args.pathalg_subparser+
+                                      "_"+str(args.num_custom_guardsexits)+"guardexit"+str(args.custom_guardexit_cons_bw))
+        print(score_file)
+        print(guessing_entropy_result)
+        with open(score_file, 'w') as sf:
+            sf.write("%s" % (guessing_entropy_result))
+        sf.close()
+
     elif (args.subparser == 'score'):
         logging.basicConfig(stream=sys.stdout, level=getattr(logging,
             args.loglevel))    
@@ -2211,8 +2468,9 @@ commands', dest='pathalg_subparser')
         # adv_insertion = network_modifiers_slim.AdversaryInsertion(args, _testing)
         # network_modifications = [adv_insertion]
 
-        #address = generate_address(args.location)
-        address = "8.8.8.8"
+        address = None
+        if args.location is not None:
+            address = generate_address(args.location)
 
         # create object that will add diversity relays into network
         diversity_insertion = network_modifiers_slim.CustomInsertion(args, address, _testing)
@@ -2256,73 +2514,69 @@ commands', dest='pathalg_subparser')
         #network_states_list = list(network_states)
 
         (guards_probabilities, exits_probabilities,
-        guards_number, exits_number,
-        guards_total_bandwidth, exits_total_bandwidth) = compute_probabilities(network_states, water_filling)
+         guards_number, exits_number,
+         guards_total_bandwidth, exits_total_bandwidth,
+         average_top_as_guards_probability,
+         average_top_as_exits_probability) = compute_probabilities(network_states, water_filling)
+        print("Top AS average guard part: {}".format(average_top_as_guards_probability))
+        print("Top AS average exit part: {}".format(average_top_as_exits_probability))
+        average_top_as_customer_cone_in_circuit = average_top_as_guards_probability*average_top_as_exits_probability
 
-        probabilities_reduction = 1
-        guessing_entropy_result = guessing_entropy(guards_probabilities, exits_probabilities, probabilities_reduction)*probabilities_reduction
+        #probabilities_reduction = 1
+        #guessing_entropy_result = guessing_entropy(guards_probabilities, exits_probabilities, probabilities_reduction)*probabilities_reduction
 
-        # Top AS is 16276 (OVH) by default
-        top_as_number = int(args.top_as)
-        # Top country is DE (Germany) by default
-        top_country_code = args.top_country
+        # Top ASs are 16276 (OVH), 12876 (Online S.a.s), 24940 (Hetzner) by default
+        top_as_number = []
+        if args.top_as is not None:
+            top_as_number.append(int(args.top_as))
+        else:
+            top_as_number = [16276, 12876, 24940]
+        # Top country are DE (Germany), FR (France), NL (Netherlands) by default
+        top_country_code = []
+        if args.top_country is not None:
+            top_country_code.append(args.top_country)
+        else:
+            top_country_code = ['DE', 'FR', 'NL']
 
-        #(as_paths_compromised, as_first_compromise) = as_compromise_path(guards_probabilities,
-        #                                                                 exits_probabilities,
-        #                                                                 top_as_number)
+        (as_paths_compromised, as_first_compromise) = as_compromise_path(guards_probabilities,
+                                                                         exits_probabilities,
+                                                                         top_as_number)
 
-        #(country_paths_compromised, country_first_compromise) = country_compromise_path(guards_probabilities,
-        #                                                                                exits_probabilities,
-        #                                                                                top_country_code)
+        (country_paths_compromised, country_first_compromise) = country_compromise_path(guards_probabilities,
+                                                                                        exits_probabilities,
+                                                                                        top_country_code)
 
         #print("Scores AS: %s\t%s\t%s" % (guessing_entropy_result, as_paths_compromised, as_first_compromise))
         #print("Scores Country: %s\t%s\t%s" % (guessing_entropy_result, country_paths_compromised, country_first_compromise))
 
-        score_file = os.path.join(args.nsf_dir+"/../"+"guessing_entropy_"+args.pathalg_subparser)
-        if args.num_custom_guards != 0:
-            score_file = os.path.join(args.nsf_dir+"/../",
-                                      "guessing_entropy_"+args.pathalg_subparser+
-                                      "_"+str(args.num_custom_guards)+"guard"+str(args.custom_guard_cons_bw))
-        elif args.num_custom_exits != 0:
-            score_file = os.path.join(args.nsf_dir+"/../",
-                                      "guessing_entropy_"+args.pathalg_subparser+
-                                      "_"+str(args.num_custom_exits)+"exit"+str(args.custom_exit_cons_bw))
-        elif args.num_custom_guardsexits != 0:
-            score_file = os.path.join(args.nsf_dir+"/../",
-                                      "guessing_entropy_"+args.pathalg_subparser+
-                                      "_"+str(args.num_custom_guardsexits)+"guardexit"+str(args.custom_guardexit_cons_bw))
-        print(score_file)
-        print(guessing_entropy_result)
-        with open(score_file, 'w') as sf:
-            sf.write("%s" % (guessing_entropy_result))
-        sf.close()
+        if not os.path.exists(args.nsf_dir+"/../"+"AS"+str(top_as_number)+"_"+str(top_country_code)):
+            os.makedirs(args.nsf_dir+"/../"+"AS"+str(top_as_number)+"_"+str(top_country_code))
 
-        """
-        if not os.path.exists(args.nsf_dir+"/.."+"AS"+top_as_number+"_"+top_country_code):
-            os.makedirs(args.nsf_dir+"/.."+"AS"+top_as_number+"_"+top_country_code)
-
-        if water_filling:
-            score_file = os.path.join(args.nsf_dir+"/.."+"AS"+top_as_number+"_"+top_country_code,
-                                      "score_added_"+args.adversary+"_wf")
-            with open(score_file, 'w') as sf:
-                sf.write("Guard\t%s\t%s\t%s\t%s\t%s\t%s" % (args.location, guessing_entropy_result,
-                                                        as_paths_compromised, as_first_compromise,
-                                                        country_paths_compromised, country_first_compromise))
-                sf.write("Exit\t%s\t%s\t%s\t%s\t%s\t%s" % (args.location, guessing_entropy_result,
-                                                       as_paths_compromised, as_first_compromise,
-                                                       country_paths_compromised, country_first_compromise))
-                sf.write("GuardExit\t%s\t%s\t%s\t%s\t%s\t%s" % (args.location, guessing_entropy_result,
-                                                            as_paths_compromised, as_first_compromise,
-                                                            country_paths_compromised, country_first_compromise))
-            sf.close()
+        if args.location is not None:
+            score_file = os.path.join(args.nsf_dir+"/../"+"AS"+str(top_as_number)+"_"+str(top_country_code),
+                                    "score_added_"+args.location+"_"+args.pathalg_subparser)
         else:
-            score_file = score_file = os.path.join(args.nsf_dir+"/.."+"AS"+top_as_number+"_"+top_country_code,
-                                                   "score_added_"+args.adversary+"tor")
-            with open(score_file, 'w') as sf:
-                sf.write("Scores AS: %s\t%s\t%s\n" % (guessing_entropy_result, as_paths_compromised, as_first_compromise))
-                sf.write("Scores Country: %s\t%s\t%s" % (guessing_entropy_result, country_paths_compromised, country_first_compromise))
-            sf.close()
-
-        print("done")
-        """
+            score_file = os.path.join(args.nsf_dir+"/../"+"AS"+str(top_as_number)+"_"+str(top_country_code),
+                                      "score_"+args.pathalg_subparser)
+        with open(score_file, 'a') as sf:
+            if args.num_custom_guards != 0:
+                sf.write("Guard\t%s\t%s\t%s\t%s\t%s\t%s\n" % (args.location,
+                                                          as_paths_compromised, as_first_compromise,
+                                                          country_paths_compromised, country_first_compromise,
+                                                          average_top_as_customer_cone_in_circuit))
+            elif args.num_custom_exits != 0:
+                sf.write("Exit\t%s\t%s\t%s\t%s\t%s\t%s\n" % (args.location,
+                                                         as_paths_compromised, as_first_compromise,
+                                                         country_paths_compromised, country_first_compromise,
+                                                         average_top_as_customer_cone_in_circuit))
+            elif args.num_custom_guardsexits != 0:
+                sf.write("GuardExit\t%s\t%s\t%s\t%s\t%s\t%s\n" % (args.location,
+                                                              as_paths_compromised, as_first_compromise,
+                                                              country_paths_compromised, country_first_compromise,
+                                                              average_top_as_customer_cone_in_circuit))
+            else:
+                sf.write("Vanilla\t%s\t%s\t%s\t%s\t%s\n" % (as_paths_compromised, as_first_compromise,
+                                                        country_paths_compromised, country_first_compromise,
+                                                        average_top_as_customer_cone_in_circuit))
+        sf.close()
 
