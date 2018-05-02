@@ -1917,7 +1917,7 @@ def compute_probabilities(network_states, water_filling):
         customer_cone_subnets[customer_cone_file] = []
         guards_in_as[customer_cone_file] = 0.0
         exits_in_as[customer_cone_file] = 0.0
-        with open(customer_cone_file, ) as ccf:
+        with open(customer_cone_file, 'r') as ccf:
             for line in ccf:
                 customer_cone_subnets[customer_cone_file].append(line)
         ccf.close()

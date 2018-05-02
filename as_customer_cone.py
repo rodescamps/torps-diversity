@@ -6,67 +6,148 @@ import urllib
 import json
 import gzip
 
-def ip_in_as(ip, subnets):
-    """
-    Returns True if {ip} is in the range of one of the {subnets},
-    Returns False otherwise.
-    """
-    ipv4 = [int(n) for n in ip.split('.')]
-    for subnets_ranges in subnets:
-        range_start_full, range_end_full = subnets_ranges.split(',')
+def is_included(range_start, range_end, reduced_customer_cone_prefixes):
+    for reduced_customer_cone_prefix in reduced_customer_cone_prefixes:
+        reduced_range_start_full, reduced_range_end_full = reduced_customer_cone_prefix.split(',')
+        reduced_range_start = [int(n) for n in reduced_range_start_full.split('.')]
+        reduced_range_end = [int(n) for n in reduced_range_end_full.split('.')]
+
+        if range_start[0] > reduced_range_start[0] and range_end[0] < reduced_range_end[0]:
+            return True
+        elif range_start[0] == reduced_range_start[0] and range_end[0] == reduced_range_end[0]:
+            if range_start[1] > reduced_range_start[1] and range_end[1] < reduced_range_end[1]:
+                return True
+            elif range_start[1] == reduced_range_start[1] and range_end[1] == reduced_range_end[1]:
+                if range_start[2] > reduced_range_start[2] and range_end[2] < reduced_range_end[2]:
+                    return True
+                elif range_start[2] == reduced_range_start[2] and range_end[2] == reduced_range_end[2]:
+                    if range_start[3] >= reduced_range_start[3] and range_end[3] <= reduced_range_end[3]:
+                        return True
+    return False
+
+def extend(range_start, range_end, reduced_customer_cone_prefixes):
+
+    for reduced_customer_cone_prefix in reduced_customer_cone_prefixes:
+        reduced_range_start_full, reduced_range_end_full = reduced_customer_cone_prefix.split(',')
+        reduced_range_start = [int(n) for n in reduced_range_start_full.split('.')]
+        reduced_range_end = [int(n) for n in reduced_range_end_full.split('.')]
+
+        # 3 cases: extend start and end, extend start, extend end
+
+        # (1) We extend the start of range and end of range
+
+        # Prepare subnet format in case it is added
+        range_start_full = ""
+        for n in range_start:
+            range_start_full += str(n)
+            range_start_full += "."
+        range_start_full = range_start_full[:-1]
+        range_end_full = ""
+        for n in range_end:
+            range_end_full += str(n)
+            range_end_full += "."
+        range_end_full = range_end_full[:-1]
+        prefix_to_add = range_start_full + "," + range_end_full
+
+        if range_start[0] < reduced_range_start[0] and range_end[0] > reduced_range_end[0]:
+            reduced_customer_cone_prefixes.remove(reduced_customer_cone_prefix)
+            reduced_customer_cone_prefixes.append(prefix_to_add)
+            return True, reduced_customer_cone_prefixes
+        elif range_start[0] == reduced_range_start[0] and range_end[0] == reduced_range_end[0]:
+            if range_start[1] < reduced_range_start[1] and range_end[1] > reduced_range_end[1]:
+                reduced_customer_cone_prefixes.remove(reduced_customer_cone_prefix)
+                reduced_customer_cone_prefixes.append(prefix_to_add)
+                return True, reduced_customer_cone_prefixes
+            elif range_start[1] == reduced_range_start[1] and range_end[1] == reduced_range_end[1]:
+                if range_start[2] < reduced_range_start[2] and range_end[2] > reduced_range_end[2]:
+                    reduced_customer_cone_prefixes.remove(reduced_customer_cone_prefix)
+                    reduced_customer_cone_prefixes.append(prefix_to_add)
+                    return True, reduced_customer_cone_prefixes
+                elif range_start[2] == reduced_range_start[2] and range_end[2] == reduced_range_end[2]:
+                    if range_start[3] < reduced_range_start[3] and range_end[3] > reduced_range_end[3]:
+                        reduced_customer_cone_prefixes.remove(reduced_customer_cone_prefix)
+                        reduced_customer_cone_prefixes.append(prefix_to_add)
+                        return True, reduced_customer_cone_prefixes
+
+        # (2) We extend the start of range
+
+        # Prepare subnet format in case it is added
+        range_start_full = ""
+        for n in range_start:
+            range_start_full += str(n)
+            range_start_full += "."
+        range_start_full = range_start_full[:-1]
+        prefix_to_add = range_start_full + "," + reduced_range_end_full
+
+        if range_start[0] < reduced_range_start[0] <= range_end[0] <= reduced_range_end[0]:
+            reduced_customer_cone_prefixes.remove(reduced_customer_cone_prefix)
+            reduced_customer_cone_prefixes.append(prefix_to_add)
+            return True, reduced_customer_cone_prefixes
+        elif range_start[0] == reduced_range_start[0] and range_end[0] == reduced_range_end[0]:
+            if range_start[1] < reduced_range_start[1] <= range_end[1] <= reduced_range_end[1]:
+                reduced_customer_cone_prefixes.remove(reduced_customer_cone_prefix)
+                reduced_customer_cone_prefixes.append(prefix_to_add)
+                return True, reduced_customer_cone_prefixes
+            elif range_start[1] == reduced_range_start[1] and range_end[1] == reduced_range_end[1]:
+                if range_start[2] < reduced_range_start[2] <= range_end[2] <= reduced_range_end[2]:
+                    reduced_customer_cone_prefixes.remove(reduced_customer_cone_prefix)
+                    reduced_customer_cone_prefixes.append(prefix_to_add)
+                    return True, reduced_customer_cone_prefixes
+                elif range_start[2] == reduced_range_start[2] and range_end[2] == reduced_range_end[2]:
+                    if range_start[3] < reduced_range_start[3] <= range_end[3] <= reduced_range_end[3]:
+                        reduced_customer_cone_prefixes.remove(reduced_customer_cone_prefix)
+                        reduced_customer_cone_prefixes.append(prefix_to_add)
+                        return True, reduced_customer_cone_prefixes
+
+        # (3) We extend the end of range
+
+        # Prepare subnet format in case it is added
+        range_end_full = ""
+        for n in range_end:
+            range_end_full += str(n)
+            range_end_full += "."
+        range_end_full = range_end_full[:-1]
+        prefix_to_add = reduced_range_start_full + "," + range_end_full
+
+        if reduced_range_start[0] <= range_start[0] <= reduced_range_end[0] < range_end[0]:
+            reduced_customer_cone_prefixes.remove(reduced_customer_cone_prefix)
+            reduced_customer_cone_prefixes.append(prefix_to_add)
+            return True, reduced_customer_cone_prefixes
+        elif range_start[0] == reduced_range_start[0] and range_end[0] == reduced_range_end[0]:
+            if reduced_range_start[1] <= range_start[1] <= reduced_range_end[1] < range_end[1]:
+                reduced_customer_cone_prefixes.remove(reduced_customer_cone_prefix)
+                reduced_customer_cone_prefixes.append(prefix_to_add)
+                return True, reduced_customer_cone_prefixes
+            elif range_start[1] == reduced_range_start[1] and range_end[1] == reduced_range_end[1]:
+                if reduced_range_start[2] <= range_start[2] <= reduced_range_end[2] < range_end[2]:
+                    reduced_customer_cone_prefixes.remove(reduced_customer_cone_prefix)
+                    reduced_customer_cone_prefixes.append(prefix_to_add)
+                    return True, reduced_customer_cone_prefixes
+                elif range_start[2] == reduced_range_start[2] and range_end[2] == reduced_range_end[2]:
+                    if reduced_range_start[3] <= range_start[3] <= reduced_range_end[3] < range_end[3]:
+                        reduced_customer_cone_prefixes.remove(reduced_customer_cone_prefix)
+                        reduced_customer_cone_prefixes.append(prefix_to_add)
+                        return True, reduced_customer_cone_prefixes
+    return False, reduced_customer_cone_prefixes
+
+def reduce_prefixes(customer_cone_prefixes):
+
+    reduced_customer_cone_prefixes = []
+
+    i = 1
+    for customer_cone_prefix in customer_cone_prefixes:
+        range_start_full, range_end_full = customer_cone_prefix.split(',')
         range_start = [int(n) for n in range_start_full.split('.')]
         range_end = [int(n) for n in range_end_full.split('.')]
-        if ipv4[0] == range_start[0] and ipv4[0] == range_end[0]:
-            if ipv4[1] == range_start[1] and ipv4[1] == range_end[1]:
-                if ipv4[2] == range_start[2] and ipv4[2] == range_end[2]:
-                    if range_start[3] <= ipv4[3] <= range_end[3]:
-                        return True
-                elif range_start[2] <= ipv4[2] <= range_end[2]:
-                    if ipv4[2] == range_start[2]:
-                        if ipv4[3] >= range_start[3]:
-                            return True
-                    elif ipv4[2] == range_end[2]:
-                        if ipv4[3] <= range_end[3]:
-                            return True
-                    else:
-                        return True
-            elif range_start[1] <= ipv4[1] <= range_end[1]:
-                if ipv4[1] == range_start[1]:
-                    if ipv4[2] == range_start[2]:
-                        if ipv4[3] >= range_start[3]:
-                            return True
-                    elif ipv4[2] >= range_start[2]:
-                        return True
-                elif ipv4[1] == range_end[1]:
-                    if ipv4[2] == range_end[2]:
-                        if ipv4[3] <= range_end[3]:
-                            return True
-                    elif ipv4[2] <= range_end[2]:
-                        return True
-                else:
-                    return True
-        elif range_start[0] <= ipv4[0] <= range_end[0]:
-            if ipv4[0] == range_start[0]:
-                if ipv4[1] == range_start[1]:
-                    if ipv4[2] == range_start[2]:
-                        if ipv4[3] >= range_start[3]:
-                            return True
-                    elif ipv4[2] >= range_start[2]:
-                        return True
-                elif ipv4[1] >= range_start[1]:
-                    return True
-            elif ipv4[0] == range_end[0]:
-                if ipv4[1] == range_end[0]:
-                    if ipv4[2] == range_end[2]:
-                        if ipv4[3] <= range_end[3]:
-                            return True
-                    elif ipv4[2] <= range_end[2]:
-                        return True
-                elif ipv4[1] <= range_end[1]:
-                    return True
-            else:
-                return True
-    return False
+
+        # If we do not extend existing subnet range and we are not included in existing subnet range, add prefix
+        is_extended, reduced_customer_cone_prefixes = extend(range_start, range_end, reduced_customer_cone_prefixes)
+        if not is_included(range_start, range_end, reduced_customer_cone_prefixes) and not is_extended:
+            reduced_customer_cone_prefixes.append(customer_cone_prefix)
+        print("{}/{}".format(i, len(customer_cone_prefixes)))
+        i += 1
+
+    return reduced_customer_cone_prefixes
 
 if __name__ == '__main__':
     usage = 'Usage: as_customer_cone.py [AS number] [results_out_dir] \n\
@@ -79,7 +160,7 @@ if __name__ == '__main__':
 
     searched_as_number = sys.argv[1]
     out_dir = sys.argv[2]
-
+    """
     list_as = []
     customer_cone_as = []
     customer_cone_prefixes = []
@@ -112,7 +193,7 @@ if __name__ == '__main__':
                 customer_as = link["asn"]
                 if customer_as not in customer_cone_as:
                     customer_cone_as.append(customer_as)
-                    print("recursion - AS {}/32383".format(len(customer_cone_as)))
+                    print("recursion - AS {}".format(len(customer_cone_as)))
                     add_prefixes(str(customer_as))
             if searched_as_number == sys.argv[1]:
                 print("{}/{}".format(i, len(links["data"])))
@@ -120,9 +201,28 @@ if __name__ == '__main__':
 
     add_prefixes(searched_as_number)
 
+    reduced_customer_cone_prefixes = reduce_prefixes(customer_cone_prefixes)
+
     customer_cone_file = os.path.join(out_dir,searched_as_number+"_customer_cone_prefixes")
     with open(customer_cone_file, 'w') as ccf:
         # Write all the prefixes to the specified file
         for prefix in customer_cone_prefixes:
+            ccf.write("%s\n" % prefix)
+    ccf.close()
+    """
+
+    customer_cone_prefixes = []
+
+    customer_cone_file = os.path.join(out_dir,searched_as_number+"_customer_cone_prefixes")
+    with open(customer_cone_file, 'r') as ccf:
+        customer_cone_prefixes = ccf.read().splitlines()
+    ccf.close()
+
+    reduced_customer_cone_prefixes = reduce_prefixes(customer_cone_prefixes)
+
+    customer_cone_file = os.path.join(out_dir,searched_as_number+"_customer_cone_prefixes_reduced")
+    with open(customer_cone_file, 'w') as ccf:
+        # Write all the prefixes to the specified file
+        for prefix in reduced_customer_cone_prefixes:
             ccf.write("%s\n" % prefix)
     ccf.close()
