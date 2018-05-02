@@ -15,6 +15,7 @@ import process_consensuses_slim
 import re
 import network_modifiers_slim
 from network_modifiers_slim import *
+import denasa_suspect_ases
 import event_callbacks
 import importlib
 import logging
@@ -1849,6 +1850,23 @@ def compute_probabilities(network_states, water_filling):
     guards_total_bandwidth = 0
     exits_total_bandwidth = 0
 
+    customer_cone_subnets = dict()
+    guards_in_as = dict()
+    exits_in_as = dict()
+
+    customer_cone_files = []
+    for dirpath, dirnames, filenames in os.walk("../out/customer_cone_prefixes", followlinks=True):
+        for filename in filenames:
+            if (filename[0] != '.'):
+                customer_cone_files.append(os.path.join(dirpath,filename))
+    for customer_cone_file in customer_cone_files:
+        customer_cone_subnets[customer_cone_file] = []
+        guards_in_as[customer_cone_file] = 0.0
+        exits_in_as[customer_cone_file] = 0.0
+        with open(customer_cone_file, 'r') as ccf:
+            for line in ccf:
+                customer_cone_subnets[customer_cone_file].append(line)
+        ccf.close()
 
     network_states_size = 24*31
     i = 1
@@ -1874,8 +1892,18 @@ def compute_probabilities(network_states, water_filling):
                 # Takes bandwidth proportion for exit allocated by the network
                 bandwidth = guards_weights[consensus]
                 hibernating = network_state.descriptors[consensus].hibernating
+
+                # DeNASA g-select
+                denasa_excluded = False
+                if denasa:
+                    for as_customer_cone, subnets in customer_cone_subnets.items():
+                        if as_customer_cone in denasa_suspect_ases.GSELECT:
+                            if ip_in_as(address, subnets):
+                                denasa_excluded = True
+                                break
+
                 # If node is hibernating (not running), it is not taken into account
-                if not hibernating:
+                if not hibernating and not denasa_excluded:
                     if address not in guards:
                         guards.append(address)
                         guards_bandwidths[address] = [bandwidth, 1]
@@ -1903,24 +1931,6 @@ def compute_probabilities(network_states, water_filling):
         print('[{}/{}]'.format(i, network_states_size))
         i += 1
         #if i == 10: break
-
-    customer_cone_subnets = dict()
-    guards_in_as = dict()
-    exits_in_as = dict()
-
-    customer_cone_files = []
-    for dirpath, dirnames, filenames in os.walk("../out/customer_cone_prefixes", followlinks=True):
-        for filename in filenames:
-            if (filename[0] != '.'):
-                customer_cone_files.append(os.path.join(dirpath,filename))
-    for customer_cone_file in customer_cone_files:
-        customer_cone_subnets[customer_cone_file] = []
-        guards_in_as[customer_cone_file] = 0.0
-        exits_in_as[customer_cone_file] = 0.0
-        with open(customer_cone_file, 'r') as ccf:
-            for line in ccf:
-                customer_cone_subnets[customer_cone_file].append(line)
-        ccf.close()
 
     for address in guards:
         bandwidth_details = guards_bandwidths[address]
@@ -1984,7 +1994,7 @@ def compute_probabilities(network_states, water_filling):
            guards_total_bandwidth, exits_total_bandwidth, \
            average_top_as_guards_probability, average_top_as_exits_probability
 
-def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers):
+def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, denasa):
 
     average_number_paths_compromised = 0.0
     average_time_to_first_path_compromised = 0.0
@@ -1999,6 +2009,20 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers):
         for row in asreader:
             as_list.append(row)
     csvfile.close()
+
+    # Prepare the top ASes subnets for DeNASA
+    customer_cone_subnets = dict()
+    customer_cone_files = []
+    for dirpath, dirnames, filenames in os.walk("../out/customer_cone_prefixes", followlinks=True):
+        for filename in filenames:
+            if (filename[0] != '.'):
+                customer_cone_files.append(os.path.join(dirpath,filename))
+    for customer_cone_file in customer_cone_files:
+        customer_cone_subnets[customer_cone_file] = []
+        with open(customer_cone_file, 'r') as ccf:
+            for line in ccf:
+                customer_cone_subnets[customer_cone_file].append(line)
+        ccf.close()
 
     for as_number in as_numbers:
 
@@ -2022,6 +2046,17 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers):
         for exit_address, exit_probability in exits_probabilities.items():
             # Calls method from as_inference.py
             if ip_in_as(exit_address, subnets):
+                # DeNASA e-select:1.0
+                if denasa:
+                    guards_not_selected = 0
+                    for guard_address, guard_probability in guards_probabilities.items():
+                        for as_customer_cone, global_as_subnets in customer_cone_subnets.items():
+                            if as_customer_cone in denasa_suspect_ases.ESELECT:
+                                if ip_in_as(guard_address, global_as_subnets):
+                                    if ip_in_as(exit_address, global_as_subnets):
+                                        guards_not_selected += 1
+                                        break # As soon as we find an AS that prevents the guard selection, add the guard once
+                    exit_probability *= 1 - (guards_not_selected / float(len(guards_probabilities)))
                 as_exits_probability += exit_probability
 
         # Period is one month, and circuits change every 10min
@@ -2050,7 +2085,7 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers):
 
     return average_number_paths_compromised/len(as_numbers), average_time_to_first_path_compromised/len(as_numbers)
 
-def country_compromise_path(guards_probabilities, exits_probabilities, country_codes):
+def country_compromise_path(guards_probabilities, exits_probabilities, country_codes, denasa):
 
     average_number_paths_compromised = 0.0
     average_time_to_first_path_compromised = 0.0
@@ -2230,6 +2265,8 @@ commands', dest='pathalg_subparser')
                                                      help='use vanilla Tor path selection')
     tor_score_parser = pathalg_subparsers.add_parser('tor-wf',
                                                      help='use water_filling weights during path selection')
+    tor_score_parser = pathalg_subparsers.add_parser('tor-denasa',
+                                                     help='Applies DeNASA to Tor weights during path selection')
     guessing_entropy_parser.add_argument('--loglevel', choices=['DEBUG', 'INFO',
                                                      'WARNING', 'ERROR', 'CRITICAL'],
                               help='set level of log messages to send to stdout, DEBUG produces testing output, quiet at all other levels', default='INFO')
@@ -2279,6 +2316,8 @@ commands', dest='pathalg_subparser')
         help='use vanilla Tor path selection')
     tor_score_parser = pathalg_subparsers.add_parser('tor-wf',
         help='use water_filling weights during path selection')
+    tor_score_parser = pathalg_subparsers.add_parser('tor-denasa',
+                                                     help='Applies DeNASA to Tor weights during path selection')
     score_parser.add_argument('--loglevel', choices=['DEBUG', 'INFO',
                                                         'WARNING', 'ERROR', 'CRITICAL'],
         help='set level of log messages to send to stdout, DEBUG produces testing output, quiet at all other levels', default='INFO')
@@ -2403,15 +2442,18 @@ commands', dest='pathalg_subparser')
         # for alternate path-selection algorithms
         # set parameters and substitute simulation functions
         water_filling = False
+        denasa = False
         if args.pathalg_subparser == 'tor-wf':
             water_filling = True
+        if args.pathalg_subparser == 'tor-denasa':
+            denasa = True
 
         (guards_probabilities, exits_probabilities,
          guards_number, exits_number,
-         guards_total_bandwidth, exits_total_bandwidth) = compute_probabilities(network_states, water_filling)
+         guards_total_bandwidth, exits_total_bandwidth) = compute_probabilities(network_states, water_filling, denasa)
 
         probabilities_reduction = 1
-        guessing_entropy_result = guessing_entropy(guards_probabilities, exits_probabilities, probabilities_reduction)*probabilities_reduction
+        guessing_entropy_result = guessing_entropy(guards_probabilities, exits_probabilities, probabilities_reduction, denasa)*probabilities_reduction
 
         score_file = os.path.join(args.nsf_dir+"/../"+"guessing_entropy_"+args.pathalg_subparser)
         if args.num_custom_guards != 0:
@@ -2507,8 +2549,11 @@ commands', dest='pathalg_subparser')
         # for alternate path-selection algorithms
         # set parameters and substitute simulation functions
         water_filling = False
+        denasa = False
         if args.pathalg_subparser == 'tor-wf':
             water_filling = True
+        if args.pathalg_subparser == 'tor-denasa':
+            denasa = True
 
         #network_states_it1, network_states_it2 = itertools.tee(network_states, 1)
         #network_states_list = list(network_states)
@@ -2517,7 +2562,7 @@ commands', dest='pathalg_subparser')
          guards_number, exits_number,
          guards_total_bandwidth, exits_total_bandwidth,
          average_top_as_guards_probability,
-         average_top_as_exits_probability) = compute_probabilities(network_states, water_filling)
+         average_top_as_exits_probability) = compute_probabilities(network_states, water_filling, denasa)
         print("Top AS average guard part: {}".format(average_top_as_guards_probability))
         print("Top AS average exit part: {}".format(average_top_as_exits_probability))
         average_top_as_customer_cone_in_circuit = average_top_as_guards_probability*average_top_as_exits_probability
@@ -2540,11 +2585,13 @@ commands', dest='pathalg_subparser')
 
         (as_paths_compromised, as_first_compromise) = as_compromise_path(guards_probabilities,
                                                                          exits_probabilities,
-                                                                         top_as_number)
+                                                                         top_as_number,
+                                                                         denasa)
 
         (country_paths_compromised, country_first_compromise) = country_compromise_path(guards_probabilities,
                                                                                         exits_probabilities,
-                                                                                        top_country_code)
+                                                                                        top_country_code,
+                                                                                        denasa)
 
         #print("Scores AS: %s\t%s\t%s" % (guessing_entropy_result, as_paths_compromised, as_first_compromise))
         #print("Scores Country: %s\t%s\t%s" % (guessing_entropy_result, country_paths_compromised, country_first_compromise))

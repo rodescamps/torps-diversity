@@ -2,13 +2,15 @@ import sys
 import os
 from pathsim import *
 import math
+import denasa_suspect_ases
+from as_inference import ip_in_as
 
 
 
 def consensusname(log_file):
   return log_file.split('.')[1]
 
-def build_prob_matrix(guards_probabilities, exits_probabilities, probabilities_reduction):
+def build_prob_matrix(guards_probabilities, exits_probabilities, probabilities_reduction, denasa):
 
   prob_matrix = {}
   guards = {}
@@ -53,6 +55,7 @@ def build_prob_matrix(guards_probabilities, exits_probabilities, probabilities_r
 
   i = 1
   total = 0.0
+  probabilities_denasa = 0
   for guard_address, guard_probability in aggregated_guards_probabilities.items():
     for exit_address, exit_probability in aggregated_exits_probabilities.items():
 
@@ -63,7 +66,30 @@ def build_prob_matrix(guards_probabilities, exits_probabilities, probabilities_r
       guards[guard_address] += 1
       exits[exit_address] += 1
 
+      # DeNASA e-select:1.0
+      customer_cone_subnets = dict()
+      customer_cone_files = []
+      for dirpath, dirnames, filenames in os.walk("../out/customer_cone_prefixes", followlinks=True):
+          for filename in filenames:
+              if (filename[0] != '.'):
+                  customer_cone_files.append(os.path.join(dirpath,filename))
+      for customer_cone_file in customer_cone_files:
+          customer_cone_subnets[customer_cone_file] = []
+          with open(customer_cone_file, 'r') as ccf:
+              for line in ccf:
+                  customer_cone_subnets[customer_cone_file].append(line)
+          ccf.close()
+
       path_probability = guard_probability * exit_probability
+
+      if denasa:
+        for as_customer_cone, subnets in customer_cone_subnets.items():
+            if as_customer_cone in denasa_suspect_ases.ESELECT:
+               if ip_in_as(guard_address, subnets):
+                   if ip_in_as(exit_address, subnets):
+                       probabilities_denasa += path_probability
+                       path_probability = 0
+
       if guard_address not in prob_matrix:
         prob_matrix[guard_address] = {}
         prob_matrix[guard_address][exit_address] = path_probability
@@ -73,6 +99,13 @@ def build_prob_matrix(guards_probabilities, exits_probabilities, probabilities_r
     i += 1
   print("Matrix prob total = "+ str(total))
 
+  if denasa:
+      total = 0
+      for guard_address, guard_probability in aggregated_guards_probabilities.items():
+            for exit_address, exit_probability in aggregated_exits_probabilities.items():
+                prob_matrix[guard_address][exit_address] /= (1.0 - probabilities_denasa)
+                total += prob_matrix[guard_address][exit_address]
+      print("Matrix prob total DeNASA = "+ str(total))
   """
   #exits = {}
   #guards = {}
@@ -110,9 +143,9 @@ def build_prob_matrix(guards_probabilities, exits_probabilities, probabilities_r
   return prob_matrix, guards, exits
 
 
-def guessing_entropy(guards_prob, exits_prob, probabilities_reduction):
+def guessing_entropy(guards_prob, exits_prob, probabilities_reduction, denasa):
 
-  (prob_matrix, guards, exits) = build_prob_matrix(guards_prob, exits_prob, probabilities_reduction)
+  (prob_matrix, guards, exits) = build_prob_matrix(guards_prob, exits_prob, probabilities_reduction, denasa)
 
   all_nodes = len(guards)
   for exit in exits:
