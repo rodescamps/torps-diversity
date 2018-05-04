@@ -1959,7 +1959,14 @@ def compute_probabilities(network_states, water_filling, denasa, guessing_entrop
     number_paths_compromised = 0.0
     time_to_first_path_compromised = 0
 
-    if not guessing_entropy:
+    if guessing_entropy:
+        for address in guards:
+            average_bandwidth = guards_bandwidths[address]
+            guards_probabilities[address] = average_bandwidth/float(guards_total_bandwidth)
+        for address in exits:
+            average_bandwidth = exits_bandwidths[address]
+            exits_probabilities[address] = average_bandwidth/float(exits_total_bandwidth)
+    else:
         i = 1
         for address in guards:
             average_bandwidth = guards_bandwidths[address]
