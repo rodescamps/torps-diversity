@@ -1837,7 +1837,7 @@ def compute_average(network_states):
         general_average += average
     return general_average/float(len(averages))
 
-def compute_probabilities(network_states, water_filling, denasa):
+def compute_probabilities(network_states, water_filling, denasa, guessing_entropy):
     guards = []
     guards_bandwidths = dict()
     exits = []
@@ -1925,9 +1925,8 @@ def compute_probabilities(network_states, water_filling, denasa):
         #if i == 10: break
 
     # DeNASA g-select
-    for address in guards:
-        denasa_excluded = False
-        if denasa:
+    if denasa:
+        for address in guards:
             for as_customer_cone, subnets in customer_cone_subnets.items():
                 if as_customer_cone in denasa_suspect_ases.GSELECT:
                     if ip_in_as(address, subnets):
@@ -1945,16 +1944,6 @@ def compute_probabilities(network_states, water_filling, denasa):
     print("Guards total bandwidth: {}".format(guards_total_bandwidth))
     print("# of guards: {}".format(len(guards)))
 
-    i = 1
-    for address in guards:
-        average_bandwidth = guards_bandwidths[address]
-        guards_probabilities[address] = average_bandwidth/float(guards_total_bandwidth)
-        for as_customer_cone, subnets in customer_cone_subnets.items():
-            if ip_in_as(address, subnets):
-                guards_in_as[as_customer_cone] += guards_probabilities[address]
-        if i % 100 == 0: print('guards: [{}/{}]'.format(i, len(guards)))
-        i += 1
-
     for address in exits:
         bandwidth_details = exits_bandwidths[address]
         # Computes the average of the node bandwidth on the analyzed period
@@ -1966,49 +1955,62 @@ def compute_probabilities(network_states, water_filling, denasa):
     print("Exits total bandwidth: {}".format(exits_total_bandwidth))
     print("# of exits: {}".format(len(exits)))
 
-    i = 1
-    for address in exits:
-        average_bandwidth = exits_bandwidths[address]
-        exits_probabilities[address] = average_bandwidth/float(exits_total_bandwidth)
-        for as_customer_cone, subnets in customer_cone_subnets.items():
-            if ip_in_as(address, subnets):
-                exits_in_as[as_customer_cone] += exits_probabilities[address]
-        if i % 100 == 0: print('exits: [{}/{}]'.format(i, len(exits)))
-        i += 1
-
-    # Top AS customer cone average
-    top_as_guards_total_probability = 0.0
-    for as_customer_cone, probability in guards_in_as.items():
-        top_as_guards_total_probability += probability
-
-    average_top_as_guards_probability = top_as_guards_total_probability / float(len(guards_in_as))
-
-    top_as_exits_total_probability = 0.0
-    for as_customer_cone, probability in exits_in_as.items():
-        top_as_exits_total_probability += probability
-
-    average_top_as_exits_probability = top_as_exits_total_probability / float(len(exits_in_as))
-
-    # Number of paths/time to first compromise for top ASes
-    # Period is one month, and circuits change every 10min
-    period = 31*24*60
-    circuits_total = period/10
+    # Metrics for top ASes influence
     number_paths_compromised = 0.0
-    first_path_compromised = False
     time_to_first_path_compromised = 0
 
-    for i in range(circuits_total):
-        number_paths_compromised += (average_top_as_guards_probability*average_top_as_exits_probability)
-        if not first_path_compromised:
-            if number_paths_compromised >= 1.0:
-                # Computes when we compromise one circuit exactly (hypothetically between two constructed circuits)
-                number_paths_compromised_previously = number_paths_compromised - (average_top_as_guards_probability*average_top_as_exits_probability)
-                number_paths_compromised_to_reach_first = 1.0 - number_paths_compromised_previously
-                marginal_average_circuit_to_add = number_paths_compromised_to_reach_first/(average_top_as_guards_probability*average_top_as_exits_probability)
-                marginal_time_to_add = marginal_average_circuit_to_add * 10
-                # Time in hours
-                time_to_first_path_compromised = (((i-1) * 10)+marginal_time_to_add)/60.0
-                first_path_compromised = True
+    if not guessing_entropy:
+        i = 1
+        for address in guards:
+            average_bandwidth = guards_bandwidths[address]
+            guards_probabilities[address] = average_bandwidth/float(guards_total_bandwidth)
+            for as_customer_cone, subnets in customer_cone_subnets.items():
+                if ip_in_as(address, subnets):
+                    guards_in_as[as_customer_cone] += guards_probabilities[address]
+            if i % 100 == 0: print('guards: [{}/{}]'.format(i, len(guards)))
+            i += 1
+
+        i = 1
+        for address in exits:
+            average_bandwidth = exits_bandwidths[address]
+            exits_probabilities[address] = average_bandwidth/float(exits_total_bandwidth)
+            for as_customer_cone, subnets in customer_cone_subnets.items():
+                if ip_in_as(address, subnets):
+                    exits_in_as[as_customer_cone] += exits_probabilities[address]
+            if i % 100 == 0: print('exits: [{}/{}]'.format(i, len(exits)))
+            i += 1
+
+        # Top AS customer cone average
+        top_as_guards_total_probability = 0.0
+        for as_customer_cone, probability in guards_in_as.items():
+            top_as_guards_total_probability += probability
+
+        average_top_as_guards_probability = top_as_guards_total_probability / float(len(guards_in_as))
+
+        top_as_exits_total_probability = 0.0
+        for as_customer_cone, probability in exits_in_as.items():
+            top_as_exits_total_probability += probability
+
+        average_top_as_exits_probability = top_as_exits_total_probability / float(len(exits_in_as))
+
+        # Number of paths/time to first compromise for top ASes
+        # Period is one month, and circuits change every 10min
+        period = 31*24*60
+        circuits_total = period/10
+        first_path_compromised = False
+
+        for i in range(circuits_total):
+            number_paths_compromised += (average_top_as_guards_probability*average_top_as_exits_probability)
+            if not first_path_compromised:
+                if number_paths_compromised >= 1.0:
+                    # Computes when we compromise one circuit exactly (hypothetically between two constructed circuits)
+                    number_paths_compromised_previously = number_paths_compromised - (average_top_as_guards_probability*average_top_as_exits_probability)
+                    number_paths_compromised_to_reach_first = 1.0 - number_paths_compromised_previously
+                    marginal_average_circuit_to_add = number_paths_compromised_to_reach_first/(average_top_as_guards_probability*average_top_as_exits_probability)
+                    marginal_time_to_add = marginal_average_circuit_to_add * 10
+                    # Time in hours
+                    time_to_first_path_compromised = (((i-1) * 10)+marginal_time_to_add)/60.0
+                    first_path_compromised = True
 
     return guards_probabilities, exits_probabilities, \
            guards_number, exits_number, \
@@ -2496,9 +2498,11 @@ commands', dest='pathalg_subparser')
         if args.pathalg_subparser == 'tor-denasa':
             denasa = True
 
+        # top_as_paths_compromised, top_as_first_compromise not used when guessing entropy computed
         (guards_probabilities, exits_probabilities,
          guards_number, exits_number,
-         guards_total_bandwidth, exits_total_bandwidth) = compute_probabilities(network_states, water_filling, denasa)
+         guards_total_bandwidth, exits_total_bandwidth,
+         top_as_paths_compromised, top_as_first_compromise) = compute_probabilities(network_states, water_filling, denasa, True)
 
         probabilities_reduction = 10
         guessing_entropy_result = guessing_entropy(guards_probabilities, exits_probabilities, probabilities_reduction, denasa)*probabilities_reduction
@@ -2609,7 +2613,7 @@ commands', dest='pathalg_subparser')
         (guards_probabilities, exits_probabilities,
          guards_number, exits_number,
          guards_total_bandwidth, exits_total_bandwidth,
-         top_as_paths_compromised, top_as_first_compromise) = compute_probabilities(network_states, water_filling, denasa)
+         top_as_paths_compromised, top_as_first_compromise) = compute_probabilities(network_states, water_filling, denasa, False)
 
         #probabilities_reduction = 1
         #guessing_entropy_result = guessing_entropy(guards_probabilities, exits_probabilities, probabilities_reduction)*probabilities_reduction
