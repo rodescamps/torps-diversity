@@ -2419,7 +2419,7 @@ commands', dest='pathalg_subparser')
         average = compute_average(network_states)
         print(average)
 
-    elif (args.subparser == 'guessing_entropy'):
+    elif (args.subparser == 'guessing-entropy'):
         logging.basicConfig(stream=sys.stdout, level=getattr(logging,
                                                              args.loglevel))
         if (logger.getEffectiveLevel() == logging.DEBUG):
@@ -2449,13 +2449,15 @@ commands', dest='pathalg_subparser')
         network_state_files.sort(key = lambda x: os.path.basename(x))
         network_state_files = pad_network_state_files(network_state_files)
 
+        network_modifications = []
+
         # create object that will add adversary relays into network
-        adv_insertion = network_modifiers_slim.AdversaryInsertion(args, _testing)
-        network_modifications = [adv_insertion]
+        #adv_insertion = network_modifiers_slim.AdversaryInsertion(args, _testing)
+        #network_modifications = [adv_insertion]
 
         # create object that will add diversity relays into network
         diversity_insertion = network_modifiers_slim.CustomInsertion(args, None, _testing)
-        network_modifications = network_modifications.append(diversity_insertion)
+        network_modifications = [diversity_insertion]
 
         # Recompute Bwweights from specifications in a way that waterfilling is optimal
         if (args.wf_optimal):
