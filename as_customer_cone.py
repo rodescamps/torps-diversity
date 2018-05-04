@@ -152,7 +152,7 @@ if __name__ == '__main__':
 
     searched_as_number = sys.argv[1]
     out_dir = sys.argv[2]
-    """
+
     list_as = []
     customer_cone_as = []
     customer_cone_prefixes = []
@@ -201,7 +201,7 @@ if __name__ == '__main__':
         for prefix in customer_cone_prefixes:
             ccf.write("%s\n" % prefix)
     ccf.close()
-    """
+
 
     customer_cone_prefixes = []
 
