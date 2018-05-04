@@ -282,7 +282,7 @@ class Bwweights(object):
 class CustomInsertion(object):
 
 
-    def add_custom_guards(self, num_custom_guards, bandwidth, water_filling=False):
+    def add_custom_guards(self, num_custom_guards, bandwidth, address, water_filling=False):
         """"Adds custom guards into self.add_relays and self.add_descriptors."""
         #, custom_relays, descriptors
         for i in xrange(num_custom_guards):
@@ -336,7 +336,7 @@ class CustomInsertion(object):
         self.custom_time = args.custom_time
         self.custom_relays = {}
         self.descriptors = {}
-        self.add_custom_guards(args.num_custom_guards, args.custom_guard_cons_bw, water_filling=True)
+        self.add_custom_guards(args.num_custom_guards, args.custom_guard_cons_bw, address, water_filling=True)
         self.add_custom_exits(args.num_custom_guards, args.num_custom_exits,
                            args.custom_exit_cons_bw, address, water_filling=True)
         self.add_custom_guardsexits(args.num_custom_guards, args.num_custom_exits,

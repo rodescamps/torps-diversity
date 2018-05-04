@@ -1837,7 +1837,7 @@ def compute_average(network_states):
         general_average += average
     return general_average/float(len(averages))
 
-def compute_probabilities(network_states, water_filling):
+def compute_probabilities(network_states, water_filling, denasa):
     guards = []
     guards_bandwidths = dict()
     exits = []
@@ -1860,12 +1860,13 @@ def compute_probabilities(network_states, water_filling):
             if (filename[0] != '.'):
                 customer_cone_files.append(os.path.join(dirpath,filename))
     for customer_cone_file in customer_cone_files:
-        customer_cone_subnets[customer_cone_file] = []
-        guards_in_as[customer_cone_file] = 0.0
-        exits_in_as[customer_cone_file] = 0.0
+        customer_cone_as = re.sub("[^0-9]", "", customer_cone_file)
+        customer_cone_subnets[customer_cone_as] = []
+        guards_in_as[customer_cone_as] = 0.0
+        exits_in_as[customer_cone_as] = 0.0
         with open(customer_cone_file, 'r') as ccf:
             for line in ccf:
-                customer_cone_subnets[customer_cone_file].append(line)
+                customer_cone_subnets[customer_cone_as].append(line)
         ccf.close()
 
     network_states_size = 24*31
@@ -1893,17 +1894,8 @@ def compute_probabilities(network_states, water_filling):
                 bandwidth = guards_weights[consensus]
                 hibernating = network_state.descriptors[consensus].hibernating
 
-                # DeNASA g-select
-                denasa_excluded = False
-                if denasa:
-                    for as_customer_cone, subnets in customer_cone_subnets.items():
-                        if as_customer_cone in denasa_suspect_ases.GSELECT:
-                            if ip_in_as(address, subnets):
-                                denasa_excluded = True
-                                break
-
                 # If node is hibernating (not running), it is not taken into account
-                if not hibernating and not denasa_excluded:
+                if not hibernating:
                     if address not in guards:
                         guards.append(address)
                         guards_bandwidths[address] = [bandwidth, 1]
@@ -1928,9 +1920,19 @@ def compute_probabilities(network_states, water_filling):
                         total_bandwidth = old_bandwidth_details[0]
                         old_counter = old_bandwidth_details[1]
                         exits_bandwidths[address] = [total_bandwidth+bandwidth, old_counter+1]
-        print('[{}/{}]'.format(i, network_states_size))
+        if i % 100 == 0: print('[{}/{}]'.format(i, network_states_size))
         i += 1
         #if i == 10: break
+
+    # DeNASA g-select
+    for address in guards:
+        denasa_excluded = False
+        if denasa:
+            for as_customer_cone, subnets in customer_cone_subnets.items():
+                if as_customer_cone in denasa_suspect_ases.GSELECT:
+                    if ip_in_as(address, subnets):
+                        guards.remove(address)
+                        break
 
     for address in guards:
         bandwidth_details = guards_bandwidths[address]
@@ -1940,8 +1942,8 @@ def compute_probabilities(network_states, water_filling):
         # Added to the total bandwidth of the network
         guards_total_bandwidth += average_bandwidth
         guards_number += 1
-    print(guards_total_bandwidth)
-    print(len(guards))
+    print("Guards total bandwidth: {}".format(guards_total_bandwidth))
+    print("# of guards: {}".format(len(guards)))
 
     i = 1
     for address in guards:
@@ -1950,9 +1952,8 @@ def compute_probabilities(network_states, water_filling):
         for as_customer_cone, subnets in customer_cone_subnets.items():
             if ip_in_as(address, subnets):
                 guards_in_as[as_customer_cone] += guards_probabilities[address]
-        print('guards: [{}/{}]'.format(i, len(guards)))
+        if i % 100 == 0: print('guards: [{}/{}]'.format(i, len(guards)))
         i += 1
-    print("guards: "+str(guards_in_as))
 
     for address in exits:
         bandwidth_details = exits_bandwidths[address]
@@ -1962,8 +1963,8 @@ def compute_probabilities(network_states, water_filling):
         # Added to the total bandwidth of the network
         exits_total_bandwidth += average_bandwidth
         exits_number += 1
-    print(exits_total_bandwidth)
-    print(len(exits))
+    print("Exits total bandwidth: {}".format(exits_total_bandwidth))
+    print("# of exits: {}".format(len(exits)))
 
     i = 1
     for address in exits:
@@ -1972,9 +1973,8 @@ def compute_probabilities(network_states, water_filling):
         for as_customer_cone, subnets in customer_cone_subnets.items():
             if ip_in_as(address, subnets):
                 exits_in_as[as_customer_cone] += exits_probabilities[address]
-        print('exits: [{}/{}]'.format(i, len(exits)))
+        if i % 100 == 0: print('exits: [{}/{}]'.format(i, len(exits)))
         i += 1
-    print("exits: "+str(exits_in_as))
 
     # Top AS customer cone average
     top_as_guards_total_probability = 0.0
@@ -1989,10 +1989,31 @@ def compute_probabilities(network_states, water_filling):
 
     average_top_as_exits_probability = top_as_exits_total_probability / float(len(exits_in_as))
 
+    # Number of paths/time to first compromise for top ASes
+    # Period is one month, and circuits change every 10min
+    period = 31*24*60
+    circuits_total = period/10
+    number_paths_compromised = 0.0
+    first_path_compromised = False
+    time_to_first_path_compromised = 0
+
+    for i in range(circuits_total):
+        number_paths_compromised += (average_top_as_guards_probability*average_top_as_exits_probability)
+        if not first_path_compromised:
+            if number_paths_compromised >= 1.0:
+                # Computes when we compromise one circuit exactly (hypothetically between two constructed circuits)
+                number_paths_compromised_previously = number_paths_compromised - (average_top_as_guards_probability*average_top_as_exits_probability)
+                number_paths_compromised_to_reach_first = 1.0 - number_paths_compromised_previously
+                marginal_average_circuit_to_add = number_paths_compromised_to_reach_first/(average_top_as_guards_probability*average_top_as_exits_probability)
+                marginal_time_to_add = marginal_average_circuit_to_add * 10
+                # Time in hours
+                time_to_first_path_compromised = (((i-1) * 10)+marginal_time_to_add)/60.0
+                first_path_compromised = True
+
     return guards_probabilities, exits_probabilities, \
            guards_number, exits_number, \
            guards_total_bandwidth, exits_total_bandwidth, \
-           average_top_as_guards_probability, average_top_as_exits_probability
+           number_paths_compromised, time_to_first_path_compromised
 
 def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, denasa):
 
@@ -2018,10 +2039,11 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
             if (filename[0] != '.'):
                 customer_cone_files.append(os.path.join(dirpath,filename))
     for customer_cone_file in customer_cone_files:
-        customer_cone_subnets[customer_cone_file] = []
+        customer_cone_as = re.sub("[^0-9]", "", customer_cone_file)
+        customer_cone_subnets[customer_cone_as] = []
         with open(customer_cone_file, 'r') as ccf:
             for line in ccf:
-                customer_cone_subnets[customer_cone_file].append(line)
+                customer_cone_subnets[customer_cone_as].append(line)
         ccf.close()
 
     for as_number in as_numbers:
@@ -2101,6 +2123,21 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
             country_list.append(row)
     csvfile.close()
 
+    # Prepare the top ASes subnets for DeNASA
+    customer_cone_subnets = dict()
+    customer_cone_files = []
+    for dirpath, dirnames, filenames in os.walk("../out/customer_cone_prefixes", followlinks=True):
+        for filename in filenames:
+            if (filename[0] != '.'):
+                customer_cone_files.append(os.path.join(dirpath,filename))
+    for customer_cone_file in customer_cone_files:
+        customer_cone_as = re.sub("[^0-9]", "", customer_cone_file)
+        customer_cone_subnets[customer_cone_as] = []
+        with open(customer_cone_file, 'r') as ccf:
+            for line in ccf:
+                customer_cone_subnets[customer_cone_as].append(line)
+        ccf.close()
+
     for country_code in country_codes:
 
         searched_country_code = country_code
@@ -2123,6 +2160,17 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
         for exit_address, exit_probability in exits_probabilities.items():
             # Calls method from as_inference.py
             if ip_in_as(exit_address, subnets):
+                # DeNASA e-select:1.0
+                if denasa:
+                    guards_not_selected = 0
+                    for guard_address, guard_probability in guards_probabilities.items():
+                        for as_customer_cone, global_as_subnets in customer_cone_subnets.items():
+                            if as_customer_cone in denasa_suspect_ases.ESELECT:
+                                if ip_in_as(guard_address, global_as_subnets):
+                                    if ip_in_as(exit_address, global_as_subnets):
+                                        guards_not_selected += 1
+                                        break # As soon as we find an AS that prevents the guard selection, add the guard once
+                    exit_probability *= 1 - (guards_not_selected / float(len(guards_probabilities)))
                 country_exits_probability += exit_probability
 
         # Period is one month, and circuits change every 10min
@@ -2561,11 +2609,7 @@ commands', dest='pathalg_subparser')
         (guards_probabilities, exits_probabilities,
          guards_number, exits_number,
          guards_total_bandwidth, exits_total_bandwidth,
-         average_top_as_guards_probability,
-         average_top_as_exits_probability) = compute_probabilities(network_states, water_filling, denasa)
-        print("Top AS average guard part: {}".format(average_top_as_guards_probability))
-        print("Top AS average exit part: {}".format(average_top_as_exits_probability))
-        average_top_as_customer_cone_in_circuit = average_top_as_guards_probability*average_top_as_exits_probability
+         top_as_paths_compromised, top_as_first_compromise) = compute_probabilities(network_states, water_filling, denasa)
 
         #probabilities_reduction = 1
         #guessing_entropy_result = guessing_entropy(guards_probabilities, exits_probabilities, probabilities_reduction)*probabilities_reduction
@@ -2607,23 +2651,23 @@ commands', dest='pathalg_subparser')
                                       "score_"+args.pathalg_subparser)
         with open(score_file, 'a') as sf:
             if args.num_custom_guards != 0:
-                sf.write("Guard\t%s\t%s\t%s\t%s\t%s\t%s\n" % (args.location,
+                sf.write("Guard\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (args.location,
                                                           as_paths_compromised, as_first_compromise,
                                                           country_paths_compromised, country_first_compromise,
-                                                          average_top_as_customer_cone_in_circuit))
+                                                          top_as_paths_compromised, top_as_first_compromise))
             elif args.num_custom_exits != 0:
-                sf.write("Exit\t%s\t%s\t%s\t%s\t%s\t%s\n" % (args.location,
+                sf.write("Exit\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (args.location,
                                                          as_paths_compromised, as_first_compromise,
                                                          country_paths_compromised, country_first_compromise,
-                                                         average_top_as_customer_cone_in_circuit))
+                                                         top_as_paths_compromised, top_as_first_compromise))
             elif args.num_custom_guardsexits != 0:
-                sf.write("GuardExit\t%s\t%s\t%s\t%s\t%s\t%s\n" % (args.location,
+                sf.write("GuardExit\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (args.location,
                                                               as_paths_compromised, as_first_compromise,
                                                               country_paths_compromised, country_first_compromise,
-                                                              average_top_as_customer_cone_in_circuit))
+                                                              top_as_paths_compromised, top_as_first_compromise))
             else:
-                sf.write("Vanilla\t%s\t%s\t%s\t%s\t%s\n" % (as_paths_compromised, as_first_compromise,
+                sf.write("Vanilla\t%s\t%s\t%s\t%s\t%s\t%s\n" % (as_paths_compromised, as_first_compromise,
                                                         country_paths_compromised, country_first_compromise,
-                                                        average_top_as_customer_cone_in_circuit))
+                                                        top_as_paths_compromised, top_as_first_compromise))
         sf.close()
 

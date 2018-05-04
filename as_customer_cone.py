@@ -51,23 +51,15 @@ def extend(range_start, range_end, reduced_customer_cone_prefixes):
 
         if range_start[0] < reduced_range_start[0] and range_end[0] > reduced_range_end[0]:
             reduced_customer_cone_prefixes.remove(reduced_customer_cone_prefix)
-            reduced_customer_cone_prefixes.append(prefix_to_add)
-            return True, reduced_customer_cone_prefixes
         elif range_start[0] == reduced_range_start[0] and range_end[0] == reduced_range_end[0]:
             if range_start[1] < reduced_range_start[1] and range_end[1] > reduced_range_end[1]:
                 reduced_customer_cone_prefixes.remove(reduced_customer_cone_prefix)
-                reduced_customer_cone_prefixes.append(prefix_to_add)
-                return True, reduced_customer_cone_prefixes
             elif range_start[1] == reduced_range_start[1] and range_end[1] == reduced_range_end[1]:
                 if range_start[2] < reduced_range_start[2] and range_end[2] > reduced_range_end[2]:
                     reduced_customer_cone_prefixes.remove(reduced_customer_cone_prefix)
-                    reduced_customer_cone_prefixes.append(prefix_to_add)
-                    return True, reduced_customer_cone_prefixes
                 elif range_start[2] == reduced_range_start[2] and range_end[2] == reduced_range_end[2]:
                     if range_start[3] < reduced_range_start[3] and range_end[3] > reduced_range_end[3]:
                         reduced_customer_cone_prefixes.remove(reduced_customer_cone_prefix)
-                        reduced_customer_cone_prefixes.append(prefix_to_add)
-                        return True, reduced_customer_cone_prefixes
 
         # (2) We extend the start of range
 
@@ -81,23 +73,15 @@ def extend(range_start, range_end, reduced_customer_cone_prefixes):
 
         if range_start[0] < reduced_range_start[0] <= range_end[0] <= reduced_range_end[0]:
             reduced_customer_cone_prefixes.remove(reduced_customer_cone_prefix)
-            reduced_customer_cone_prefixes.append(prefix_to_add)
-            return True, reduced_customer_cone_prefixes
         elif range_start[0] == reduced_range_start[0] and range_end[0] == reduced_range_end[0]:
             if range_start[1] < reduced_range_start[1] <= range_end[1] <= reduced_range_end[1]:
                 reduced_customer_cone_prefixes.remove(reduced_customer_cone_prefix)
-                reduced_customer_cone_prefixes.append(prefix_to_add)
-                return True, reduced_customer_cone_prefixes
             elif range_start[1] == reduced_range_start[1] and range_end[1] == reduced_range_end[1]:
                 if range_start[2] < reduced_range_start[2] <= range_end[2] <= reduced_range_end[2]:
                     reduced_customer_cone_prefixes.remove(reduced_customer_cone_prefix)
-                    reduced_customer_cone_prefixes.append(prefix_to_add)
-                    return True, reduced_customer_cone_prefixes
                 elif range_start[2] == reduced_range_start[2] and range_end[2] == reduced_range_end[2]:
                     if range_start[3] < reduced_range_start[3] <= range_end[3] <= reduced_range_end[3]:
                         reduced_customer_cone_prefixes.remove(reduced_customer_cone_prefix)
-                        reduced_customer_cone_prefixes.append(prefix_to_add)
-                        return True, reduced_customer_cone_prefixes
 
         # (3) We extend the end of range
 
@@ -111,23 +95,15 @@ def extend(range_start, range_end, reduced_customer_cone_prefixes):
 
         if reduced_range_start[0] <= range_start[0] <= reduced_range_end[0] < range_end[0]:
             reduced_customer_cone_prefixes.remove(reduced_customer_cone_prefix)
-            reduced_customer_cone_prefixes.append(prefix_to_add)
-            return True, reduced_customer_cone_prefixes
         elif range_start[0] == reduced_range_start[0] and range_end[0] == reduced_range_end[0]:
             if reduced_range_start[1] <= range_start[1] <= reduced_range_end[1] < range_end[1]:
                 reduced_customer_cone_prefixes.remove(reduced_customer_cone_prefix)
-                reduced_customer_cone_prefixes.append(prefix_to_add)
-                return True, reduced_customer_cone_prefixes
             elif range_start[1] == reduced_range_start[1] and range_end[1] == reduced_range_end[1]:
                 if reduced_range_start[2] <= range_start[2] <= reduced_range_end[2] < range_end[2]:
                     reduced_customer_cone_prefixes.remove(reduced_customer_cone_prefix)
-                    reduced_customer_cone_prefixes.append(prefix_to_add)
-                    return True, reduced_customer_cone_prefixes
                 elif range_start[2] == reduced_range_start[2] and range_end[2] == reduced_range_end[2]:
                     if reduced_range_start[3] <= range_start[3] <= reduced_range_end[3] < range_end[3]:
                         reduced_customer_cone_prefixes.remove(reduced_customer_cone_prefix)
-                        reduced_customer_cone_prefixes.append(prefix_to_add)
-                        return True, reduced_customer_cone_prefixes
     return False, reduced_customer_cone_prefixes
 
 def reduce_prefixes(customer_cone_prefixes):
@@ -142,10 +118,26 @@ def reduce_prefixes(customer_cone_prefixes):
 
         # If we do not extend existing subnet range and we are not included in existing subnet range, add prefix
         is_extended, reduced_customer_cone_prefixes = extend(range_start, range_end, reduced_customer_cone_prefixes)
-        if not is_included(range_start, range_end, reduced_customer_cone_prefixes) and not is_extended:
+        if not is_included(range_start, range_end, reduced_customer_cone_prefixes):
             reduced_customer_cone_prefixes.append(customer_cone_prefix)
-        print("{}/{}".format(i, len(customer_cone_prefixes)))
+            #print("{} added".format(customer_cone_prefix))
+            """
+
+            range_start_full, range_end_full = customer_cone_prefix.split(',')
+            range_start = [int(n) for n in range_start_full.split('.')]
+            range_end = [int(n) for n in range_end_full.split('.')]
+
+            is_extended, reduced_customer_cone_prefixes = extend(range_start, range_end, reduced_customer_cone_prefixes)
+            if is_extended:
+                reduced_customer_cone_prefixes.remove(prefix)
+                j += 1
+            """
+            #print("{} discarded".format(customer_cone_prefix))
+        #print(reduced_customer_cone_prefixes)
+        if i % 1000 == 0:
+            print("{}/{}".format(i, len(customer_cone_prefixes)))
         i += 1
+        #if i == 1000: break
 
     return reduced_customer_cone_prefixes
 
