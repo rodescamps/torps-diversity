@@ -2275,8 +2275,8 @@ directories are located')
     average_parser.add_argument('--nsf_dir', default='out/network-state-files',
                               help='stores the network state files to use')
 
-    guessing_entropy_parser = subparsers.add_parser('score',
-                                         help='Computes diversity score.')
+    guessing_entropy_parser = subparsers.add_parser('guessing-entropy',
+                                         help='Computes guessing entropy.')
     guessing_entropy_parser.add_argument('--nsf_dir', default='out/network-state-files',
                               help='stores the network state files to use')
     guessing_entropy_parser.add_argument('--adv_guard_cons_bw', type=float, default=0,
@@ -2449,8 +2449,6 @@ commands', dest='pathalg_subparser')
         network_state_files.sort(key = lambda x: os.path.basename(x))
         network_state_files = pad_network_state_files(network_state_files)
 
-        network_modifications = []
-
         # create object that will add adversary relays into network
         adv_insertion = network_modifiers_slim.AdversaryInsertion(args, _testing)
         network_modifications = [adv_insertion]
@@ -2500,7 +2498,7 @@ commands', dest='pathalg_subparser')
          guards_number, exits_number,
          guards_total_bandwidth, exits_total_bandwidth) = compute_probabilities(network_states, water_filling, denasa)
 
-        probabilities_reduction = 1
+        probabilities_reduction = 10
         guessing_entropy_result = guessing_entropy(guards_probabilities, exits_probabilities, probabilities_reduction, denasa)*probabilities_reduction
 
         score_file = os.path.join(args.nsf_dir+"/../"+"guessing_entropy_"+args.pathalg_subparser)
