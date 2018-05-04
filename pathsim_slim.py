@@ -2307,14 +2307,14 @@ consensuses')
                               help='indicates the number of diversity guard and exit nodes to add')
     guessing_entropy_parser.add_argument('--wf_optimal', help='Recompute bwweights from dir-spec.txt\
             in a way that waterfilling would then be optimal', action='store_true')
-    pathalg_subparsers = guessing_entropy_parser.add_subparsers(help='score\
+    pathalg_subparsers = guessing_entropy_parser.add_subparsers(help='guessing entropy\
 commands', dest='pathalg_subparser')
     tor_score_parser = pathalg_subparsers.add_parser('tor',
                                                      help='use vanilla Tor path selection')
     tor_score_parser = pathalg_subparsers.add_parser('tor-wf',
                                                      help='use water_filling weights during path selection')
     tor_score_parser = pathalg_subparsers.add_parser('tor-denasa',
-                                                     help='Applies DeNASA to Tor weights during path selection')
+                                                     help='applies DeNASA to Tor weights during path selection')
     guessing_entropy_parser.add_argument('--loglevel', choices=['DEBUG', 'INFO',
                                                      'WARNING', 'ERROR', 'CRITICAL'],
                               help='set level of log messages to send to stdout, DEBUG produces testing output, quiet at all other levels', default='INFO')
@@ -2365,7 +2365,7 @@ commands', dest='pathalg_subparser')
     tor_score_parser = pathalg_subparsers.add_parser('tor-wf',
         help='use water_filling weights during path selection')
     tor_score_parser = pathalg_subparsers.add_parser('tor-denasa',
-                                                     help='Applies DeNASA to Tor weights during path selection')
+                                                     help='applies DeNASA to Tor weights during path selection')
     score_parser.add_argument('--loglevel', choices=['DEBUG', 'INFO',
                                                         'WARNING', 'ERROR', 'CRITICAL'],
         help='set level of log messages to send to stdout, DEBUG produces testing output, quiet at all other levels', default='INFO')
