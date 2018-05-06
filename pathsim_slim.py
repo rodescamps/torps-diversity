@@ -1922,7 +1922,7 @@ def compute_probabilities(network_states, water_filling, denasa, guessing_entrop
                         exits_bandwidths[address] = [total_bandwidth+bandwidth, old_counter+1]
         if i % 100 == 0: print('[{}/{}]'.format(i, network_states_size))
         i += 1
-        #if i == 10: break
+        if i == 2: break
 
     # DeNASA g-select
     if denasa:
@@ -2511,7 +2511,7 @@ commands', dest='pathalg_subparser')
          guards_total_bandwidth, exits_total_bandwidth,
          top_as_paths_compromised, top_as_first_compromise) = compute_probabilities(network_states, water_filling, denasa, True)
 
-        probabilities_reduction = 10
+        probabilities_reduction = 1
         guessing_entropy_result = guessing_entropy(guards_probabilities, exits_probabilities, probabilities_reduction, denasa)*probabilities_reduction
 
         score_file = os.path.join(args.nsf_dir+"/../"+"guessing_entropy_"+args.pathalg_subparser)
@@ -2625,18 +2625,18 @@ commands', dest='pathalg_subparser')
         #probabilities_reduction = 1
         #guessing_entropy_result = guessing_entropy(guards_probabilities, exits_probabilities, probabilities_reduction)*probabilities_reduction
 
-        # Top ASs are 16276 (OVH), 12876 (Online S.a.s), 24940 (Hetzner) by default
+        # Top ASs are 16276 (OVH), 12876 (Online S.a.s), 24940 (Hetzner), 14061 (Digital Ocean, LLC) by default
         top_as_number = []
         if args.top_as is not None:
             top_as_number.append(int(args.top_as))
         else:
-            top_as_number = [16276, 12876, 24940]
-        # Top country are DE (Germany), FR (France), NL (Netherlands) by default
+            top_as_number = [16276, 12876] # [16276, 12876, 24940, 14061]
+        # Top country are DE (Germany), FR (France), NL (Netherlands), US (United States) by default
         top_country_code = []
         if args.top_country is not None:
             top_country_code.append(args.top_country)
         else:
-            top_country_code = ['DE', 'FR', 'NL']
+            top_country_code = ['DE', 'FR'] # ['DE', 'FR', 'NL', 'US']
 
         (as_paths_compromised, as_first_compromise) = as_compromise_path(guards_probabilities,
                                                                          exits_probabilities,

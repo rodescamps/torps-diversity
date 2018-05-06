@@ -34,7 +34,7 @@ def build_prob_matrix(guards_probabilities, exits_probabilities, probabilities_r
     for guard_address in aggregated_guards_probabilities:
       aggregated_guards_probabilities[guard_address] = aggregated_guards_probabilities[guard_address] + probability_to_distribute
 
-  #print(aggregated_guards_probabilities)
+  print(len(aggregated_guards_probabilities))
   aggregated_exits_probabilities = {}
 
   aggregated_probability = 0.0
@@ -52,6 +52,8 @@ def build_prob_matrix(guards_probabilities, exits_probabilities, probabilities_r
     probability_to_distribute = aggregated_probability/float(len(aggregated_exits_probabilities))
     for exit_address in aggregated_exits_probabilities:
       aggregated_exits_probabilities[exit_address] = aggregated_exits_probabilities[exit_address] + probability_to_distribute
+
+  print(len(aggregated_exits_probabilities))
 
   i = 1
   total = 0.0
@@ -140,6 +142,9 @@ def build_prob_matrix(guards_probabilities, exits_probabilities, probabilities_r
         #if int(counter_line) % 100000 == 0:
         #print counter_line
   """
+  print(len(guards))
+  print(len(exits))
+  print(len(prob_matrix))
   return prob_matrix, guards, exits
 
 
@@ -232,7 +237,7 @@ def get_max_marg_prob(prob_matrix, guards, exits):
     for exit, nbr_seen in prob_matrix[guard].items():
       #pdb.set_trace()
       if exit not in exit_seen and exit not in exits:
-        exit_seen[exit] = exit;
+        exit_seen[exit] = exit
         acc = 0
         for guard2 in guards:
           if exit in prob_matrix[guard2]:
