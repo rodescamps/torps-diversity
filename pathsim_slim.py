@@ -2208,7 +2208,7 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
 
     return average_number_paths_compromised/len(country_codes), average_time_to_first_path_compromised/len(country_codes)
 
-def generate_address(location):
+def generate_addresses(location, num_addresses):
 
     subnets = []
 
@@ -2235,18 +2235,36 @@ def generate_address(location):
                 if row['country_code'] == searched_country_code:
                     subnets.append(row['range_start']+','+row['range_end'])
 
-    random_subnet = choice(subnets)
-    range_start_full, range_end_full = random_subnet.split(',')
-    range_start = [int(n) for n in range_start_full.split('.')]
-    range_end = [int(n) for n in range_end_full.split('.')]
-    if range_start[0] != range_end[0]:
-        return str(randint(range_start[0], range_end[0]))+"."+str(randint(0, 255))+"."+str(randint(0, 255))+"."+str(randint(0, 255))
-    elif range_start[1] != range_end[1]:
-        return str(range_start[0])+"."+str(randint(range_start[1], range_end[1]))+"."+str(randint(0, 255))+"."+str(randint(0, 255))
-    elif range_start[2] != range_end[2]:
-        return str(range_start[0])+"."+str(range_start[1])+"."+str(randint(range_start[2], range_end[2]))+"."+str(randint(0, 255))
-    else:
-        return str(range_start[0])+"."+str(range_start[1])+"."+str(range_start[2])+"."+str(randint(range_start[3], range_end[3]))
+    addresses = []
+
+    for i in range(num_addresses):
+        random_subnet = choice(subnets)
+        range_start_full, range_end_full = random_subnet.split(',')
+        range_start = [int(n) for n in range_start_full.split('.')]
+        range_end = [int(n) for n in range_end_full.split('.')]
+        if range_start[0] != range_end[0]:
+            address = str(randint(range_start[0], range_end[0]))+"."+str(randint(0, 255))+"."+str(randint(0, 255))+"."+str(randint(0, 255))
+            while address in addresses:
+                address = str(randint(range_start[0], range_end[0]))+"."+str(randint(0, 255))+"."+str(randint(0, 255))+"."+str(randint(0, 255))
+            addresses.append(address)
+        elif range_start[1] != range_end[1]:
+            address = str(range_start[0])+"."+str(randint(range_start[1], range_end[1]))+"."+str(randint(0, 255))+"."+str(randint(0, 255))
+            while address in addresses:
+                address = str(range_start[0])+"."+str(randint(range_start[1], range_end[1]))+"."+str(randint(0, 255))+"."+str(randint(0, 255))
+            addresses.append(address)
+        elif range_start[2] != range_end[2]:
+            address = str(range_start[0])+"."+str(range_start[1])+"."+str(randint(range_start[2], range_end[2]))+"."+str(randint(0, 255))
+            while address in addresses:
+                address = str(range_start[0])+"."+str(range_start[1])+"."+str(randint(range_start[2], range_end[2]))+"."+str(randint(0, 255))
+            addresses.append(address)
+        else:
+            address = str(range_start[0])+"."+str(range_start[1])+"."+str(range_start[2])+"."+str(randint(range_start[3], range_end[3]))
+            while address in addresses:
+                address = str(range_start[0])+"."+str(range_start[1])+"."+str(range_start[2])+"."+str(randint(range_start[3], range_end[3]))
+            addresses.append(address)
+
+    return addresses
+
 
 if __name__ == '__main__':
     import argparse
@@ -2569,12 +2587,12 @@ commands', dest='pathalg_subparser')
         # adv_insertion = network_modifiers_slim.AdversaryInsertion(args, _testing)
         # network_modifications = [adv_insertion]
 
-        address = None
+        addresses = None
         if args.location is not None:
-            address = generate_address(args.location)
+            addresses = generate_addresses(args.location, args.num_custom_guards+args.num_custom_exits+args.num_custom_guardsexits)
 
         # create object that will add diversity relays into network
-        diversity_insertion = network_modifiers_slim.CustomInsertion(args, address, _testing)
+        diversity_insertion = network_modifiers_slim.CustomInsertion(args, addresses, _testing)
         network_modifications = [diversity_insertion]
 
         # Recompute Bwweights from specifications in a way that waterfilling is optimal

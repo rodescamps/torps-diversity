@@ -282,7 +282,7 @@ class Bwweights(object):
 class CustomInsertion(object):
 
 
-    def add_custom_guards(self, num_custom_guards, bandwidth, address, water_filling=False):
+    def add_custom_guards(self, num_custom_guards, bandwidth, addresses, water_filling=False):
         """"Adds custom guards into self.add_relays and self.add_descriptors."""
         #, custom_relays, descriptors
         for i in xrange(num_custom_guards):
@@ -294,12 +294,14 @@ class CustomInsertion(object):
 
             # create descriptor
             hibernating = False
-            if address is None:
+            if addresses is None:
                 address = '10.'+num_str+'.0.0' # avoid /16 conflicts
+            else:
+                address = addresses[i]
             self.descriptors[fingerprint] = pathsim_slim.ServerDescriptor(fingerprint, hibernating, address)
 
 
-    def add_custom_exits(self, num_custom_guards, num_custom_exits, bandwidth, address, water_filling=False):
+    def add_custom_exits(self, num_custom_guards, num_custom_exits, bandwidth, addresses, water_filling=False):
         """"Adds custom exits into self.add_relays and self.add_descriptors."""
         for i in xrange(num_custom_exits):
             # create consensus
@@ -310,12 +312,14 @@ class CustomInsertion(object):
 
             # create descriptor
             hibernating = False
-            if address is None:
+            if addresses is None:
                 address = '10.'+str(num_custom_guards+i+1)+'.0.0' # avoid /16 conflicts
+            else:
+                address = addresses[i]
             self.descriptors[fingerprint] = pathsim_slim.ServerDescriptor(fingerprint, hibernating, address)
 
     def add_custom_guardsexits(self, num_custom_guards, num_custom_exits, num_custom_guardsexits,
-                               bandwidth, address, water_filling=False):
+                               bandwidth, addresses, water_filling=False):
         """"Adds custom exits into self.add_relays and self.add_descriptors."""
         for i in xrange(num_custom_guardsexits):
             # create consensus
@@ -326,21 +330,23 @@ class CustomInsertion(object):
 
             # create descriptor
             hibernating = False
-            if address is None:
+            if addresses is None:
                 address = '10.'+str(num_custom_guards+num_custom_exits+i+1)+'.0.0' # avoid /16 conflicts
+            else:
+                address = addresses[i]
             self.descriptors[fingerprint] = pathsim_slim.ServerDescriptor(fingerprint, hibernating, address)
 
 
 
-    def __init__(self, args, address, testing):
+    def __init__(self, args, addresses, testing):
         self.custom_time = args.custom_time
         self.custom_relays = {}
         self.descriptors = {}
-        self.add_custom_guards(args.num_custom_guards, args.custom_guard_cons_bw, address, water_filling=True)
+        self.add_custom_guards(args.num_custom_guards, args.custom_guard_cons_bw, addresses, water_filling=True)
         self.add_custom_exits(args.num_custom_guards, args.num_custom_exits,
-                           args.custom_exit_cons_bw, address, water_filling=True)
+                           args.custom_exit_cons_bw, addresses, water_filling=True)
         self.add_custom_guardsexits(args.num_custom_guards, args.num_custom_exits,
-                              args.num_custom_guardsexits, args.custom_guardexit_cons_bw, address, water_filling=True)
+                              args.num_custom_guardsexits, args.custom_guardexit_cons_bw, addresses, water_filling=True)
         self.testing = testing
         self.first_modification = True
         self.bww = Bwweights(args.wf_optimal)
