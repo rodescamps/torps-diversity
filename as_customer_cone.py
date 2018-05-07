@@ -158,8 +158,9 @@ if __name__ == '__main__':
     customer_cone_prefixes = []
 
     # Prepare the AS subnets in DictReader
-    subnets_as_file = urllib.URLopener()
-    subnets_as_file.retrieve("https://iptoasn.com/data/ip2asn-v4.tsv.gz", "ip2asn-v4.tsv.gz")
+    if not os.path.isfile("ip2asn-v4.tsv.gz"):
+        subnets_as_file = urllib.URLopener()
+        subnets_as_file.retrieve("https://iptoasn.com/data/ip2asn-v4.tsv.gz", "ip2asn-v4.tsv.gz")
 
     with gzip.open('ip2asn-v4.tsv.gz', 'rb') as csvfile:
         asreader = csv.DictReader(csvfile, ['range_start', 'range_end', 'AS_number', 'country_code', 'AS_description'], dialect='excel-tab')

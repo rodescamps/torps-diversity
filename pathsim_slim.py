@@ -22,6 +22,7 @@ import logging
 import pdb
 import multiprocessing
 import itertools
+import urllib
 
 logger = logging.getLogger(__name__)
 _testing = False#True
@@ -2032,8 +2033,9 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
     as_list = []
 
     # Prepare the AS subnets in DictReader
-    subnets_as_file = urllib.URLopener()
-    subnets_as_file.retrieve("https://iptoasn.com/data/ip2asn-v4.tsv.gz", "ip2asn-v4.tsv.gz")
+    if not os.path.isfile("ip2asn-v4.tsv.gz"):
+        subnets_as_file = urllib.URLopener()
+        subnets_as_file.retrieve("https://iptoasn.com/data/ip2asn-v4.tsv.gz", "ip2asn-v4.tsv.gz")
     with gzip.open('ip2asn-v4.tsv.gz', 'rb') as csvfile:
         asreader = csv.DictReader(csvfile, ['range_start', 'range_end', 'AS_number', 'country_code', 'AS_description'], dialect='excel-tab')
         for row in asreader:
@@ -2124,8 +2126,9 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
     country_list = []
 
     # Prepare the country subnets in DictReader
-    subnets_country_file = urllib.URLopener()
-    subnets_country_file.retrieve("https://iptoasn.com/data/ip2country-v4.tsv.gz", "ip2country-v4.tsv.gz")
+    if not os.path.isfile("ip2country-v4.tsv.gz"):
+        subnets_country_file = urllib.URLopener()
+        subnets_country_file.retrieve("https://iptoasn.com/data/ip2country-v4.tsv.gz", "ip2country-v4.tsv.gz")
     with gzip.open('ip2country-v4.tsv.gz', 'rb') as csvfile:
         countryreader = csv.DictReader(csvfile, ['range_start', 'range_end', 'country_code'], dialect='excel-tab')
         for row in countryreader:
@@ -2216,8 +2219,9 @@ def generate_addresses(location, num_addresses):
         searched_as_number = location[2:]
 
         # Prepare the AS subnets in DictReader
-        subnets_as_file = urllib.URLopener()
-        subnets_as_file.retrieve("https://iptoasn.com/data/ip2asn-v4.tsv.gz", "ip2asn-v4.tsv.gz")
+        if not os.path.isfile("ip2asn-v4.tsv.gz"):
+            subnets_as_file = urllib.URLopener()
+            subnets_as_file.retrieve("https://iptoasn.com/data/ip2asn-v4.tsv.gz", "ip2asn-v4.tsv.gz")
         with gzip.open('ip2asn-v4.tsv.gz', 'rb') as csvfile:
             asreader = csv.DictReader(csvfile, ['range_start', 'range_end', 'AS_number', 'country_code', 'AS_description'], dialect='excel-tab')
             for row in asreader:
@@ -2227,8 +2231,9 @@ def generate_addresses(location, num_addresses):
         searched_country_code = location
 
         # Prepare the country subnets in DictReader
-        subnets_country_file = urllib.URLopener()
-        subnets_country_file.retrieve("https://iptoasn.com/data/ip2country-v4.tsv.gz", "ip2country-v4.tsv.gz")
+        if not os.path.isfile("ip2country-v4.tsv.gz"):
+            subnets_country_file = urllib.URLopener()
+            subnets_country_file.retrieve("https://iptoasn.com/data/ip2country-v4.tsv.gz", "ip2country-v4.tsv.gz")
         with gzip.open('ip2country-v4.tsv.gz', 'rb') as csvfile:
             countryreader = csv.DictReader(csvfile, ['range_start', 'range_end', 'country_code'], dialect='excel-tab')
             for row in countryreader:
@@ -2680,17 +2685,20 @@ commands', dest='pathalg_subparser')
                                       "score_"+args.pathalg_subparser)
         with open(score_file, 'a') as sf:
             if args.num_custom_guards != 0:
-                sf.write("Guard\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (args.location,
+                sf.write("Guards\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (args.location,
+                                                          args.num_custom_guards, args.custom_guard_cons_bw,
                                                           as_paths_compromised, as_first_compromise,
                                                           country_paths_compromised, country_first_compromise,
                                                           top_as_paths_compromised, top_as_first_compromise))
             elif args.num_custom_exits != 0:
-                sf.write("Exit\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (args.location,
+                sf.write("Exits\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (args.location,
+                                                         args.num_custom_exits, args.custom_exit_cons_bw,
                                                          as_paths_compromised, as_first_compromise,
                                                          country_paths_compromised, country_first_compromise,
                                                          top_as_paths_compromised, top_as_first_compromise))
             elif args.num_custom_guardsexits != 0:
-                sf.write("GuardExit\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (args.location,
+                sf.write("GuardExits\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (args.location,
+                                                              args.num_custom_guardsexits, args.custom_guardexit_cons_bw,
                                                               as_paths_compromised, as_first_compromise,
                                                               country_paths_compromised, country_first_compromise,
                                                               top_as_paths_compromised, top_as_first_compromise))
