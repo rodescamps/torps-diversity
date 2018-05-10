@@ -55,6 +55,21 @@ def build_prob_matrix(guards_probabilities, exits_probabilities, probabilities_r
 
   print(len(aggregated_exits_probabilities))
 
+  # DeNASA e-select:0.0 preparation
+  customer_cone_subnets = dict()
+  if denasa:
+    customer_cone_files = []
+    for dirpath, dirnames, filenames in os.walk("../out/customer_cone_prefixes", followlinks=True):
+      for filename in filenames:
+        if (filename[0] != '.'):
+          customer_cone_files.append(os.path.join(dirpath,filename))
+    for customer_cone_file in customer_cone_files:
+      customer_cone_subnets[customer_cone_file] = []
+      with open(customer_cone_file, 'r') as ccf:
+        for line in ccf:
+          customer_cone_subnets[customer_cone_file].append(line)
+      ccf.close()
+
   i = 1
   total = 0.0
   probabilities_denasa = 0
@@ -67,20 +82,6 @@ def build_prob_matrix(guards_probabilities, exits_probabilities, probabilities_r
         exits[exit_address] = 0
       guards[guard_address] += 1
       exits[exit_address] += 1
-
-      # DeNASA e-select:1.0
-      customer_cone_subnets = dict()
-      customer_cone_files = []
-      for dirpath, dirnames, filenames in os.walk("../out/customer_cone_prefixes", followlinks=True):
-          for filename in filenames:
-              if (filename[0] != '.'):
-                  customer_cone_files.append(os.path.join(dirpath,filename))
-      for customer_cone_file in customer_cone_files:
-          customer_cone_subnets[customer_cone_file] = []
-          with open(customer_cone_file, 'r') as ccf:
-              for line in ccf:
-                  customer_cone_subnets[customer_cone_file].append(line)
-          ccf.close()
 
       path_probability = guard_probability * exit_probability
 

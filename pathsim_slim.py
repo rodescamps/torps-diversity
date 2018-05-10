@@ -1923,7 +1923,7 @@ def compute_probabilities(network_states, water_filling, denasa, guessing_entrop
                         exits_bandwidths[address] = [total_bandwidth+bandwidth, old_counter+1]
         if i % 100 == 0: print('[{}/{}]'.format(i, network_states_size))
         i += 1
-        if i == 2: break
+        #if i == 2: break
 
     # DeNASA g-select
     if denasa:
@@ -2079,7 +2079,7 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
         for exit_address, exit_probability in exits_probabilities.items():
             # Calls method from as_inference.py
             if ip_in_as(exit_address, subnets):
-                # DeNASA e-select:1.0
+                # DeNASA e-select:0.0
                 if denasa:
                     guards_not_selected = 0
                     for guard_address, guard_probability in guards_probabilities.items():
@@ -2172,7 +2172,7 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
         for exit_address, exit_probability in exits_probabilities.items():
             # Calls method from as_inference.py
             if ip_in_as(exit_address, subnets):
-                # DeNASA e-select:1.0
+                # DeNASA e-select:0.0
                 if denasa:
                     guards_not_selected = 0
                     for guard_address, guard_probability in guards_probabilities.items():
@@ -2534,7 +2534,7 @@ commands', dest='pathalg_subparser')
          guards_total_bandwidth, exits_total_bandwidth,
          top_as_paths_compromised, top_as_first_compromise) = compute_probabilities(network_states, water_filling, denasa, True)
 
-        probabilities_reduction = 1
+        probabilities_reduction = 2
         guessing_entropy_result = guessing_entropy(guards_probabilities, exits_probabilities, probabilities_reduction, denasa)*probabilities_reduction
 
         score_file = os.path.join(args.nsf_dir+"/../"+"guessing_entropy_"+args.pathalg_subparser)
