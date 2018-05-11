@@ -69,6 +69,9 @@ def build_prob_matrix(guards_probabilities, exits_probabilities, probabilities_r
         for line in ccf:
           customer_cone_subnets[customer_cone_file].append(line)
       ccf.close()
+    for as_customer_cone, subnets in customer_cone_subnets.items():
+      if as_customer_cone not in denasa_suspect_ases.ESELECT:
+        del customer_cone_subnets[as_customer_cone]
 
   i = 1
   total = 0.0
@@ -85,13 +88,13 @@ def build_prob_matrix(guards_probabilities, exits_probabilities, probabilities_r
 
       path_probability = guard_probability * exit_probability
 
+      # Applies DeNASA e-select:0.0
       if denasa:
         for as_customer_cone, subnets in customer_cone_subnets.items():
-            if as_customer_cone in denasa_suspect_ases.ESELECT:
-               if ip_in_as(guard_address, subnets):
-                   if ip_in_as(exit_address, subnets):
-                       probabilities_denasa += path_probability
-                       path_probability = 0
+             if ip_in_as(guard_address, subnets):
+                 if ip_in_as(exit_address, subnets):
+                     probabilities_denasa += path_probability
+                     path_probability = 0
 
       if guard_address not in prob_matrix:
         prob_matrix[guard_address] = {}
@@ -100,6 +103,7 @@ def build_prob_matrix(guards_probabilities, exits_probabilities, probabilities_r
         prob_matrix[guard_address][exit_address] = path_probability
       total += path_probability
     i += 1
+    print("({}/{}) guards defined".format(i, aggregated_guards_probabilities))
   print("Matrix prob total = "+ str(total))
 
   if denasa:
