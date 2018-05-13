@@ -97,15 +97,8 @@ def process_consensuses(in_dirs, initial_descriptor_dir):
                     cons_bwweightscale = r_stat.document.params[\
                             'bwweightscale']
 
-                # Only keep GUARD and EXIT flags
-                slim_flags = []
-                if Flag.GUARD in r_stat.flags:
-                    slim_flags.append(Flag.GUARD)
-                if Flag.EXIT in r_stat.flags:
-                    slim_flags.append(Flag.EXIT)
-
                 relays[r_stat.fingerprint] = pathsim.RouterStatusEntry(\
-                    r_stat.fingerprint, r_stat.slim_flags, \
+                    r_stat.fingerprint, r_stat.flags, \
                     r_stat.bandwidth, water_filling=water_filling)
 
                 # find most recent unexpired descriptor published before

@@ -1887,6 +1887,8 @@ def compute_probabilities(network_states, water_filling, denasa, guessing_entrop
                                               network_state.cons_bw_weights, network_state.cons_bwweightscale,
                                               water_filling)
 
+        greaterBandwidth = 0
+
         for consensus in network_state.cons_rel_stats:
             if Flag.GUARD in network_state.cons_rel_stats[consensus].flags:
                 address = network_state.descriptors[consensus].address

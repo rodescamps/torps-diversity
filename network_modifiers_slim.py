@@ -289,7 +289,8 @@ class CustomInsertion(object):
             # create consensus
             num_str = str(i+1)
             fingerprint = 'D' * (40-len(num_str)) + num_str
-            flags = [Flag.GUARD]
+            flags = [Flag.FAST, Flag.GUARD, Flag.RUNNING, Flag.STABLE,
+                     Flag.VALID]
             self.custom_relays[fingerprint] = pathsim_slim.RouterStatusEntry(fingerprint, flags, bandwidth, water_filling)
 
             # create descriptor
@@ -307,7 +308,8 @@ class CustomInsertion(object):
             # create consensus
             num_str = str(i+1)
             fingerprint = 'E' * (40-len(num_str)) + num_str
-            flags = [Flag.EXIT]
+            flags = [Flag.FAST, Flag.EXIT, Flag.RUNNING, Flag.STABLE,
+                     Flag.VALID]
             self.custom_relays[fingerprint] = pathsim_slim.RouterStatusEntry(fingerprint, flags, bandwidth, water_filling)
 
             # create descriptor

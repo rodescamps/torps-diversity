@@ -103,11 +103,9 @@ def build_prob_matrix(guards_probabilities, exits_probabilities, probabilities_r
       if denasa and denasa_guard_compromised:
         for as_customer_cone, subnets in customer_cone_subnets.items():
           if ip_in_as(exit_address, subnets):
-            print("yes")
             probabilities_denasa += path_probability
             path_probability = 0
             break
-          else: print("no")
 
       if guard_address not in prob_matrix:
         prob_matrix[guard_address] = {}
@@ -116,7 +114,7 @@ def build_prob_matrix(guards_probabilities, exits_probabilities, probabilities_r
         prob_matrix[guard_address][exit_address] = path_probability
       total += path_probability
     i += 1
-    print("({}/{}) guards defined".format(i, len(aggregated_guards_probabilities)))
+    #print("({}/{}) guards defined".format(i, len(aggregated_guards_probabilities)))
   print("Matrix prob total = "+ str(total))
 
   if denasa:
