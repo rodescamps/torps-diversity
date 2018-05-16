@@ -2091,10 +2091,10 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
             exits_list = dict()
             for guard_address, guard_probability in guards_probabilities.items():
                 if ip_in_as(guard_address, subnets):
-                    guards_list.append[guard_address] = guard_probability
+                    guards_list[guard_address] = guard_probability
             for exit_address, exit_probability in exits_probabilities.items():
                 if ip_in_as(exit_address, subnets):
-                    exits_list.append[exit_address] = exit_probability
+                    exits_list[exit_address] = exit_probability
 
             # DeNASA analysis
             for guard_address, guard_probability in guards_list.items():
