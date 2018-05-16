@@ -80,14 +80,14 @@ def build_prob_matrix(guards_probabilities, exits_probabilities, probabilities_r
   total = 0.0
   probabilities_denasa = 0
   # Help to compute DeNASA strategy
-  denasa_guard_compromised = False
   for guard_address, guard_probability in aggregated_guards_probabilities.items():
+    denasa_guard_compromised = False
+    customer_cone_subnets_guard_compromised = dict()
     if denasa:
       for as_customer_cone, subnets in customer_cone_subnets.items():
         if ip_in_as(guard_address, subnets):
           denasa_guard_compromised = True
-        else:
-          denasa_guard_compromised = False
+          customer_cone_subnets_guard_compromised[as_customer_cone] = subnets
     for exit_address, exit_probability in aggregated_exits_probabilities.items():
 
       if guard_address not in guards :
@@ -101,8 +101,8 @@ def build_prob_matrix(guards_probabilities, exits_probabilities, probabilities_r
 
       # Applies DeNASA e-select:0.0
       if denasa and denasa_guard_compromised:
-        for as_customer_cone, subnets in customer_cone_subnets.items():
-          if ip_in_as(exit_address, subnets):
+        for as_customer_cone, subnets in customer_cone_subnets_guard_compromised.items():
+          if ip_in_as(exit_address, customer_cone_subnets_guard_compromised[as_customer_cone]):
             probabilities_denasa += path_probability
             path_probability = 0
             break
