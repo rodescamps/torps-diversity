@@ -2130,15 +2130,14 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
             if not first_path_compromised:
                 if number_paths_compromised >= 1.0:
                     # Computes when we compromise one circuit exactly (hypothetically between two constructed circuits)
-                    number_paths_compromised_previously = number_paths_compromised - (as_guards_probability*as_exits_probability)
+                    number_paths_compromised_previously = number_paths_compromised - as_probability
                     number_paths_compromised_to_reach_first = 1.0 - number_paths_compromised_previously
-                    marginal_average_circuit_to_add = number_paths_compromised_to_reach_first/(as_guards_probability*as_exits_probability)
+                    marginal_average_circuit_to_add = number_paths_compromised_to_reach_first/(as_probability)
                     marginal_time_to_add = marginal_average_circuit_to_add * 10
                     # Time in hours
                     time_to_first_path_compromised = (((i-1) * 10)+marginal_time_to_add)/60.0
                     first_path_compromised = True
 
-        print('AS Guards Prob: {} / Exits Prob: {}'.format(as_guards_probability, as_exits_probability))
         average_number_paths_compromised += number_paths_compromised
         average_time_to_first_path_compromised += time_to_first_path_compromised
 
@@ -2161,20 +2160,25 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
             country_list.append(row)
     csvfile.close()
 
-    # Prepare the top ASes subnets for DeNASA
+    # DeNASA e-select:0.0 preparation
     customer_cone_subnets = dict()
-    customer_cone_files = []
-    for dirpath, dirnames, filenames in os.walk("../out/customer_cone_prefixes", followlinks=True):
-        for filename in filenames:
-            if (filename[0] != '.'):
-                customer_cone_files.append(os.path.join(dirpath,filename))
-    for customer_cone_file in customer_cone_files:
-        customer_cone_as = re.sub("[^0-9]", "", customer_cone_file)
-        customer_cone_subnets[customer_cone_as] = []
-        with open(customer_cone_file, 'r') as ccf:
-            for line in ccf:
-                customer_cone_subnets[customer_cone_as].append(line)
-        ccf.close()
+    if denasa:
+        customer_cone_files = []
+        for dirpath, dirnames, filenames in os.walk("../out/customer_cone_prefixes", followlinks=True):
+            for filename in filenames:
+                if (filename[0] != '.'):
+                    customer_cone_files.append(os.path.join(dirpath,filename))
+        for customer_cone_file in customer_cone_files:
+            customer_cone_as = re.sub("[^0-9]", "", customer_cone_file)
+            customer_cone_subnets[customer_cone_as] = []
+            with open(customer_cone_file, 'r') as ccf:
+                for line in ccf:
+                    customer_cone_subnets[customer_cone_as].append(line)
+            ccf.close()
+        for as_customer_cone, subnets in customer_cone_subnets.items():
+            if as_customer_cone not in denasa_suspect_ases.ESELECT:
+                print(as_customer_cone)
+                del customer_cone_subnets[as_customer_cone]
 
     for country_code in country_codes:
 
@@ -2185,35 +2189,50 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
             if row['country_code'] == searched_country_code:
                 subnets.append(row['range_start']+','+row['range_end'])
 
-        # Searches the compromised address, and computes part of the network controlled by AS
-        country_guards_probability = 0.0
-        i = 1
-        for guard_address, guard_probability in guards_probabilities.items():
-            # Calls method from as_inference.py
-            if ip_in_as(guard_address, subnets):
-                country_guards_probability += guard_probability
-            i += 1
+        # Searches the compromised address, and computes part of the network controlled by country
+        country_probability = 0.0
+        if not denasa:
+            country_guards_probability = 0.0
+            country_exits_probability = 0.0
+            for guard_address, guard_probability in guards_probabilities.items():
+                if ip_in_as(guard_address, subnets):
+                    country_guards_probability += guard_probability
+            for exit_address, exit_probability in exits_probabilities.items():
+                if ip_in_as(exit_address, subnets):
+                    country_exits_probability += exit_probability
+            country_probability = country_guards_probability*country_exits_probability
+        else:
+            # Lookup in all subnets once for further analysis with DeNASA
+            guards_list = dict()
+            exits_list = dict()
+            for guard_address, guard_probability in guards_probabilities.items():
+                if ip_in_as(guard_address, subnets):
+                    guards_list[guard_address] = guard_probability
+            for exit_address, exit_probability in exits_probabilities.items():
+                if ip_in_as(exit_address, subnets):
+                    exits_list[exit_address] = exit_probability
 
-        country_exits_probability = 0.0
-        for exit_address, exit_probability in exits_probabilities.items():
-            # Calls method from as_inference.py
-            if ip_in_as(exit_address, subnets):
-
-                """
-                # DeNASA e-select:0.0
-                if denasa:
-                    guards_not_selected = 0
-                    for guard_address, guard_probability in guards_probabilities.items():
-                        for as_customer_cone, global_as_subnets in customer_cone_subnets.items():
-                            if as_customer_cone in denasa_suspect_ases.ESELECT:
-                                if ip_in_as(guard_address, global_as_subnets):
-                                    if ip_in_as(exit_address, global_as_subnets):
-                                        guards_not_selected += 1
-                                        break # As soon as we find an AS that prevents the guard selection, add the guard once
-                    exit_probability *= 1 - (guards_not_selected / float(len(guards_probabilities))) 
-                """
-
-                country_exits_probability += exit_probability
+            # DeNASA analysis
+            for guard_address, guard_probability in guards_list.items():
+                denasa_guard_compromised = False
+                customer_cone_subnets_guard_compromised = dict()
+                for as_customer_cone, cc_subnets in customer_cone_subnets.items():
+                    if ip_in_as(guard_address, cc_subnets):
+                        denasa_guard_compromised = True
+                        customer_cone_subnets_guard_compromised[as_customer_cone] = cc_subnets
+                for exit_address, exit_probability in exits_list.items():
+                    path_probability = guard_probability * exit_probability
+                    # Applies DeNASA e-select:0.0
+                    if denasa_guard_compromised:
+                        exit_compromised_with_guard = False
+                        for as_customer_cone, subnets in customer_cone_subnets_guard_compromised.items():
+                            if ip_in_as(exit_address, customer_cone_subnets_guard_compromised[as_customer_cone]):
+                                exit_compromised_with_guard = True
+                                break
+                        if exit_compromised_with_guard:
+                            # Tier-1 AS covers both guard and exit = compromise, not selected
+                            path_probability = 0
+                    country_probability += path_probability
 
         # Period is one month, and circuits change every 10min
         period = 31*24*60
@@ -2223,19 +2242,18 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
         time_to_first_path_compromised = 0
 
         for i in range(circuits_total):
-            number_paths_compromised += (country_guards_probability*country_exits_probability)
+            number_paths_compromised += country_probability
             if not first_path_compromised:
                 if number_paths_compromised >= 1.0:
                     # Computes when we compromise one circuit exactly (hypothetically between two constructed circuits)
-                    number_paths_compromised_previously = number_paths_compromised - (country_guards_probability*country_exits_probability)
+                    number_paths_compromised_previously = number_paths_compromised - country_probability
                     number_paths_compromised_to_reach_first = 1.0 - number_paths_compromised_previously
-                    marginal_average_circuit_to_add = number_paths_compromised_to_reach_first/(country_guards_probability*country_exits_probability)
+                    marginal_average_circuit_to_add = number_paths_compromised_to_reach_first/country_probability
                     marginal_time_to_add = marginal_average_circuit_to_add * 10
                     # Time in hours
                     time_to_first_path_compromised = (((i-1) * 10)+marginal_time_to_add)/60.0
                     first_path_compromised = True
 
-        print('Country Guards Prob: {} / Exits Prob: {}'.format(country_guards_probability, country_exits_probability))
         average_number_paths_compromised += number_paths_compromised
         average_time_to_first_path_compromised += time_to_first_path_compromised
 
