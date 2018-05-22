@@ -1851,6 +1851,9 @@ def compute_probabilities(network_states, water_filling, denasa, guessing_entrop
     guards_total_bandwidth = 0
     exits_total_bandwidth = 0
 
+    guards_in_as = dict()
+    exits_in_as = dict()
+
     network_states_size = 24*31
     i = 1
 
@@ -1865,14 +1868,12 @@ def compute_probabilities(network_states, water_filling, denasa, guessing_entrop
         for customer_cone_file in customer_cone_files:
             customer_cone_as = re.sub("[^0-9]", "", customer_cone_file)
             customer_cone_subnets[customer_cone_as] = []
+            guards_in_as[customer_cone_as] = 0.0
+            exits_in_as[customer_cone_as] = 0.0
             with open(customer_cone_file, 'r') as ccf:
                 for line in ccf:
                     customer_cone_subnets[customer_cone_as].append(line)
             ccf.close()
-        for as_customer_cone, subnets in customer_cone_subnets.items():
-            if as_customer_cone not in denasa_suspect_ases.ESELECT:
-                print(as_customer_cone)
-                del customer_cone_subnets[as_customer_cone]
 
     for network_state in network_states:
 
@@ -1973,6 +1974,12 @@ def compute_probabilities(network_states, water_filling, denasa, guessing_entrop
     top_as_probability = 0.0
 
     if denasa:
+
+        for as_customer_cone, subnets in customer_cone_subnets.items():
+            if as_customer_cone not in denasa_suspect_ases.ESELECT:
+                print(as_customer_cone)
+                del customer_cone_subnets[as_customer_cone]
+
         # DeNASA e-select:0.0, then computes influence of top tier-1 ASes
         for guard_address, guard_probability in guards_probabilities.items():
             denasa_guard_compromised = False
@@ -1996,9 +2003,6 @@ def compute_probabilities(network_states, water_filling, denasa, guessing_entrop
                 top_as_probability += path_probability
     else:
         # Computes influence of top tier-1 ASes (without DeNASA)
-        guards_in_as = dict()
-        exits_in_as = dict()
-
         for guard_address, guard_probability in guards_probabilities.items():
             for as_customer_cone, subnets in customer_cone_subnets.items():
                 if ip_in_as(guard_address, subnets):
