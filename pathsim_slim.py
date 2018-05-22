@@ -1973,7 +1973,7 @@ def compute_probabilities(network_states, water_filling, denasa, guessing_entrop
     top_as_probability = 0.0
 
     if denasa:
-        # DeNASA e-select:0.0
+        # DeNASA e-select:0.0, then computes influence of top tier-1 ASes
         for guard_address, guard_probability in guards_probabilities.items():
             denasa_guard_compromised = False
             customer_cone_subnets_guard_compromised = dict()
@@ -1995,10 +1995,31 @@ def compute_probabilities(network_states, water_filling, denasa, guessing_entrop
                         path_probability = 0
                 top_as_probability += path_probability
     else:
+        # Computes influence of top tier-1 ASes (without DeNASA)
+        guards_in_as = dict()
+        exits_in_as = dict()
+
         for guard_address, guard_probability in guards_probabilities.items():
-            for exit_address, exit_probability in exits_probabilities.items():
-                path_probability = guard_probability * exit_probability
-                top_as_probability += path_probability
+            for as_customer_cone, subnets in customer_cone_subnets.items():
+                if ip_in_as(guard_address, subnets):
+                    guards_in_as[as_customer_cone] += guard_probability
+        for exit_address, exit_probability in exits_probabilities.items():
+            for as_customer_cone, subnets in customer_cone_subnets.items():
+                if ip_in_as(exit_address, subnets):
+                    exits_in_as[as_customer_cone] += exit_probability
+
+        # Top AS customer cone average
+        top_as_guards_total_probability = 0.0
+        for as_customer_cone, probability in guards_in_as.items():
+            top_as_guards_total_probability += probability
+        average_top_as_guards_probability = top_as_guards_total_probability / float(len(guards_in_as))
+
+        top_as_exits_total_probability = 0.0
+        for as_customer_cone, probability in exits_in_as.items():
+            top_as_exits_total_probability += probability
+        average_top_as_exits_probability = top_as_exits_total_probability / float(len(exits_in_as))
+
+        top_as_probability = average_top_as_guards_probability * average_top_as_exits_probability
 
     # Number of paths/time to first compromise for top ASes
     # Period is one month, and circuits change every 10min
@@ -2007,6 +2028,7 @@ def compute_probabilities(network_states, water_filling, denasa, guessing_entrop
     first_path_compromised = False
 
     for i in range(circuits_total):
+
         number_paths_compromised += top_as_probability
         if not first_path_compromised:
             if number_paths_compromised >= 1.0:
