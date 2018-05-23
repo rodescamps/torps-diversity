@@ -1857,23 +1857,22 @@ def compute_probabilities(network_states, water_filling, denasa, guessing_entrop
     network_states_size = 24*31
     i = 1
 
-    # DeNASA e-select:0.0 preparation
+    # Top tier-1 ASes preparation
     customer_cone_subnets = dict()
-    if denasa:
-        customer_cone_files = []
-        for dirpath, dirnames, filenames in os.walk("../out/customer_cone_prefixes", followlinks=True):
-            for filename in filenames:
-                if (filename[0] != '.'):
-                    customer_cone_files.append(os.path.join(dirpath,filename))
-        for customer_cone_file in customer_cone_files:
-            customer_cone_as = re.sub("[^0-9]", "", customer_cone_file)
-            customer_cone_subnets[customer_cone_as] = []
-            guards_in_as[customer_cone_as] = 0.0
-            exits_in_as[customer_cone_as] = 0.0
-            with open(customer_cone_file, 'r') as ccf:
-                for line in ccf:
-                    customer_cone_subnets[customer_cone_as].append(line)
-            ccf.close()
+    customer_cone_files = []
+    for dirpath, dirnames, filenames in os.walk("../out/customer_cone_prefixes", followlinks=True):
+        for filename in filenames:
+            if (filename[0] != '.'):
+                customer_cone_files.append(os.path.join(dirpath,filename))
+    for customer_cone_file in customer_cone_files:
+        customer_cone_as = re.sub("[^0-9]", "", customer_cone_file)
+        customer_cone_subnets[customer_cone_as] = []
+        guards_in_as[customer_cone_as] = 0.0
+        exits_in_as[customer_cone_as] = 0.0
+        with open(customer_cone_file, 'r') as ccf:
+            for line in ccf:
+                customer_cone_subnets[customer_cone_as].append(line)
+        ccf.close()
 
     for network_state in network_states:
 
@@ -1925,7 +1924,7 @@ def compute_probabilities(network_states, water_filling, denasa, guessing_entrop
                         exits_bandwidths[address] = [total_bandwidth+bandwidth, old_counter+1]
         if i % 100 == 0: print('[{}/{}]'.format(i, network_states_size))
         i += 1
-        #if i == 2: break
+        if i == 2: break
 
     # DeNASA g-select
     if denasa:
