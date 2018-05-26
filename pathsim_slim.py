@@ -2000,6 +2000,7 @@ def compute_probabilities(network_states, water_filling, denasa, guessing_entrop
                         # Tier-1 AS covers both guard and exit = compromise, not selected
                         path_probability = 0
                 top_as_probability += path_probability
+            print('[{}/{}] Guards DeNASA analyzed'.format(i, len(guards_probabilities)))
     else:
         # Computes influence of top tier-1 ASes (without DeNASA)
         for guard_address, guard_probability in guards_probabilities.items():
