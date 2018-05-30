@@ -2146,6 +2146,7 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
                 if ip_in_as(exit_address, subnets):
                     exits_list[exit_address] = exit_probability
 
+            """
             # DeNASA analysis
             for guard_address, guard_probability in guards_list.items():
                 denasa_guard_compromised = False
@@ -2167,6 +2168,33 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
                             # Tier-1 AS covers both guard and exit = compromise, not selected
                             path_probability = 0
                     as_probability += path_probability
+            """
+
+            guards_compromised = dict()
+            exits_compromised = dict()
+
+            for guard_address, guard_probability in guards_list.items():
+                guards_compromised[guard_address] = []
+                for as_customer_cone, cc_subnets in customer_cone_subnets.items():
+                    if ip_in_as(guard_address, cc_subnets):
+                        guards_compromised[guard_address].append(as_customer_cone)
+            for exit_address, exit_probability in exits_list.items():
+                exits_compromised[exit_address] = []
+                for as_customer_cone, cc_subnets in customer_cone_subnets.items():
+                    if ip_in_as(exit_address, cc_subnets):
+                        exits_compromised[exit_address].append(as_customer_cone)
+
+            # DeNASA e-select:0.0, then computes influence of top tier-1 ASes
+            for guard_address, guard_probability in guards_list.items():
+                for exit_address, exit_probability in exits_list.items():
+                    path_probability = guard_probability * exit_probability
+                    # Applies DeNASA e-select:0.0
+                    for as_customer_cone, cc_subnets in customer_cone_subnets.items():
+                        if as_customer_cone in guards_compromised[guard_address] and as_customer_cone in exits_compromised[exit_address]:
+                            path_probability = 0
+                            break
+                    as_probability += path_probability
+                print('[{}/{}] AS Guards DeNASA analyzed'.format(i, len(guards_list)))
 
         # Period is one month, and circuits change every 10min
         period = 31*24*60
@@ -2262,6 +2290,7 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
                 if ip_in_as(exit_address, subnets):
                     exits_list[exit_address] = exit_probability
 
+            """
             # DeNASA analysis
             for guard_address, guard_probability in guards_list.items():
                 denasa_guard_compromised = False
@@ -2283,6 +2312,33 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
                             # Tier-1 AS covers both guard and exit = compromise, not selected
                             path_probability = 0
                     country_probability += path_probability
+            """
+
+            guards_compromised = dict()
+            exits_compromised = dict()
+
+            for guard_address, guard_probability in guards_list.items():
+                guards_compromised[guard_address] = []
+                for as_customer_cone, cc_subnets in customer_cone_subnets.items():
+                    if ip_in_as(guard_address, cc_subnets):
+                        guards_compromised[guard_address].append(as_customer_cone)
+            for exit_address, exit_probability in exits_list.items():
+                exits_compromised[exit_address] = []
+                for as_customer_cone, cc_subnets in customer_cone_subnets.items():
+                    if ip_in_as(exit_address, cc_subnets):
+                        exits_compromised[exit_address].append(as_customer_cone)
+
+            # DeNASA e-select:0.0, then computes influence of top tier-1 ASes
+            for guard_address, guard_probability in guards_list.items():
+                for exit_address, exit_probability in exits_list.items():
+                    path_probability = guard_probability * exit_probability
+                    # Applies DeNASA e-select:0.0
+                    for as_customer_cone, cc_subnets in customer_cone_subnets.items():
+                        if as_customer_cone in guards_compromised[guard_address] and as_customer_cone in exits_compromised[exit_address]:
+                            path_probability = 0
+                            break
+                    country_probability += path_probability
+                print('[{}/{}] Country Guards DeNASA analyzed'.format(i, len(guards_list)))
 
         # Period is one month, and circuits change every 10min
         period = 31*24*60
