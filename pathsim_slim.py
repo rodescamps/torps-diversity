@@ -2036,12 +2036,15 @@ def compute_probabilities(network_states, water_filling, denasa, guessing_entrop
         for guard_address, guard_probability in guards_probabilities.items():
             for exit_address, exit_probability in exits_probabilities.items():
                 # Applies DeNASA e-select:0.0
+                path_compromised = False
                 for as_customer_cone, cc_subnets in customer_cone_subnets.items():
                     if as_customer_cone in guards_compromised_denasa[guard_address] and as_customer_cone in exits_compromised_denasa[exit_address]:
+                        path_compromised = True
                         break
-                for as_customer_cone, cc_subnets in customer_cone_subnets_adversaries.items():
-                    if as_customer_cone in guards_compromised[guard_address] and as_customer_cone in exits_compromised[exit_address]:
-                        top_as_probability += guard_probability * exit_probability
+                if not path_compromised:
+                    for as_customer_cone, cc_subnets in customer_cone_subnets_adversaries.items():
+                        if as_customer_cone in guards_compromised[guard_address] and as_customer_cone in exits_compromised[exit_address]:
+                            top_as_probability += guard_probability * exit_probability
 
         top_as_probability = top_as_probability / float(len(customer_cone_subnets_adversaries))
 
