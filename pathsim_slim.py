@@ -2175,7 +2175,7 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
         as_influence_file = os.path.join("as_influence_list")
         with open(as_influence_file, 'w') as aif:
             for as_number, as_probability in as_influence.items():
-                aif.write("%s\t%s\n" % as_number, as_probability)
+                aif.write("%s\t%s\n" % (as_number, as_probability))
         aif.close()
 
         as_influence_list = csv.DictReader(open('as_influence_list'), ['AS_number', 'probability'], dialect='excel-tab')
