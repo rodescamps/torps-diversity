@@ -2143,8 +2143,9 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
         i = 0
         for guard_address, guard_probability in guards_probabilities.items():
             for row in as_list:
-                subnet = row['range_start']+','+row['range_end']
-                if ip_in_as(guard_address, subnet):
+                subnets = []
+                subnets.append(row['range_start']+','+row['range_end'])
+                if ip_in_as(guard_address, subnets):
                     if row['AS_number'] in as_influence_guards:
                         as_influence_guards[row['AS_number']] += guard_probability
                     else:
@@ -2156,8 +2157,9 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
         i = 0
         for exit_address, exit_probability in exits_probabilities.items():
             for row in as_list:
-                subnet = row['range_start']+','+row['range_end']
-                if ip_in_as(exit_address, subnet):
+                subnets = []
+                subnets.append(row['range_start']+','+row['range_end'])
+                if ip_in_as(exit_address, subnets):
                     if row['AS_number'] in as_influence_exits:
                         as_influence_exits[row['AS_number']] += exit_probability
                     else:
