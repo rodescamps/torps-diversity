@@ -2832,7 +2832,7 @@ commands', dest='pathalg_subparser')
         if args.top_as is not None:
             top_as_number.append(int(args.top_as))
         else:
-            top_as_number = [16276, 12876] # [16276, 12876, 24940, 14061]
+            top_as_number = [] # [16276, 12876, 24940, 14061]
         # Top country are DE (Germany), FR (France), NL (Netherlands), US (United States) by default
         top_country_code = []
         if args.top_country is not None:
