@@ -23,6 +23,7 @@ import pdb
 import multiprocessing
 import itertools
 import urllib
+import operator
 
 logger = logging.getLogger(__name__)
 _testing = False#True
@@ -1982,8 +1983,7 @@ def compute_probabilities(network_states, water_filling, denasa, guessing_entrop
 
     # Metrics for top ASes influence
     number_paths_compromised = 0.0
-    time_to_first_path_compromised = 0
-
+    time_to_first_path_compromised = -1
 
     for address in guards:
         average_bandwidth = guards_bandwidths[address]
@@ -2125,6 +2125,10 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
     average_number_paths_compromised = 0.0
     average_time_to_first_path_compromised = 0.0
 
+    as_adversaries = []
+    if as_numbers:
+        as_adversaries = as_numbers
+
     as_list = []
 
     # Prepare the AS subnets in DictReader
@@ -2157,7 +2161,58 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
                 print(as_customer_cone)
                 del customer_cone_subnets[as_customer_cone]
 
-    for as_number in as_numbers:
+    # If no AS adversary(ies) is (are) specified, consider the top AS as the adversary
+    if not as_adversaries:
+        # Prints all ASes influence on Tor network by decreasing probabilities on guard and exit nodes distinctly
+        as_influence_guards = dict()
+        for guard_address, guard_probability in guards_probabilities.items():
+            for row in as_list:
+                subnet = row['range_start']+','+row['range_end']
+                if ip_in_as(guard_address, subnet):
+                    if row['AS_number'] in as_influence_guards:
+                        as_influence_guards[row['AS_number']] += guard_probability
+                    else:
+                        as_influence_guards[row['AS_number']] = guard_probability
+        as_influence_exits = dict()
+        for exit_address, exit_probability in exits_probabilities.items():
+            for row in as_list:
+                subnet = row['range_start']+','+row['range_end']
+                if ip_in_as(exit_address, subnet):
+                    if row['AS_number'] in as_influence_exits:
+                        as_influence_exits[row['AS_number']] += exit_probability
+                    else:
+                        as_influence_exits[row['AS_number']] = exit_probability
+
+        # Computes the AS that has the greater influence on the network paths (guards probabilities * exits probabilities)
+        as_influence = dict()
+        for as_number, as_probability in as_influence_exits.items():
+            as_influence[as_number] = as_probability * as_influence_guards[as_number]
+
+        as_influence_file = os.path.join("as_influence_list")
+        with open(as_influence_file, 'w') as aif:
+            for as_number, as_probability in as_influence.items():
+                aif.write("%s\t%s\n" % as_number, as_probability)
+        aif.close()
+
+        as_influence_list = csv.DictReader(open('as_influence_list'), ['AS_number', 'probability'], dialect='excel-tab')
+        sortedlist = sorted(as_influence_list, key=operator.itemgetter(1), reverse=True)
+        with open("as_influence_list_sorted", "wb") as f:
+            fileWriter = csv.writer(f, delimiter='  ')
+            for row in sortedlist:
+                fileWriter.writerow(row)
+
+        top_as_adversary_number = ''
+        top_as_adversary_probability = 0.0
+        for as_number, as_probability in as_influence.items():
+            if as_probability > top_as_adversary_probability:
+                top_as_adversary_probability = as_probability
+                top_as_adversary_number = as_number
+
+        as_adversaries.append(top_as_adversary_number)
+        print("Top as: {}".format(top_as_adversary_number))
+
+    # Computes average for all AS adversaries considered
+    for as_number in as_adversaries:
 
         searched_as_number = str(as_number)
 
@@ -2189,30 +2244,6 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
                 if ip_in_as(exit_address, subnets):
                     exits_list[exit_address] = exit_probability
 
-            """
-            # DeNASA analysis
-            for guard_address, guard_probability in guards_list.items():
-                denasa_guard_compromised = False
-                customer_cone_subnets_guard_compromised = dict()
-                for as_customer_cone, cc_subnets in customer_cone_subnets.items():
-                    if ip_in_as(guard_address, cc_subnets):
-                        denasa_guard_compromised = True
-                        customer_cone_subnets_guard_compromised[as_customer_cone] = cc_subnets
-                for exit_address, exit_probability in exits_list.items():
-                    path_probability = guard_probability * exit_probability
-                    # Applies DeNASA e-select:0.0
-                    if denasa_guard_compromised:
-                        exit_compromised_with_guard = False
-                        for as_customer_cone, subnets in customer_cone_subnets_guard_compromised.items():
-                            if ip_in_as(exit_address, customer_cone_subnets_guard_compromised[as_customer_cone]):
-                                exit_compromised_with_guard = True
-                                break
-                        if exit_compromised_with_guard:
-                            # Tier-1 AS covers both guard and exit = compromise, not selected
-                            path_probability = 0
-                    as_probability += path_probability
-            """
-
             guards_compromised = dict()
             exits_compromised = dict()
 
@@ -2243,7 +2274,7 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
         circuits_total = period/10
         number_paths_compromised = 0.0
         first_path_compromised = False
-        time_to_first_path_compromised = 0
+        time_to_first_path_compromised = -1
 
         for i in range(circuits_total):
             number_paths_compromised += as_probability
@@ -2386,7 +2417,7 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
         circuits_total = period/10
         number_paths_compromised = 0.0
         first_path_compromised = False
-        time_to_first_path_compromised = 0
+        time_to_first_path_compromised = -1
 
         for i in range(circuits_total):
             number_paths_compromised += country_probability

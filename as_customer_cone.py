@@ -152,7 +152,7 @@ if __name__ == '__main__':
 
     searched_as_number = sys.argv[1]
     out_dir = sys.argv[2]
-    """
+
     list_as = []
     customer_cone_as = []
     customer_cone_prefixes = []
@@ -194,28 +194,15 @@ if __name__ == '__main__':
 
     add_prefixes(searched_as_number)
 
+    # Following code optimizes subnets list by generating only unique range that do not overlap
+    # Takes a long time, and the reduction is only a few percent for the biggest ASes
+    """
     reduced_customer_cone_prefixes = reduce_prefixes(customer_cone_prefixes)
+    """
 
     customer_cone_file = os.path.join(out_dir,searched_as_number+"_customer_cone_prefixes")
     with open(customer_cone_file, 'w') as ccf:
         # Write all the prefixes to the specified file
         for prefix in customer_cone_prefixes:
-            ccf.write("%s\n" % prefix)
-    ccf.close()
-    """
-
-    customer_cone_prefixes = []
-
-    customer_cone_file = os.path.join(out_dir,searched_as_number+"_customer_cone_prefixes")
-    with open(customer_cone_file, 'r') as ccf:
-        customer_cone_prefixes = ccf.read().splitlines()
-    ccf.close()
-
-    reduced_customer_cone_prefixes = reduce_prefixes(customer_cone_prefixes)
-
-    customer_cone_file = os.path.join(out_dir,searched_as_number+"_customer_cone_prefixes_reduced")
-    with open(customer_cone_file, 'w') as ccf:
-        # Write all the prefixes to the specified file
-        for prefix in reduced_customer_cone_prefixes:
             ccf.write("%s\n" % prefix)
     ccf.close()
