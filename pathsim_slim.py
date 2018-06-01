@@ -2140,6 +2140,7 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
     if not as_adversaries:
         # Prints all ASes influence on Tor network by decreasing probabilities on guard and exit nodes distinctly
         as_influence_guards = dict()
+        i = 0
         for guard_address, guard_probability in guards_probabilities.items():
             for row in as_list:
                 subnet = row['range_start']+','+row['range_end']
@@ -2148,8 +2149,11 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
                         as_influence_guards[row['AS_number']] += guard_probability
                     else:
                         as_influence_guards[row['AS_number']] = guard_probability
-                break
+                    break
+            i += 1
+            print('[{}/{}] guards analyzed adversaries'.format(i, len(guards_probabilities)))
         as_influence_exits = dict()
+        i = 0
         for exit_address, exit_probability in exits_probabilities.items():
             for row in as_list:
                 subnet = row['range_start']+','+row['range_end']
@@ -2158,7 +2162,8 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
                         as_influence_exits[row['AS_number']] += exit_probability
                     else:
                         as_influence_exits[row['AS_number']] = exit_probability
-                break
+                    break
+            print('[{}/{}] exits analyzed adversaries'.format(i, len(guards_probabilities)))
 
         # Computes the AS that has the greater influence on the network paths (guards probabilities * exits probabilities)
         as_influence = dict()
