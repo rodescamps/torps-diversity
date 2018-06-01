@@ -2047,31 +2047,6 @@ def compute_probabilities(network_states, water_filling, denasa, guessing_entrop
                             top_as_probability += guard_probability * exit_probability
 
         top_as_probability = top_as_probability / float(len(customer_cone_subnets_adversaries))
-
-        """
-        # DeNASA e-select:0.0, then computes influence of top tier-1 ASes
-        for guard_address, guard_probability in guards_probabilities.items():
-            denasa_guard_compromised = False
-            customer_cone_subnets_guard_compromised = dict()
-            for as_customer_cone, cc_subnets in customer_cone_subnets.items():
-                if ip_in_as(guard_address, cc_subnets):
-                    denasa_guard_compromised = True
-                    customer_cone_subnets_guard_compromised[as_customer_cone] = cc_subnets
-            for exit_address, exit_probability in exits_probabilities.items():
-                path_probability = guard_probability * exit_probability
-                # Applies DeNASA e-select:0.0
-                if denasa_guard_compromised:
-                    exit_compromised_with_guard = False
-                    for as_customer_cone, subnets in customer_cone_subnets_guard_compromised.items():
-                        if ip_in_as(exit_address, customer_cone_subnets_guard_compromised[as_customer_cone]):
-                            exit_compromised_with_guard = True
-                            break
-                    if exit_compromised_with_guard:
-                        # Tier-1 AS covers both guard and exit = compromise, not selected
-                        path_probability = 0
-                top_as_probability += path_probability
-            print('[{}/{}] Guards DeNASA analyzed'.format(i, len(guards_probabilities)))
-        """
     else:
         for guard_address, guard_probability in guards_probabilities.items():
             for as_customer_cone, subnets in customer_cone_subnets_adversaries.items():
@@ -2173,6 +2148,7 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
                         as_influence_guards[row['AS_number']] += guard_probability
                     else:
                         as_influence_guards[row['AS_number']] = guard_probability
+                break
         as_influence_exits = dict()
         for exit_address, exit_probability in exits_probabilities.items():
             for row in as_list:
@@ -2182,6 +2158,7 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
                         as_influence_exits[row['AS_number']] += exit_probability
                     else:
                         as_influence_exits[row['AS_number']] = exit_probability
+                break
 
         # Computes the AS that has the greater influence on the network paths (guards probabilities * exits probabilities)
         as_influence = dict()
@@ -2362,30 +2339,6 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
             for exit_address, exit_probability in exits_probabilities.items():
                 if ip_in_as(exit_address, subnets):
                     exits_list[exit_address] = exit_probability
-
-            """
-            # DeNASA analysis
-            for guard_address, guard_probability in guards_list.items():
-                denasa_guard_compromised = False
-                customer_cone_subnets_guard_compromised = dict()
-                for as_customer_cone, cc_subnets in customer_cone_subnets.items():
-                    if ip_in_as(guard_address, cc_subnets):
-                        denasa_guard_compromised = True
-                        customer_cone_subnets_guard_compromised[as_customer_cone] = cc_subnets
-                for exit_address, exit_probability in exits_list.items():
-                    path_probability = guard_probability * exit_probability
-                    # Applies DeNASA e-select:0.0
-                    if denasa_guard_compromised:
-                        exit_compromised_with_guard = False
-                        for as_customer_cone, subnets in customer_cone_subnets_guard_compromised.items():
-                            if ip_in_as(exit_address, customer_cone_subnets_guard_compromised[as_customer_cone]):
-                                exit_compromised_with_guard = True
-                                break
-                        if exit_compromised_with_guard:
-                            # Tier-1 AS covers both guard and exit = compromise, not selected
-                            path_probability = 0
-                    country_probability += path_probability
-            """
 
             guards_compromised = dict()
             exits_compromised = dict()
