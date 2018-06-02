@@ -2144,14 +2144,15 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
         for guard_address, guard_probability in guards_probabilities.items():
             for row in as_list:
                 subnets = []
-                subnets.append(row['range_start']+','+row['range_end'])
-                if ip_in_as(guard_address, subnets):
-                    if row['AS_number'] in as_influence_guards:
-                        as_influence_guards[row['AS_number']] += guard_probability
-                    else:
-                        as_influence_guards[row['AS_number']] = guard_probability
-                    print(subnets)
-                    break
+                if row['AS_number'] != '0':
+                    subnets.append(row['range_start']+','+row['range_end'])
+                    if ip_in_as(guard_address, subnets):
+                        if row['AS_number'] in as_influence_guards:
+                            as_influence_guards[row['AS_number']] += guard_probability
+                        else:
+                            as_influence_guards[row['AS_number']] = guard_probability
+                        print(subnets)
+                        break
             i += 1
             print('[{}/{}] guards analyzed adversaries'.format(i, len(guards_probabilities)))
         as_influence_exits = dict()
@@ -2159,14 +2160,15 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
         for exit_address, exit_probability in exits_probabilities.items():
             for row in as_list:
                 subnets = []
-                subnets.append(row['range_start']+','+row['range_end'])
-                if ip_in_as(exit_address, subnets):
-                    if row['AS_number'] in as_influence_exits:
-                        as_influence_exits[row['AS_number']] += exit_probability
-                    else:
-                        as_influence_exits[row['AS_number']] = exit_probability
-                    print(subnets)
-                    break
+                if row['AS_number'] != '0':
+                    subnets.append(row['range_start']+','+row['range_end'])
+                    if ip_in_as(exit_address, subnets):
+                        if row['AS_number'] in as_influence_exits:
+                            as_influence_exits[row['AS_number']] += exit_probability
+                        else:
+                            as_influence_exits[row['AS_number']] = exit_probability
+                        print(subnets)
+                        break
             i += 1
             print('[{}/{}] exits analyzed adversaries'.format(i, len(guards_probabilities)))
 
