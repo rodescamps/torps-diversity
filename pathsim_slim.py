@@ -2282,7 +2282,7 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
         average_number_paths_compromised += number_paths_compromised
         average_time_to_first_path_compromised += time_to_first_path_compromised
 
-    return average_number_paths_compromised/len(as_numbers), average_time_to_first_path_compromised/len(as_numbers)
+    return average_number_paths_compromised/len(as_adversaries), average_time_to_first_path_compromised/len(as_adversaries)
 
 def country_compromise_path(guards_probabilities, exits_probabilities, country_codes, denasa):
 
