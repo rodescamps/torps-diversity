@@ -2165,7 +2165,9 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
                         as_influence_exits[row['AS_number']] += exit_probability
                     else:
                         as_influence_exits[row['AS_number']] = exit_probability
+                    print(subnets)
                     break
+            i += 1
             print('[{}/{}] exits analyzed adversaries'.format(i, len(guards_probabilities)))
 
         # Computes the AS that has the greater influence on the network paths (guards probabilities * exits probabilities)
@@ -2182,7 +2184,7 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
         as_influence_list = csv.DictReader(open('as_influence_list'), ['AS_number', 'probability'], dialect='excel-tab')
         sortedlist = sorted(as_influence_list, key=operator.itemgetter('probability'), reverse=True)
         with open("as_influence_list_sorted", "wb") as f:
-            fileWriter = csv.writer(f, delimiter='  ')
+            fileWriter = csv.writer(f, delimiter='\t')
             for row in sortedlist:
                 fileWriter.writerow(row)
 
