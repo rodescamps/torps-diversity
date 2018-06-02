@@ -2175,7 +2175,8 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
         # Computes the AS that has the greater influence on the network paths (guards probabilities * exits probabilities)
         as_influence = dict()
         for as_number, as_probability in as_influence_exits.items():
-            as_influence[as_number] = as_probability * as_influence_guards[as_number]
+            if as_number in as_influence_guards:
+                as_influence[as_number] = as_probability * as_influence_guards[as_number]
 
         as_influence_file = os.path.join("as_influence_list")
         with open(as_influence_file, 'w') as aif:
