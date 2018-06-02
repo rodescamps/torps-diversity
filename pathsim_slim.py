@@ -2150,6 +2150,7 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
                         as_influence_guards[row['AS_number']] += guard_probability
                     else:
                         as_influence_guards[row['AS_number']] = guard_probability
+                    print(subnets)
                     break
             i += 1
             print('[{}/{}] guards analyzed adversaries'.format(i, len(guards_probabilities)))
@@ -2179,7 +2180,7 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
         aif.close()
 
         as_influence_list = csv.DictReader(open('as_influence_list'), ['AS_number', 'probability'], dialect='excel-tab')
-        sortedlist = sorted(as_influence_list, key=operator.itemgetter(1), reverse=True)
+        sortedlist = sorted(as_influence_list, key=operator.itemgetter('probability'), reverse=True)
         with open("as_influence_list_sorted", "wb") as f:
             fileWriter = csv.writer(f, delimiter='  ')
             for row in sortedlist:
