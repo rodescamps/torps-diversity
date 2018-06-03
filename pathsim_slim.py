@@ -2184,12 +2184,8 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
                 aif.write("%s\t%s\n" % (as_number, as_probability))
         aif.close()
 
-        as_influence_list = csv.DictReader(open('as_influence_list'), ['AS_number', 'probability'], dialect='excel-tab')
-        sortedlist = sorted(as_influence_list, key=operator.itemgetter('probability'), reverse=True)
-        with open("as_influence_list_sorted", "wb") as f:
-            fileWriter = csv.writer(f, delimiter='\t')
-            for row in sortedlist:
-                fileWriter.writerow(row)
+        # Creates a reversed sorted list to consult it afterwards
+        os.system("sort -t$'\t' -k2 -gr as_influence_list > as_influence_list_sorted")
 
         top_as_adversary_number = ''
         top_as_adversary_probability = 0.0
@@ -2282,12 +2278,16 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
         average_number_paths_compromised += number_paths_compromised
         average_time_to_first_path_compromised += time_to_first_path_compromised
 
-    return average_number_paths_compromised/len(as_adversaries), average_time_to_first_path_compromised/len(as_adversaries)
+    return average_number_paths_compromised/len(as_adversaries), average_time_to_first_path_compromised/len(as_adversaries), as_adversaries
 
 def country_compromise_path(guards_probabilities, exits_probabilities, country_codes, denasa):
 
     average_number_paths_compromised = 0.0
     average_time_to_first_path_compromised = 0.0
+
+    country_adversaries = []
+    if country_codes:
+        country_adversaries = country_codes
 
     country_list = []
 
@@ -2321,7 +2321,67 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
                 print(as_customer_cone)
                 del customer_cone_subnets[as_customer_cone]
 
-    for country_code in country_codes:
+    if not country_adversaries:
+        # Prints all Countries influence on Tor network by decreasing probabilities on guard and exit nodes distinctly
+        country_influence_guards = dict()
+        i = 0
+        for guard_address, guard_probability in guards_probabilities.items():
+            for row in country_list:
+                subnets = []
+                if row['country_code'] != 'None':
+                    subnets.append(row['range_start']+','+row['range_end'])
+                    if ip_in_as(guard_address, subnets):
+                        if row['country_code'] in country_influence_guards:
+                            country_influence_guards[row['country_code']] += guard_probability
+                        else:
+                            country_influence_guards[row['country_code']] = guard_probability
+                        print(subnets)
+                        break
+            i += 1
+            print('[{}/{}] country guards analyzed adversaries'.format(i, len(guards_probabilities)))
+        country_influence_exits = dict()
+        i = 0
+        for exit_address, exit_probability in exits_probabilities.items():
+            for row in country_list:
+                subnets = []
+                if row['country_code'] != '0':
+                    subnets.append(row['range_start']+','+row['range_end'])
+                    if ip_in_as(exit_address, subnets):
+                        if row['country_code'] in country_influence_exits:
+                            country_influence_exits[row['country_code']] += exit_probability
+                        else:
+                            country_influence_exits[row['country_code']] = exit_probability
+                        print(subnets)
+                        break
+            i += 1
+            print('[{}/{}] country exits analyzed adversaries'.format(i, len(guards_probabilities)))
+
+        # Computes the Country that has the greater influence on the network paths (guards probabilities * exits probabilities)
+        country_influence = dict()
+        for country_code, country_probability in country_influence_exits.items():
+            if country_code in country_influence_guards:
+                country_influence[country_code] = country_probability * country_influence_guards[country_code]
+
+        country_influence_file = os.path.join("country_influence_list")
+        with open(country_influence_file, 'w') as cif:
+            for country_code, country_probability in country_influence.items():
+                cif.write("%s\t%s\n" % (country_code, country_probability))
+        cif.close()
+
+        # Creates a reversed sorted list to consult it afterwards
+        os.system("sort -t$'\t' -k2 -gr country_influence_list > country_influence_list_sorted")
+
+        top_country_adversary_code = ''
+        top_country_adversary_probability = 0.0
+        for country_code, country_probability in country_influence.items():
+            if country_probability > top_country_adversary_probability:
+                top_country_adversary_probability = country_probability
+                top_country_adversary_code = country_code
+
+        country_adversaries.append(top_country_adversary_code)
+        print("Top country: {}".format(top_country_adversary_code))
+
+    for country_code in country_adversaries:
 
         searched_country_code = country_code
 
@@ -2401,7 +2461,7 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
         average_number_paths_compromised += number_paths_compromised
         average_time_to_first_path_compromised += time_to_first_path_compromised
 
-    return average_number_paths_compromised/len(country_codes), average_time_to_first_path_compromised/len(country_codes)
+    return average_number_paths_compromised/len(country_adversaries), average_time_to_first_path_compromised/len(country_adversaries), country_adversaries
 
 def generate_addresses(location, num_addresses):
 
@@ -2853,12 +2913,12 @@ commands', dest='pathalg_subparser')
         else:
             top_country_code = ['DE', 'FR'] # ['DE', 'FR', 'NL', 'US']
 
-        (as_paths_compromised, as_first_compromise) = as_compromise_path(guards_probabilities,
+        (as_paths_compromised, as_first_compromise, top_as_adversary) = as_compromise_path(guards_probabilities,
                                                                          exits_probabilities,
                                                                          top_as_number,
                                                                          denasa)
 
-        (country_paths_compromised, country_first_compromise) = country_compromise_path(guards_probabilities,
+        (country_paths_compromised, country_first_compromise, top_country_adversary) = country_compromise_path(guards_probabilities,
                                                                                         exits_probabilities,
                                                                                         top_country_code,
                                                                                         denasa)
@@ -2866,14 +2926,14 @@ commands', dest='pathalg_subparser')
         #print("Scores AS: %s\t%s\t%s" % (guessing_entropy_result, as_paths_compromised, as_first_compromise))
         #print("Scores Country: %s\t%s\t%s" % (guessing_entropy_result, country_paths_compromised, country_first_compromise))
 
-        if not os.path.exists(args.nsf_dir+"/../"+"AS"+str(top_as_number)+"_"+str(top_country_code)):
-            os.makedirs(args.nsf_dir+"/../"+"AS"+str(top_as_number)+"_"+str(top_country_code))
+        if not os.path.exists(args.nsf_dir+"/../"+"AS"+str(top_as_number)+"_"+str(top_country_adversary)):
+            os.makedirs(args.nsf_dir+"/../"+"AS"+str(top_as_number)+"_"+str(top_country_adversary))
 
         if args.location is not None:
-            score_file = os.path.join(args.nsf_dir+"/../"+"AS"+str(top_as_number)+"_"+str(top_country_code),
+            score_file = os.path.join(args.nsf_dir+"/../"+"AS"+str(top_as_adversary)+"_"+str(top_country_adversary),
                                     "score_added_"+args.location+"_"+args.pathalg_subparser)
         else:
-            score_file = os.path.join(args.nsf_dir+"/../"+"AS"+str(top_as_number)+"_"+str(top_country_code),
+            score_file = os.path.join(args.nsf_dir+"/../"+"AS"+str(top_as_adversary)+"_"+str(top_country_adversary),
                                       "score_"+args.pathalg_subparser)
         with open(score_file, 'a') as sf:
             if args.num_custom_guards != 0:
