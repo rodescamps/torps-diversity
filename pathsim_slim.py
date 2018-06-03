@@ -2181,9 +2181,17 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
             # Probability is 0 if only guard or only exit is controlled (correlation not possible)
             probability = 0.0
             if as_number in as_influence_guards:
-                probability = as_probability * as_influence_guards[as_number]
+                # Probability in percentage
+                probability = (as_probability * as_influence_guards[as_number])*100
             as_influence[as_number] = probability
             list_probabilities.append(probability)
+        # Takes also into account the last set: guards ASes that do not appear in exit ASes
+        for as_number, as_probability in as_influence_guards.items():
+            # Probability is 0 if only guard or only exit is controlled (correlation not possible)
+            probability = 0.0
+            if as_number not in as_influence_exits:
+                as_influence[as_number] = probability
+                list_probabilities.append(probability)
 
         # Compute probability mean
         m = sum(list_probabilities) / float(len(list_probabilities))
@@ -2378,9 +2386,17 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
             # Probability is 0 if only guard or only exit is controlled (correlation not possible)
             probability = 0.0
             if country_code in country_influence_guards:
-                probability = country_probability * country_influence_guards[country_code]
+                # Probability in percentage
+                probability = (country_probability * country_influence_guards[country_code])*100
             country_influence[country_code] = probability
             list_probabilities.append(probability)
+        # Takes also into account the last set: guards ASes that do not appear in exit ASes
+        for country_code, country_probability in country_influence_guards.items():
+            # Probability is 0 if only guard or only exit is controlled (correlation not possible)
+            probability = 0.0
+            if country_code not in country_influence_exits:
+                country_influence[country_code] = probability
+                list_probabilities.append(probability)
 
         # Compute probability mean
         m = sum(list_probabilities) / float(len(list_probabilities))
