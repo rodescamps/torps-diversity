@@ -2046,8 +2046,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                 as_providers[as_encountered] += list_providers
                             else:
                                 as_providers[as_encountered] = list_providers
-
-                        print(subnets)
+                        print(row['AS_number'])
                         break
             i += 1
             print('[{}/{}] guards analyzed adversaries'.format(i, len(guards_probabilities)))
@@ -2078,7 +2077,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
 
                         add_prefixes(row['AS_number'])
 
-                        print(subnets)
+                        print(row['AS_number'])
                         break
             i += 1
             print('[{}/{}] exits analyzed adversaries'.format(i, len(exits_probabilities)))
