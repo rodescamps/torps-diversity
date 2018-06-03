@@ -2017,9 +2017,6 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                         def add_prefixes(searched_as_number):
 
                             # Optimization, avoids recursion
-                            print("Searched AS: {}".format(searched_as_number))
-                            for as_element in as_providers:
-                                print("{} and {}, same: {}".format(searched_as_number, as_element, (searched_as_number == as_element)))
                             if searched_as_number in as_providers:
                                 print("optimization")
                                 for provider in as_providers[searched_as_number]:
@@ -2035,11 +2032,11 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                 for link in links["data"]:
                                     if link["relationship"] == "provider":
                                         provider_found = True
-                                        provider_as = link["asn"]
+                                        provider_as = str(link["asn"])
                                         if link["asn"] not in list_as_encountered:
-                                            list_as_encountered.append(str(link["asn"]))
+                                            list_as_encountered.append(link["asn"])
                                             print("recursion: {}".format(link["asn"]))
-                                            add_prefixes(str(provider_as))
+                                            add_prefixes(provider_as)
                                 if not provider_found:
                                     list_providers.append(searched_as_number)
                                     if searched_as_number in as_influence_guards:
