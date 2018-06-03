@@ -2034,8 +2034,8 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                     provider_as = link["asn"]
                                     if link["asn"] not in list_as_encountered:
                                         list_as_encountered.append(link["asn"])
-                                    print("recursion: {}".format(link["asn"]))
-                                    add_prefixes(str(provider_as))
+                                        print("recursion: {}".format(link["asn"]))
+                                        add_prefixes(str(provider_as))
                             if not provider_found:
                                 list_providers.append(searched_as_number)
                                 if searched_as_number in as_influence_guards:
