@@ -1971,6 +1971,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
     # Metrics for top ASes influence
     number_paths_compromised = 0.0
     time_to_first_path_compromised = -1
+    as_variance = 0.0
 
     for address in guards:
         average_bandwidth = guards_bandwidths[address]
@@ -1997,6 +1998,10 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
         # Prints all ASes influence on Tor network by decreasing probabilities on guard and exit nodes distinctly
         as_influence_guards = dict()
         i = 0
+
+        # To optimize the provider links recursion, keeps tier-1 providers in memmory for all ASes encountered
+        as_providers = dict()
+
         for guard_address, guard_probability in guards_probabilities.items():
             for row in as_list:
                 subnets = []
@@ -2004,7 +2009,19 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                     subnets.append(row['range_start']+','+row['range_end'])
                     if ip_in_as(guard_address, subnets):
 
+                        list_as_encountered = []
+                        list_providers = []
+
                         def add_prefixes(searched_as_number):
+
+                            # Optimization, avoids recursion
+                            if searched_as_number in as_providers:
+                                for provider in as_providers[searched_as_number]:
+                                    if provider in as_influence_guards:
+                                        as_influence_guards[provider] += guard_probability
+                                    else:
+                                        as_influence_guards[provider] = guard_probability
+
                             url = "http://as-rank.caida.org/api/v1/asns/"+str(searched_as_number)+"/links"
                             response = urllib.urlopen(url)
                             links = json.loads(response.read())
@@ -2013,14 +2030,22 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                 if link["relationship"] == "provider":
                                     provider_found = True
                                     provider_as = link["asn"]
+                                    if link["asn"] not in list_as_encountered:
+                                        list_as_encountered.append(link["asn"])
                                     add_prefixes(str(provider_as))
                             if not provider_found:
+                                list_providers.append(searched_as_number)
                                 if searched_as_number in as_influence_guards:
                                     as_influence_guards[searched_as_number] += guard_probability
                                 else:
                                     as_influence_guards[searched_as_number] = guard_probability
 
                         add_prefixes(row['AS_number'])
+                        for as_encountered in list_as_encountered:
+                            if as_encountered in as_providers:
+                                as_providers[as_encountered] += list_providers
+                            else:
+                                as_providers[as_encountered] = list_providers
 
                         print(subnets)
                         break
