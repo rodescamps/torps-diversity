@@ -2017,7 +2017,6 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
 
                             # Optimization, avoids recursion
                             if searched_as_number in as_providers:
-                                print("optimization")
                                 for provider in as_providers[searched_as_number]:
                                     if provider in as_influence_guards:
                                         as_influence_guards[provider] += guard_probability
@@ -2034,7 +2033,6 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                         provider_as = str(link["asn"])
                                         if provider_as not in list_as_encountered:
                                             list_as_encountered.append(provider_as)
-                                            print("recursion: {}".format(provider_as))
                                             as_encountered_to_add = add_prefixes(provider_as, list_as_encountered)
                                             for as_encountered in as_encountered_to_add:
                                                 if as_encountered not in list_as_encountered:
