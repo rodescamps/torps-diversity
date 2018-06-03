@@ -2017,7 +2017,11 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                         def add_prefixes(searched_as_number):
 
                             # Optimization, avoids recursion
+                            print("Searched AS: {}".format(searched_as_number))
+                            for as_element in as_providers:
+                                print("{} and {}, same: {}".format(searched_as_number, as_element, (searched_as_number == as_element)))
                             if searched_as_number in as_providers:
+                                print("optimization")
                                 for provider in as_providers[searched_as_number]:
                                     if provider in as_influence_guards:
                                         as_influence_guards[provider] += guard_probability
