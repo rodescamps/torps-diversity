@@ -2099,6 +2099,7 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
 
     average_number_paths_compromised = 0.0
     average_time_to_first_path_compromised = 0.0
+    as_variance = 0.0
 
     as_adversaries = []
     if as_numbers:
@@ -2296,6 +2297,7 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
 
     average_number_paths_compromised = 0.0
     average_time_to_first_path_compromised = 0.0
+    country_variance = 0.0
 
     country_adversaries = []
     if country_codes:
