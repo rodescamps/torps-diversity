@@ -2059,7 +2059,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                         print(len(as_providers))
                         break
             i += 1
-            print('[{}/{}] guards analyzed adversaries'.format(i, len(guards_probabilities)))
+            print('[{}/{}] cone guards analyzed adversaries'.format(i, len(guards_probabilities)))
         as_influence_exits = dict()
         i = 0
         for exit_address, exit_probability in exits_probabilities.items():
@@ -2069,28 +2069,57 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                     subnets.append(row['range_start']+','+row['range_end'])
                     if ip_in_as(exit_address, subnets):
 
-                        def add_prefixes(searched_as_number):
-                            url = "http://as-rank.caida.org/api/v1/asns/"+str(searched_as_number)+"/links"
-                            response = urllib.urlopen(url)
-                            links = json.loads(response.read())
-                            provider_found = False
-                            for link in links["data"]:
-                                if link["relationship"] == "provider":
-                                    provider_found = True
-                                    provider_as = link["asn"]
-                                    add_prefixes(str(provider_as))
-                            if not provider_found:
-                                if searched_as_number in as_influence_guards:
-                                    as_influence_guards[searched_as_number] += guard_probability
-                                else:
-                                    as_influence_guards[searched_as_number] = guard_probability
-
-                        add_prefixes(row['AS_number'])
+                        list_providers = []
 
                         print(row['AS_number'])
+
+                        def add_prefixes(searched_as_number, list_as_encountered):
+
+                            # Optimization, avoids recursion
+                            if searched_as_number in as_providers:
+                                print("optimization")
+                                for provider in as_providers[searched_as_number]:
+                                    if provider in as_influence_exits:
+                                        as_influence_exits[provider] += exit_probability
+                                    else:
+                                        as_influence_exits[provider] = exit_probability
+                            else:
+                                url = "http://as-rank.caida.org/api/v1/asns/"+str(searched_as_number)+"/links"
+                                response = urllib.urlopen(url)
+                                links = json.loads(response.read())
+                                provider_found = False
+                                for link in links["data"]:
+                                    if link["relationship"] == "provider":
+                                        provider_found = True
+                                        provider_as = str(link["asn"])
+                                        if provider_as not in list_as_encountered:
+                                            list_as_encountered.append(provider_as)
+                                            print("recursion: {}".format(provider_as))
+                                            as_encountered_to_add = add_prefixes(provider_as, list_as_encountered)
+                                            for as_encountered in as_encountered_to_add:
+                                                if as_encountered not in list_as_encountered:
+                                                    list_as_encountered.append(as_encountered)
+                                if not provider_found:
+                                    list_providers.append(searched_as_number)
+                                    if searched_as_number in as_influence_exits:
+                                        as_influence_exits[searched_as_number] += exit_probability
+                                    else:
+                                        as_influence_exits[searched_as_number] = exit_probability
+                            return list_as_encountered
+
+                        list_as_encountered = add_prefixes(row['AS_number'], [])
+                        for as_encountered in list_as_encountered:
+                            if as_encountered not in list_providers:
+                                if as_encountered in as_providers:
+                                    for provider in list_providers:
+                                        if provider not in as_providers[as_encountered]:
+                                            as_providers[as_encountered].append(provider)
+                                else:
+                                    as_providers[as_encountered] = list_providers
+                        print(len(as_providers))
                         break
             i += 1
-            print('[{}/{}] exits analyzed adversaries'.format(i, len(exits_probabilities)))
+            print('[{}/{}] cone exits analyzed adversaries'.format(i, len(exits_probabilities)))
 
         # Computes the tier-1 AS that has the greater influence on the network paths (guards probabilities * exits probabilities)
         as_influence = dict()
