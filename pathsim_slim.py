@@ -2023,25 +2023,25 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                         as_influence_guards[provider] += guard_probability
                                     else:
                                         as_influence_guards[provider] = guard_probability
-
-                            url = "http://as-rank.caida.org/api/v1/asns/"+str(searched_as_number)+"/links"
-                            response = urllib.urlopen(url)
-                            links = json.loads(response.read())
-                            provider_found = False
-                            for link in links["data"]:
-                                if link["relationship"] == "provider":
-                                    provider_found = True
-                                    provider_as = link["asn"]
-                                    if link["asn"] not in list_as_encountered:
-                                        list_as_encountered.append(link["asn"])
-                                        print("recursion: {}".format(link["asn"]))
-                                        add_prefixes(str(provider_as))
-                            if not provider_found:
-                                list_providers.append(searched_as_number)
-                                if searched_as_number in as_influence_guards:
-                                    as_influence_guards[searched_as_number] += guard_probability
-                                else:
-                                    as_influence_guards[searched_as_number] = guard_probability
+                            else:
+                                url = "http://as-rank.caida.org/api/v1/asns/"+str(searched_as_number)+"/links"
+                                response = urllib.urlopen(url)
+                                links = json.loads(response.read())
+                                provider_found = False
+                                for link in links["data"]:
+                                    if link["relationship"] == "provider":
+                                        provider_found = True
+                                        provider_as = link["asn"]
+                                        if link["asn"] not in list_as_encountered:
+                                            list_as_encountered.append(link["asn"])
+                                            print("recursion: {}".format(link["asn"]))
+                                            add_prefixes(str(provider_as))
+                                if not provider_found:
+                                    list_providers.append(searched_as_number)
+                                    if searched_as_number in as_influence_guards:
+                                        as_influence_guards[searched_as_number] += guard_probability
+                                    else:
+                                        as_influence_guards[searched_as_number] = guard_probability
 
                         add_prefixes(row['AS_number'])
                         for as_encountered in list_as_encountered:
