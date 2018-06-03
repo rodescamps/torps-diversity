@@ -2012,6 +2012,8 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                         list_as_encountered = []
                         list_providers = []
 
+                        print(row['AS_number'])
+
                         def add_prefixes(searched_as_number):
 
                             # Optimization, avoids recursion
@@ -2046,7 +2048,6 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                 as_providers[as_encountered] += list_providers
                             else:
                                 as_providers[as_encountered] = list_providers
-                        print(row['AS_number'])
                         break
             i += 1
             print('[{}/{}] guards analyzed adversaries'.format(i, len(guards_probabilities)))
