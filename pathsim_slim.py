@@ -2505,7 +2505,7 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
         for guard_address, guard_probability in guards_probabilities.items():
             for row in country_list:
                 subnets = []
-                if row['country_code'] != 'None':
+                if row['country_code'] != 'None' and row['country_code'] != 'Unknown':
                     subnets.append(row['range_start']+','+row['range_end'])
                     if ip_in_as(guard_address, subnets):
                         if row['country_code'] in country_influence_guards:
@@ -2521,7 +2521,7 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
         for exit_address, exit_probability in exits_probabilities.items():
             for row in country_list:
                 subnets = []
-                if row['country_code'] != '0':
+                if row['country_code'] != 'None' and row['country_code'] != 'Unknown':
                     subnets.append(row['range_start']+','+row['range_end'])
                     if ip_in_as(exit_address, subnets):
                         if row['country_code'] in country_influence_exits:
