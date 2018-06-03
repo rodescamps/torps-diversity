@@ -2174,9 +2174,21 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
 
         # Computes the AS that has the greater influence on the network paths (guards probabilities * exits probabilities)
         as_influence = dict()
+        # To compute the variance metric, a list of probabilities is needed
+        list_probabilities = []
         for as_number, as_probability in as_influence_exits.items():
+            # Probability is 0 if only guard or only exit is controlled (correlation not possible)
+            probability = 0.0
             if as_number in as_influence_guards:
-                as_influence[as_number] = as_probability * as_influence_guards[as_number]
+                probability = as_probability * as_influence_guards[as_number]
+            as_influence[as_number] = probability
+            list_probabilities.append(probability)
+
+        # Compute probability mean
+        m = sum(list_probabilities) / float(len(list_probabilities))
+
+        # Compute variance using a list comprehension
+        as_variance = sum((xi - m) ** 2 for xi in list_probabilities) / float(len(list_probabilities))
 
         as_influence_file = os.path.join("as_influence_list")
         with open(as_influence_file, 'w') as aif:
@@ -2278,7 +2290,7 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
         average_number_paths_compromised += number_paths_compromised
         average_time_to_first_path_compromised += time_to_first_path_compromised
 
-    return average_number_paths_compromised/len(as_adversaries), average_time_to_first_path_compromised/len(as_adversaries), as_adversaries
+    return average_number_paths_compromised/len(as_adversaries), average_time_to_first_path_compromised/len(as_adversaries), as_variance, as_adversaries
 
 def country_compromise_path(guards_probabilities, exits_probabilities, country_codes, denasa):
 
@@ -2358,9 +2370,21 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
 
         # Computes the Country that has the greater influence on the network paths (guards probabilities * exits probabilities)
         country_influence = dict()
+        # To compute the variance metric, a list of probabilities is needed
+        list_probabilities = []
         for country_code, country_probability in country_influence_exits.items():
+            # Probability is 0 if only guard or only exit is controlled (correlation not possible)
+            probability = 0.0
             if country_code in country_influence_guards:
-                country_influence[country_code] = country_probability * country_influence_guards[country_code]
+                probability = country_probability * country_influence_guards[country_code]
+            country_influence[country_code] = probability
+            list_probabilities.append(probability)
+
+        # Compute probability mean
+        m = sum(list_probabilities) / float(len(list_probabilities))
+
+        # Compute variance using a list comprehension
+        country_variance = sum((xi - m) ** 2 for xi in list_probabilities) / float(len(list_probabilities))
 
         country_influence_file = os.path.join("country_influence_list")
         with open(country_influence_file, 'w') as cif:
@@ -2461,7 +2485,7 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
         average_number_paths_compromised += number_paths_compromised
         average_time_to_first_path_compromised += time_to_first_path_compromised
 
-    return average_number_paths_compromised/len(country_adversaries), average_time_to_first_path_compromised/len(country_adversaries), country_adversaries
+    return average_number_paths_compromised/len(country_adversaries), average_time_to_first_path_compromised/len(country_adversaries), country_variance, country_adversaries
 
 def generate_addresses(location, num_addresses):
 
@@ -2911,14 +2935,14 @@ commands', dest='pathalg_subparser')
         if args.top_country is not None:
             top_country_code.append(args.top_country)
         else:
-            top_country_code = ['DE', 'FR'] # ['DE', 'FR', 'NL', 'US']
+            top_country_code = [] # ['DE', 'FR', 'NL', 'US']
 
-        (as_paths_compromised, as_first_compromise, top_as_adversary) = as_compromise_path(guards_probabilities,
+        (as_paths_compromised, as_first_compromise, as_variance, top_as_adversary) = as_compromise_path(guards_probabilities,
                                                                          exits_probabilities,
                                                                          top_as_number,
                                                                          denasa)
 
-        (country_paths_compromised, country_first_compromise, top_country_adversary) = country_compromise_path(guards_probabilities,
+        (country_paths_compromised, country_first_compromise, country_variance, top_country_adversary) = country_compromise_path(guards_probabilities,
                                                                                         exits_probabilities,
                                                                                         top_country_code,
                                                                                         denasa)
@@ -2937,26 +2961,26 @@ commands', dest='pathalg_subparser')
                                       "score_"+args.pathalg_subparser)
         with open(score_file, 'a') as sf:
             if args.num_custom_guards != 0:
-                sf.write("Guards\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (args.location,
+                sf.write("Guards\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (args.location,
                                                           args.num_custom_guards, args.custom_guard_cons_bw,
-                                                          as_paths_compromised, as_first_compromise,
-                                                          country_paths_compromised, country_first_compromise,
+                                                          as_paths_compromised, as_first_compromise, as_variance,
+                                                          country_paths_compromised, country_first_compromise, country_variance,
                                                           top_as_paths_compromised, top_as_first_compromise))
             elif args.num_custom_exits != 0:
-                sf.write("Exits\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (args.location,
+                sf.write("Exits\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (args.location,
                                                          args.num_custom_exits, args.custom_exit_cons_bw,
-                                                         as_paths_compromised, as_first_compromise,
-                                                         country_paths_compromised, country_first_compromise,
+                                                         as_paths_compromised, as_first_compromise, as_variance,
+                                                         country_paths_compromised, country_first_compromise, country_variance,
                                                          top_as_paths_compromised, top_as_first_compromise))
             elif args.num_custom_guardsexits != 0:
-                sf.write("GuardExits\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (args.location,
+                sf.write("GuardExits\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (args.location,
                                                               args.num_custom_guardsexits, args.custom_guardexit_cons_bw,
-                                                              as_paths_compromised, as_first_compromise,
-                                                              country_paths_compromised, country_first_compromise,
+                                                              as_paths_compromised, as_first_compromise, as_variance,
+                                                              country_paths_compromised, country_first_compromise, country_variance,
                                                               top_as_paths_compromised, top_as_first_compromise))
             else:
-                sf.write("Vanilla\t%s\t%s\t%s\t%s\t%s\t%s\n" % (as_paths_compromised, as_first_compromise,
-                                                        country_paths_compromised, country_first_compromise,
+                sf.write("Vanilla\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (as_paths_compromised, as_first_compromise, as_variance,
+                                                        country_paths_compromised, country_first_compromise, country_variance,
                                                         top_as_paths_compromised, top_as_first_compromise))
         sf.close()
 
