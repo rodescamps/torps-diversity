@@ -1882,9 +1882,9 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
             ccf.close()
 
     # By default: Top tier-1 AS adversaries = Top tier-1 AS DeNASA
-    denasa_adversaries_considered = False
+    denasa_adversaries_considered = True
     if not customer_cone_subnets_adversaries:
-        denasa_adversaries_considered = True
+        denasa_adversaries_considered = False
 
     if len(tier1_as_adversaries) > 2:
         g_select = tier1_as_adversaries[:2]
