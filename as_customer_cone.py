@@ -141,18 +141,7 @@ def reduce_prefixes(customer_cone_prefixes):
 
     return reduced_customer_cone_prefixes
 
-if __name__ == '__main__':
-    usage = 'Usage: as_customer_cone.py [AS number] [results_out_dir] \n\
-            Exports in [results_out.dir]/[AS number]_customer_cone_prefixes all the prefixes in its customer cone \
-            according to caida.org'
-
-    if (len(sys.argv) < 2):
-        print(usage)
-        sys.exit(1)
-
-    searched_as_number = sys.argv[1]
-    out_dir = sys.argv[2]
-
+def compute_customer_cone(searched_as_number, out_dir):
     list_as = []
     customer_cone_as = []
     customer_cone_prefixes = []
@@ -206,3 +195,17 @@ if __name__ == '__main__':
         for prefix in customer_cone_prefixes:
             ccf.write("%s\n" % prefix)
     ccf.close()
+
+if __name__ == '__main__':
+    usage = 'Usage: as_customer_cone.py [AS number] [results_out_dir] \n\
+            Exports in [results_out.dir]/[AS number]_customer_cone_prefixes all the prefixes in its customer cone \
+            according to caida.org'
+
+    if (len(sys.argv) < 2):
+        print(usage)
+        sys.exit(1)
+
+    searched_as_number = sys.argv[1]
+    out_dir = sys.argv[2]
+
+    compute_customer_cone(searched_as_number, out_dir)

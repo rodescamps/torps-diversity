@@ -24,6 +24,7 @@ import multiprocessing
 import itertools
 import urllib
 import operator
+from as_customer_cone import compute_customer_cone
 
 logger = logging.getLogger(__name__)
 _testing = False#True
@@ -1839,7 +1840,7 @@ def compute_average(network_states):
         general_average += average
     return general_average/float(len(averages))
 
-def compute_probabilities(network_states, water_filling, denasa, guessing_entropy):
+def compute_probabilities(network_states, water_filling, denasa, tier1_as_adversaries, guessing_entropy):
     guards = []
     guards_bandwidths = dict()
     exits = []
@@ -1858,8 +1859,12 @@ def compute_probabilities(network_states, water_filling, denasa, guessing_entrop
     network_states_size = 24*31
     i = 1
 
-    # Top tier-1 ASes DeNASA preparation
     customer_cone_subnets = dict()
+    g_select = []
+    e_select = []
+
+    # Top tier-1 ASes ADVERSARIES preparation (may be different than adversaries considered by DeNASA)
+    customer_cone_subnets_adversaries = dict()
     customer_cone_files = []
     for dirpath, dirnames, filenames in os.walk("../out/customer_cone_prefixes", followlinks=True):
         for filename in filenames:
@@ -1867,36 +1872,27 @@ def compute_probabilities(network_states, water_filling, denasa, guessing_entrop
                 customer_cone_files.append(os.path.join(dirpath,filename))
     for customer_cone_file in customer_cone_files:
         customer_cone_as = re.sub("[^0-9]", "", customer_cone_file)
-        customer_cone_subnets[customer_cone_as] = []
-        guards_in_as[customer_cone_as] = 0.0
-        exits_in_as[customer_cone_as] = 0.0
-        with open(customer_cone_file, 'r') as ccf:
-            for line in ccf:
-                customer_cone_subnets[customer_cone_as].append(line)
-        ccf.close()
-
-    # Top tier-1 ASes ADVERSARIES preparation (may be different than adversaries considered by DeNASA)
-    customer_cone_subnets_adversaries = dict()
-    customer_cone_files = []
-    for dirpath, dirnames, filenames in os.walk("../out/customer_cone_adversaries", followlinks=True):
-        for filename in filenames:
-            if (filename[0] != '.'):
-                customer_cone_files.append(os.path.join(dirpath,filename))
-    for customer_cone_file in customer_cone_files:
-        customer_cone_as = re.sub("[^0-9]", "", customer_cone_file)
-        customer_cone_subnets_adversaries[customer_cone_as] = []
-        guards_in_as[customer_cone_as] = 0.0
-        exits_in_as[customer_cone_as] = 0.0
-        with open(customer_cone_file, 'r') as ccf:
-            for line in ccf:
-                customer_cone_subnets_adversaries[customer_cone_as].append(line)
-        ccf.close()
+        # Takes only specified adversaries into account
+        if customer_cone_as in tier1_as_adversaries:
+            customer_cone_subnets_adversaries[customer_cone_as] = []
+            guards_in_as[customer_cone_as] = 0.0
+            exits_in_as[customer_cone_as] = 0.0
+            with open(customer_cone_file, 'r') as ccf:
+                for line in ccf:
+                    customer_cone_subnets_adversaries[customer_cone_as].append(line)
+            ccf.close()
 
     # By default: Top tier-1 AS adversaries = Top tier-1 AS DeNASA
     denasa_adversaries_considered = False
     if not customer_cone_subnets_adversaries:
         denasa_adversaries_considered = True
-        customer_cone_subnets_adversaries = customer_cone_subnets
+
+    if len(tier1_as_adversaries) > 2:
+        g_select = tier1_as_adversaries[:2]
+        e_select = tier1_as_adversaries[2:]
+    else:
+        g_select = tier1_as_adversaries
+        e_select = []
 
     for network_state in network_states:
 
@@ -1950,15 +1946,6 @@ def compute_probabilities(network_states, water_filling, denasa, guessing_entrop
         i += 1
         #if i == 2: break
 
-    # DeNASA g-select
-    if denasa:
-        for address in guards:
-            for as_customer_cone, subnets in customer_cone_subnets.items():
-                if as_customer_cone in denasa_suspect_ases.GSELECT:
-                    if ip_in_as(address, subnets):
-                        guards.remove(address)
-                        break
-
     for address in guards:
         bandwidth_details = guards_bandwidths[address]
         # Computes the average of the node bandwidth on the analyzed period
@@ -1992,12 +1979,179 @@ def compute_probabilities(network_states, water_filling, denasa, guessing_entrop
         average_bandwidth = exits_bandwidths[address]
         exits_probabilities[address] = average_bandwidth/float(exits_total_bandwidth)
 
+    # If no tier-1 AS adversary(ies) is (are) specified, consider the top tier-1 ASes as the adversary (that control half of the network)
+    if not denasa_adversaries_considered:
+
+        as_list = []
+
+        # Prepare the AS subnets in DictReader
+        if not os.path.isfile("ip2asn-v4.tsv.gz"):
+            subnets_as_file = urllib.URLopener()
+            subnets_as_file.retrieve("https://iptoasn.com/data/ip2asn-v4.tsv.gz", "ip2asn-v4.tsv.gz")
+        with gzip.open('ip2asn-v4.tsv.gz', 'rb') as csvfile:
+            asreader = csv.DictReader(csvfile, ['range_start', 'range_end', 'AS_number', 'country_code', 'AS_description'], dialect='excel-tab')
+            for row in asreader:
+                as_list.append(row)
+        csvfile.close()
+
+        # Prints all ASes influence on Tor network by decreasing probabilities on guard and exit nodes distinctly
+        as_influence_guards = dict()
+        i = 0
+        for guard_address, guard_probability in guards_probabilities.items():
+            for row in as_list:
+                subnets = []
+                if row['AS_number'] != '0':
+                    subnets.append(row['range_start']+','+row['range_end'])
+                    if ip_in_as(guard_address, subnets):
+
+                        def add_prefixes(searched_as_number):
+                            url = "http://as-rank.caida.org/api/v1/asns/"+str(searched_as_number)+"/links"
+                            response = urllib.urlopen(url)
+                            links = json.loads(response.read())
+                            provider_found = False
+                            for link in links["data"]:
+                                if link["relationship"] == "provider":
+                                    provider_found = True
+                                    provider_as = link["asn"]
+                                    add_prefixes(str(provider_as))
+                            if not provider_found:
+                                if searched_as_number in as_influence_guards:
+                                    as_influence_guards[searched_as_number] += guard_probability
+                                else:
+                                    as_influence_guards[searched_as_number] = guard_probability
+
+                        add_prefixes(row['AS_number'])
+
+                        print(subnets)
+                        break
+            i += 1
+            print('[{}/{}] guards analyzed adversaries'.format(i, len(guards_probabilities)))
+        as_influence_exits = dict()
+        i = 0
+        for exit_address, exit_probability in exits_probabilities.items():
+            for row in as_list:
+                subnets = []
+                if row['AS_number'] != '0':
+                    subnets.append(row['range_start']+','+row['range_end'])
+                    if ip_in_as(exit_address, subnets):
+
+                        def add_prefixes(searched_as_number):
+                            url = "http://as-rank.caida.org/api/v1/asns/"+str(searched_as_number)+"/links"
+                            response = urllib.urlopen(url)
+                            links = json.loads(response.read())
+                            provider_found = False
+                            for link in links["data"]:
+                                if link["relationship"] == "provider":
+                                    provider_found = True
+                                    provider_as = link["asn"]
+                                    add_prefixes(str(provider_as))
+                            if not provider_found:
+                                if searched_as_number in as_influence_guards:
+                                    as_influence_guards[searched_as_number] += guard_probability
+                                else:
+                                    as_influence_guards[searched_as_number] = guard_probability
+
+                        add_prefixes(row['AS_number'])
+
+                        print(subnets)
+                        break
+            i += 1
+            print('[{}/{}] exits analyzed adversaries'.format(i, len(exits_probabilities)))
+
+        # Computes the tier-1 AS that has the greater influence on the network paths (guards probabilities * exits probabilities)
+        as_influence = dict()
+        # To compute the variance metric, a list of probabilities is needed
+        list_probabilities = []
+        for as_number, as_probability in as_influence_exits.items():
+            # Probability is 0 if only guard or only exit is controlled (correlation not possible)
+            probability = 0.0
+            if as_number in as_influence_guards:
+                # Probability in percentage
+                probability = (as_probability * as_influence_guards[as_number])*100
+            as_influence[as_number] = probability
+            list_probabilities.append(probability)
+        # Takes also into account the last set: guards AS cones that do not appear in exit tier-1 AS cones
+        for as_number, as_probability in as_influence_guards.items():
+            # Probability is 0 if only guard or only exit is controlled (correlation not possible)
+            probability = 0.0
+            if as_number not in as_influence_exits:
+                as_influence[as_number] = probability
+                list_probabilities.append(probability)
+
+        # Compute probability mean
+        m = sum(list_probabilities) / float(len(list_probabilities))
+
+        # Compute variance using a list comprehension
+        as_variance = sum((xi - m) ** 2 for xi in list_probabilities) / float(len(list_probabilities))
+
+        as_influence_file = os.path.join("tier1_as_influence_list")
+        with open(as_influence_file, 'w') as aif:
+            for as_number, as_probability in as_influence.items():
+                aif.write("%s\t%s\n" % (as_number, as_probability))
+        aif.close()
+
+        # Creates a reversed sorted list to consult it afterwards
+        os.system("sort -t$'\t' -k2 -gr tier1_as_influence_list > tier1_as_influence_list_sorted")
+
+        top_tier1_as_adversaries_number = []
+        as_influence_computation_list = as_influence
+        as_probability_sum = 0.0
+        # Takes the top tier-1 adversaries until we control half of the network, as advised by DeNASA
+        while as_probability_sum < 0.5:
+            top_as_adversary_number = ''
+            top_as_adversary_probability = 0.0
+            for as_number, as_probability in as_influence.items():
+                if as_probability > top_as_adversary_probability:
+                    top_as_adversary_probability = as_probability
+                    top_as_adversary_number = as_number
+            del as_influence_computation_list[top_as_adversary_number]
+            as_probability_sum += top_as_adversary_probability
+            top_tier1_as_adversaries_number.append(top_as_adversary_number)
+
+        print("Top tier-1 ASes ({} influence on Tor network): {}".format(as_probability_sum, top_tier1_as_adversaries_number))
+
+        # If a customer cone is not already computed, compute it
+        for tier1_as_adversary in top_tier1_as_adversaries_number:
+            if not os.path.exists("../out/customer_cone_prefixes"+tier1_as_adversary+"_customer_cone_prefixes"):
+                print("Computing {} customer cone".format(tier1_as_adversary))
+                compute_customer_cone(tier1_as_adversary, "../out/customer_cone_prefixes")
+
+        # Top tier-1 ASes DeNASA preparation
+        customer_cone_files = []
+        for dirpath, dirnames, filenames in os.walk("../out/customer_cone_prefixes", followlinks=True):
+            for filename in filenames:
+                if (filename[0] != '.'):
+                    customer_cone_files.append(os.path.join(dirpath,filename))
+        for customer_cone_file in customer_cone_files:
+            customer_cone_as = re.sub("[^0-9]", "", customer_cone_file)
+            if customer_cone_as in top_tier1_as_adversaries_number:
+                customer_cone_subnets[customer_cone_as] = []
+                guards_in_as[customer_cone_as] = 0.0
+                exits_in_as[customer_cone_as] = 0.0
+                with open(customer_cone_file, 'r') as ccf:
+                    for line in ccf:
+                        customer_cone_subnets[customer_cone_as].append(line)
+                ccf.close()
+
+        # Takes the two top tier-1 for g-select, may be optimized
+        g_select = top_tier1_as_adversaries_number[:2]
+        e_select = top_tier1_as_adversaries_number[2:]
+
+    # DeNASA g-select
+    if denasa:
+        for address in guards:
+            for as_customer_cone, subnets in customer_cone_subnets.items():
+                if as_customer_cone in g_select:
+                    if ip_in_as(address, subnets):
+                        guards.remove(address)
+                        break
+
     # Analysis of tier-1 ASes compromises
     top_as_probability = 0.0
 
     if denasa:
         for as_customer_cone, subnets in customer_cone_subnets.items():
-            if as_customer_cone not in denasa_suspect_ases.ESELECT:
+            if as_customer_cone not in e_select:
                 print(as_customer_cone)
                 del customer_cone_subnets[as_customer_cone]
 
@@ -2093,7 +2247,8 @@ def compute_probabilities(network_states, water_filling, denasa, guessing_entrop
     return guards_probabilities, exits_probabilities, \
            guards_number, exits_number, \
            guards_total_bandwidth, exits_total_bandwidth, \
-           number_paths_compromised, time_to_first_path_compromised
+           number_paths_compromised, time_to_first_path_compromised, \
+           as_variance
 
 def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, denasa):
 
@@ -2390,7 +2545,7 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
                 probability = (country_probability * country_influence_guards[country_code])*100
             country_influence[country_code] = probability
             list_probabilities.append(probability)
-        # Takes also into account the last set: guards ASes that do not appear in exit ASes
+        # Takes also into account the last set: guards Countries that do not appear in exit Countries
         for country_code, country_probability in country_influence_guards.items():
             # Probability is 0 if only guard or only exit is controlled (correlation not possible)
             probability = 0.0
@@ -2822,11 +2977,13 @@ commands', dest='pathalg_subparser')
         if args.pathalg_subparser == 'tor-denasa':
             denasa = True
 
-        # top_as_paths_compromised, top_as_first_compromise not used when guessing entropy computed
+        tier1_as_adversaries = denasa_suspect_ases.GSELECT+denasa_suspect_ases.ESELECT
+        # top_as_paths_compromised, top_as_first_compromise, as_variance not used when guessing entropy computed
         (guards_probabilities, exits_probabilities,
          guards_number, exits_number,
          guards_total_bandwidth, exits_total_bandwidth,
-         top_as_paths_compromised, top_as_first_compromise) = compute_probabilities(network_states, water_filling, denasa, True)
+         top_as_paths_compromised, top_as_first_compromise,
+         tier1_as_variance) = compute_probabilities(network_states, water_filling, denasa, tier1_as_adversaries, True)
 
         probabilities_reduction = 2
         guessing_entropy_result = guessing_entropy(guards_probabilities, exits_probabilities, probabilities_reduction, denasa)
@@ -2934,10 +3091,13 @@ commands', dest='pathalg_subparser')
         #network_states_it1, network_states_it2 = itertools.tee(network_states, 1)
         #network_states_list = list(network_states)
 
+        tier1_as_adversaries = [] #denasa_suspect_ases.GSELECT+denasa_suspect_ases.ESELECT
+
         (guards_probabilities, exits_probabilities,
          guards_number, exits_number,
          guards_total_bandwidth, exits_total_bandwidth,
-         top_as_paths_compromised, top_as_first_compromise) = compute_probabilities(network_states, water_filling, denasa, False)
+         top_as_paths_compromised, top_as_first_compromise,
+         tier1_as_variance) = compute_probabilities(network_states, water_filling, denasa, tier1_as_adversaries, False)
 
         #probabilities_reduction = 1
         #guessing_entropy_result = guessing_entropy(guards_probabilities, exits_probabilities, probabilities_reduction)*probabilities_reduction
@@ -2979,26 +3139,26 @@ commands', dest='pathalg_subparser')
                                       "score_"+args.pathalg_subparser)
         with open(score_file, 'a') as sf:
             if args.num_custom_guards != 0:
-                sf.write("Guards\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (args.location,
+                sf.write("Guards\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (args.location,
                                                           args.num_custom_guards, args.custom_guard_cons_bw,
                                                           as_paths_compromised, as_first_compromise, as_variance,
                                                           country_paths_compromised, country_first_compromise, country_variance,
-                                                          top_as_paths_compromised, top_as_first_compromise))
+                                                          top_as_paths_compromised, top_as_first_compromise, tier1_as_variance))
             elif args.num_custom_exits != 0:
-                sf.write("Exits\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (args.location,
+                sf.write("Exits\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (args.location,
                                                          args.num_custom_exits, args.custom_exit_cons_bw,
                                                          as_paths_compromised, as_first_compromise, as_variance,
                                                          country_paths_compromised, country_first_compromise, country_variance,
-                                                         top_as_paths_compromised, top_as_first_compromise))
+                                                         top_as_paths_compromised, top_as_first_compromise, tier1_as_variance))
             elif args.num_custom_guardsexits != 0:
-                sf.write("GuardExits\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (args.location,
+                sf.write("GuardExits\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (args.location,
                                                               args.num_custom_guardsexits, args.custom_guardexit_cons_bw,
                                                               as_paths_compromised, as_first_compromise, as_variance,
                                                               country_paths_compromised, country_first_compromise, country_variance,
-                                                              top_as_paths_compromised, top_as_first_compromise))
+                                                              top_as_paths_compromised, top_as_first_compromise, tier1_as_variance))
             else:
-                sf.write("Vanilla\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (as_paths_compromised, as_first_compromise, as_variance,
+                sf.write("Vanilla\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (as_paths_compromised, as_first_compromise, as_variance,
                                                         country_paths_compromised, country_first_compromise, country_variance,
-                                                        top_as_paths_compromised, top_as_first_compromise))
+                                                        top_as_paths_compromised, top_as_first_compromise, tier1_as_variance))
         sf.close()
 
