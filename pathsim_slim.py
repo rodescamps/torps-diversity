@@ -2009,11 +2009,9 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                     subnets.append(row['range_start']+','+row['range_end'])
                     if ip_in_as(guard_address, subnets):
 
-                        list_providers = []
-
                         print(row['AS_number'])
 
-                        def add_prefixes(searched_as_number, list_as_encountered):
+                        def add_prefixes(searched_as_number, list_as_encountered, list_provider_encountered):
 
                             # Optimization, avoids recursion
                             if searched_as_number in as_providers:
@@ -2038,22 +2036,26 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                                 if as_encountered not in list_as_encountered:
                                                     list_as_encountered.append(as_encountered)
                                 if not provider_found:
-                                    list_providers.append(searched_as_number)
-                                    if searched_as_number in as_influence_guards:
-                                        as_influence_guards[searched_as_number] += guard_probability
-                                    else:
-                                        as_influence_guards[searched_as_number] = guard_probability
-                            return list_as_encountered
+                                    if searched_as_number not in list_provider_encountered:
+                                        list_provider_encountered.append(searched_as_number)
+                                        if searched_as_number in as_influence_guards:
+                                            as_influence_guards[searched_as_number] += guard_probability
+                                        else:
+                                            as_influence_guards[searched_as_number] = guard_probability
+                            return list_as_encountered, list_provider_encountered
 
-                        list_as_encountered = add_prefixes(row['AS_number'], [])
+                        list_as_encountered, list_provider_encountered = add_prefixes(row['AS_number'], [], [])
+
                         for as_encountered in list_as_encountered:
-                            if as_encountered not in list_providers:
+                            if as_encountered not in list_provider_encountered:
                                 if as_encountered in as_providers:
-                                    for provider in list_providers:
+                                    for provider in list_provider_encountered:
                                         if provider not in as_providers[as_encountered]:
                                             as_providers[as_encountered].append(provider)
                                 else:
-                                    as_providers[as_encountered] = list_providers
+                                    as_providers[as_encountered] = list_provider_encountered
+                        if row['AS_number'] not in as_providers:
+                            as_providers[row['AS_number']].append(list_provider_encountered)
                         print(len(as_providers))
                         break
             i += 1
