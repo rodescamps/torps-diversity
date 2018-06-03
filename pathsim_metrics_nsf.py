@@ -2,7 +2,6 @@ import sys
 import os
 from pathsim import *
 import math
-import denasa_suspect_ases
 from as_inference import ip_in_as
 import re
 
@@ -11,7 +10,7 @@ import re
 def consensusname(log_file):
   return log_file.split('.')[1]
 
-def build_prob_matrix(guards_probabilities, exits_probabilities, probabilities_reduction, denasa):
+def build_prob_matrix(guards_probabilities, exits_probabilities, probabilities_reduction, denasa, e_select):
 
   prob_matrix = {}
   guards = {}
@@ -72,7 +71,7 @@ def build_prob_matrix(guards_probabilities, exits_probabilities, probabilities_r
           customer_cone_subnets[customer_cone_as].append(line)
       ccf.close()
     for as_customer_cone, subnets in customer_cone_subnets.items():
-      if as_customer_cone not in denasa_suspect_ases.ESELECT:
+      if as_customer_cone not in e_select:
         print(as_customer_cone)
         del customer_cone_subnets[as_customer_cone]
 
@@ -164,9 +163,9 @@ def build_prob_matrix(guards_probabilities, exits_probabilities, probabilities_r
   return prob_matrix, guards, exits
 
 
-def guessing_entropy(guards_prob, exits_prob, probabilities_reduction, denasa):
+def guessing_entropy(guards_prob, exits_prob, probabilities_reduction, denasa, e_select):
 
-  (prob_matrix, guards, exits) = build_prob_matrix(guards_prob, exits_prob, probabilities_reduction, denasa)
+  (prob_matrix, guards, exits) = build_prob_matrix(guards_prob, exits_prob, probabilities_reduction, denasa, e_select)
 
   all_nodes = len(guards)
   for exit in exits:

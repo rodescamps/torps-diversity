@@ -15,7 +15,6 @@ import process_consensuses_slim
 import re
 import network_modifiers_slim
 from network_modifiers_slim import *
-import denasa_suspect_ases
 import event_callbacks
 import importlib
 import logging
@@ -2248,9 +2247,9 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
            guards_number, exits_number, \
            guards_total_bandwidth, exits_total_bandwidth, \
            number_paths_compromised, time_to_first_path_compromised, \
-           as_variance
+           as_variance, e_select
 
-def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, denasa):
+def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, denasa, e_select):
 
     average_number_paths_compromised = 0.0
     average_time_to_first_path_compromised = 0.0
@@ -2288,7 +2287,7 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
                     customer_cone_subnets[customer_cone_as].append(line)
             ccf.close()
         for as_customer_cone, subnets in customer_cone_subnets.items():
-            if as_customer_cone not in denasa_suspect_ases.ESELECT:
+            if as_customer_cone not in e_select:
                 print(as_customer_cone)
                 del customer_cone_subnets[as_customer_cone]
 
@@ -2494,7 +2493,7 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
                     customer_cone_subnets[customer_cone_as].append(line)
             ccf.close()
         for as_customer_cone, subnets in customer_cone_subnets.items():
-            if as_customer_cone not in denasa_suspect_ases.ESELECT:
+            if as_customer_cone not in e_select:
                 print(as_customer_cone)
                 del customer_cone_subnets[as_customer_cone]
 
@@ -2977,16 +2976,16 @@ commands', dest='pathalg_subparser')
         if args.pathalg_subparser == 'tor-denasa':
             denasa = True
 
-        tier1_as_adversaries = denasa_suspect_ases.GSELECT+denasa_suspect_ases.ESELECT
+        tier1_as_adversaries = ['3356', '1299', '174', '2914', '3257']
         # top_as_paths_compromised, top_as_first_compromise, as_variance not used when guessing entropy computed
         (guards_probabilities, exits_probabilities,
          guards_number, exits_number,
          guards_total_bandwidth, exits_total_bandwidth,
          top_as_paths_compromised, top_as_first_compromise,
-         tier1_as_variance) = compute_probabilities(network_states, water_filling, denasa, tier1_as_adversaries, True)
+         tier1_as_variance, e_select) = compute_probabilities(network_states, water_filling, denasa, tier1_as_adversaries, True)
 
         probabilities_reduction = 2
-        guessing_entropy_result = guessing_entropy(guards_probabilities, exits_probabilities, probabilities_reduction, denasa)
+        guessing_entropy_result = guessing_entropy(guards_probabilities, exits_probabilities, probabilities_reduction, denasa, e_select)
 
         score_file = os.path.join(args.nsf_dir+"/../"+"guessing_entropy_"+args.pathalg_subparser)
         if args.num_custom_guards != 0:
@@ -3091,13 +3090,13 @@ commands', dest='pathalg_subparser')
         #network_states_it1, network_states_it2 = itertools.tee(network_states, 1)
         #network_states_list = list(network_states)
 
-        tier1_as_adversaries = [] #denasa_suspect_ases.GSELECT+denasa_suspect_ases.ESELECT
+        tier1_as_adversaries = [] #['3356', '1299', '174', '2914', '3257']
 
         (guards_probabilities, exits_probabilities,
          guards_number, exits_number,
          guards_total_bandwidth, exits_total_bandwidth,
          top_as_paths_compromised, top_as_first_compromise,
-         tier1_as_variance) = compute_probabilities(network_states, water_filling, denasa, tier1_as_adversaries, False)
+         tier1_as_variance, e_select) = compute_probabilities(network_states, water_filling, denasa, tier1_as_adversaries, False)
 
         #probabilities_reduction = 1
         #guessing_entropy_result = guessing_entropy(guards_probabilities, exits_probabilities, probabilities_reduction)*probabilities_reduction
@@ -3118,12 +3117,12 @@ commands', dest='pathalg_subparser')
         (as_paths_compromised, as_first_compromise, as_variance, top_as_adversary) = as_compromise_path(guards_probabilities,
                                                                          exits_probabilities,
                                                                          top_as_number,
-                                                                         denasa)
+                                                                         denasa, e_select)
 
         (country_paths_compromised, country_first_compromise, country_variance, top_country_adversary) = country_compromise_path(guards_probabilities,
                                                                                         exits_probabilities,
                                                                                         top_country_code,
-                                                                                        denasa)
+                                                                                        denasa, e_select)
 
         #print("Scores AS: %s\t%s\t%s" % (guessing_entropy_result, as_paths_compromised, as_first_compromise))
         #print("Scores Country: %s\t%s\t%s" % (guessing_entropy_result, country_paths_compromised, country_first_compromise))
