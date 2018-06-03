@@ -2045,11 +2045,13 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
 
                         add_prefixes(row['AS_number'])
                         for as_encountered in list_as_encountered:
-                            if as_encountered in as_providers:
-                                as_providers[as_encountered] += list_providers
-                            else:
-                                as_providers[as_encountered] = list_providers
-                        print(as_providers)
+                            if as_encountered not in list_providers:
+                                if as_encountered in as_providers:
+                                    for provider in list_providers:
+                                        if provider not in as_providers[as_encountered]:
+                                            as_providers[as_encountered].append(provider)
+                                else:
+                                    as_providers[as_encountered] = list_providers
                         print(len(as_providers))
                         break
             i += 1
