@@ -2049,6 +2049,8 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                 as_providers[as_encountered] += list_providers
                             else:
                                 as_providers[as_encountered] = list_providers
+                        print(as_providers)
+                        print(len(as_providers))
                         break
             i += 1
             print('[{}/{}] guards analyzed adversaries'.format(i, len(guards_probabilities)))
