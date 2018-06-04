@@ -2179,13 +2179,13 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
         aif.close()
 
         # Creates a reversed sorted list to consult it afterwards
-        call(["sort", "-t \',\' -k2 -gr tier1_as_influence_list > tier1_as_influence_list_sorted"])
+        call(["sort", "-t, -k2 -gr tier1_as_influence_list > tier1_as_influence_list_sorted"])
 
         top_tier1_as_adversaries_number = []
         as_influence_computation_list = as_influence
         as_probability_sum = 0.0
         # Takes the top tier-1 adversaries until we control half of the network, as advised by DeNASA
-        while as_probability_sum < 0.5:
+        while as_probability_sum < 0.05:
             top_as_adversary_number = ''
             top_as_adversary_probability = 0.0
             for as_number, as_probability in as_influence.items():
