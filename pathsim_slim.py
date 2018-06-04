@@ -2013,11 +2013,12 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
 
                         # list_as_encountered are all the ASes we observe towards the tier-1 ASes
                         # list_provider_encountered are all ASes we already added the influence (we only add each provider once per node)
-                        def add_prefixes(searched_as_number, list_as_encountered, list_provider_encountered):
+                        # list_providers keeps track of all the providers we encounter for this searched_as_numnber
+                        def add_prefixes(searched_as_number, list_as_encountered, list_provider_encountered, list_providers):
 
                             # Already added providers for this searched_as_number, only add them once
                             if searched_as_number in list_as_encountered:
-                                return list_as_encountered, list_provider_encountered
+                                return list_as_encountered, list_provider_encountered, list_providers
                             # Optimization: avoids recursion, all providers already known by previous computation
                             elif searched_as_number in as_providers:
                                 for provider_as in as_providers:
@@ -2029,7 +2030,9 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                             as_influence_guards[provider_as] += guard_probability
                                         else:
                                             as_influence_guards[provider_as] = guard_probability
-                                return list_as_encountered, list_provider_encountered
+                                    if provider_as not in list_providers:
+                                        list_providers.append(provider_as)
+                                return list_as_encountered, list_provider_encountered, list_providers
                             # Recursively computes all the providers above the AS#searched_as_number
                             else:
                                 url = "http://as-rank.caida.org/api/v1/asns/"+str(searched_as_number)+"/links"
@@ -2039,10 +2042,11 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                 for link in links["data"]:
                                     if link["relationship"] == "provider":
                                         provider_as = str(link["asn"])
-                                        list_providers.append(provider_as)
+                                        if provider_as not in list_providers:
+                                            list_providers.append(provider_as)
                                         if provider_as not in list_as_encountered:
                                             list_as_encountered.append(provider_as)
-                                            list_as_encountered, list_provider_encountered = add_prefixes(provider_as, list_as_encountered, list_provider_encountered)
+                                            list_as_encountered, list_provider_encountered, list_providers = add_prefixes(provider_as, list_as_encountered, list_provider_encountered, list_providers)
                                             if provider_as not in list_provider_encountered:
                                                 list_provider_encountered.append(provider_as)
                                                 if provider_as in as_influence_guards:
@@ -2052,10 +2056,10 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                 # Add providers of this searched_as_number in memory for future cone research for this as number
                                 if searched_as_number not in as_providers:
                                     as_providers[searched_as_number] = list_providers
-                                return list_as_encountered, list_provider_encountered
+                                return list_as_encountered, list_provider_encountered, list_providers
 
-                        list_as_encountered, list_provider_encountered = add_prefixes(row['AS_number'], [], [])
-                        
+                        list_as_encountered, list_provider_encountered, list_providers = add_prefixes(row['AS_number'], [], [])
+
                         #print(len(as_providers))
                         break
             i += 1
