@@ -2057,6 +2057,9 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                         as_influence_guards[searched_as_number] += guard_probability
                                     else:
                                         as_influence_guards[searched_as_number] = guard_probability
+
+                                    if searched_as_number not in as_providers:
+                                        as_providers[searched_as_number] = []
                                 # Add providers of this searched_as_number in memory for future cone research for this as number
                                 if searched_as_number not in as_providers:
                                     as_providers[searched_as_number] = list_provider_encountered
@@ -2125,6 +2128,9 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                         as_influence_exits[searched_as_number] += exit_probability
                                     else:
                                         as_influence_exits[searched_as_number] = exit_probability
+
+                                    if searched_as_number not in as_providers:
+                                        as_providers[searched_as_number] = []
                                 # Add providers of this searched_as_number in memory for future cone research for this as number
                                 if searched_as_number not in as_providers:
                                     as_providers[searched_as_number] = list_provider_encountered
