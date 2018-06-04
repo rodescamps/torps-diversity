@@ -2053,7 +2053,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                             for as_encountered_to_add in list_as_encountered_to_add:
                                                 if as_encountered_to_add not in list_as_encountered:
                                                     list_as_encountered.append(as_encountered_to_add)
-                                            for provider_encountered_to_add in list_as_encountered_to_add:
+                                            for provider_encountered_to_add in list_provider_encountered_to_add:
                                                 if provider_encountered_to_add not in list_provider_encountered:
                                                     list_provider_encountered.append(provider_encountered_to_add)
                                 # Tier-1 Case, thus no provider found, add it if it the first time we encounter it
@@ -2128,7 +2128,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                             for as_encountered_to_add in list_as_encountered_to_add:
                                                 if as_encountered_to_add not in list_as_encountered:
                                                     list_as_encountered.append(as_encountered_to_add)
-                                            for provider_encountered_to_add in list_as_encountered_to_add:
+                                            for provider_encountered_to_add in list_provider_encountered_to_add:
                                                 if provider_encountered_to_add not in list_provider_encountered:
                                                     list_provider_encountered.append(provider_encountered_to_add)
                                 # Tier-1 Case, thus no provider found, add it if it the first time we encounter it
@@ -2392,7 +2392,6 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
                             as_influence_guards[row['AS_number']] += guard_probability
                         else:
                             as_influence_guards[row['AS_number']] = guard_probability
-                        print(subnets)
                         break
             i += 1
             print('[{}/{}] guards analyzed adversaries'.format(i, len(guards_probabilities)))
@@ -2408,7 +2407,6 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
                             as_influence_exits[row['AS_number']] += exit_probability
                         else:
                             as_influence_exits[row['AS_number']] = exit_probability
-                        print(subnets)
                         break
             i += 1
             print('[{}/{}] exits analyzed adversaries'.format(i, len(guards_probabilities)))
@@ -2597,7 +2595,6 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
                             country_influence_guards[row['country_code']] += guard_probability
                         else:
                             country_influence_guards[row['country_code']] = guard_probability
-                        print(subnets)
                         break
             i += 1
             print('[{}/{}] country guards analyzed adversaries'.format(i, len(guards_probabilities)))
@@ -2613,7 +2610,6 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
                             country_influence_exits[row['country_code']] += exit_probability
                         else:
                             country_influence_exits[row['country_code']] = exit_probability
-                        print(subnets)
                         break
             i += 1
             print('[{}/{}] country exits analyzed adversaries'.format(i, len(guards_probabilities)))
