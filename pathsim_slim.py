@@ -2042,7 +2042,6 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                     if link["relationship"] == "provider":
                                         provider_as = str(link["asn"])
                                         if provider_as not in list_as_encountered:
-                                            list_as_encountered.append(provider_as)
                                             list_as_encountered_to_add, list_provider_encountered_to_add = add_prefixes(provider_as, list_as_encountered)
                                             for as_encountered_to_add in list_as_encountered_to_add:
                                                 if as_encountered_to_add not in list_as_encountered:
@@ -2112,7 +2111,6 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                     if link["relationship"] == "provider":
                                         provider_as = str(link["asn"])
                                         if provider_as not in list_as_encountered:
-                                            list_as_encountered.append(provider_as)
                                             list_as_encountered_to_add, list_provider_encountered_to_add = add_prefixes(provider_as, list_as_encountered)
                                             for as_encountered_to_add in list_as_encountered_to_add:
                                                 if as_encountered_to_add not in list_as_encountered:
