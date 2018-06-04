@@ -2068,6 +2068,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                 if searched_as_number not in as_providers:
                                     as_providers[searched_as_number] = list_provider_encountered
                                 return list_as_encountered, list_provider_encountered
+                                print(searched_as_number)
 
                         list_as_encountered, list_provider_encountered = add_prefixes(row['AS_number'], [])
 
