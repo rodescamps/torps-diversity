@@ -2019,9 +2019,9 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                             if searched_as_number in list_as_encountered:
                                 return list_as_encountered, []
                             # Optimization: avoids recursion, all providers already known by previous computation
-                            elif searched_as_number in as_providers[searched_as_number]:
+                            elif searched_as_number in as_providers:
                                 list_provider_encountered = []
-                                for provider_as in as_providers:
+                                for provider_as in as_providers[searched_as_number]:
                                     if provider_as not in list_as_encountered:
                                         list_as_encountered.append(provider_as)
                                     if provider_as not in list_provider_encountered:
