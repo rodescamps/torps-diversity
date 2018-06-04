@@ -2146,6 +2146,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
             # Probability is 0 if only guard or only exit is controlled (correlation not possible)
             probability = 0.0
             # Keep only tier-1 ASes
+            print("AS {} providers: {}".format(as_number, as_providers[as_number]))
             if not as_providers[as_number]:
                 if as_number in as_influence_guards:
                     # Probability in percentage
