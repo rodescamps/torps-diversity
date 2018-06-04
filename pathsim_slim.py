@@ -2055,7 +2055,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                 else:
                                     as_providers[as_encountered] = list_provider_encountered
                         if row['AS_number'] not in as_providers:
-                            as_providers[row['AS_number']].append(list_provider_encountered)
+                            as_providers[row['AS_number']] = list_provider_encountered
                         print(len(as_providers))
                         break
             i += 1
