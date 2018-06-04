@@ -2033,7 +2033,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                 return list_as_encountered, list_provider_encountered
                             # Recursively computes all the providers above the AS#searched_as_number
                             else:
-                                url = "http://as-rank.caida.org/api/v1/asns/"+str(searched_as_number)+"/links"
+                                url = "http://as-rank.caida.org/api/v1/asns/"+searched_as_number+"/links"
                                 response = urllib.urlopen(url)
                                 links = json.loads(response.read())
                                 list_provider_encountered = []
@@ -2093,7 +2093,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                 return list_as_encountered, list_provider_encountered
                             # Recursively computes all the providers above the AS#searched_as_number
                             else:
-                                url = "http://as-rank.caida.org/api/v1/asns/"+str(searched_as_number)+"/links"
+                                url = "http://as-rank.caida.org/api/v1/asns/"+searched_as_number+"/links"
                                 response = urllib.urlopen(url)
                                 links = json.loads(response.read())
                                 list_provider_encountered = []
@@ -2129,6 +2129,10 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
             # Probability is 0 if only guard or only exit is controlled (correlation not possible)
             probability = 0.0
             # Keep only tier-1 ASes
+            for as_provider in as_providers:
+                if as_number == as_provider:
+                    print("-------------------------------")
+                print(as_provider)
             if not as_providers[as_number]:
                 if as_number in as_influence_guards:
                     # Probability in percentage
