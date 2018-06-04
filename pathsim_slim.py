@@ -2019,7 +2019,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                             if searched_as_number in list_as_encountered:
                                 return list_as_encountered, []
                             # Optimization: avoids recursion, all providers already known by previous computation
-                            elif searched_as_number in as_providers:
+                            elif searched_as_number in as_providers[searched_as_number]:
                                 list_provider_encountered = []
                                 for provider_as in as_providers:
                                     if provider_as not in list_as_encountered:
@@ -2081,7 +2081,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                             # Optimization: avoids recursion, all providers already known by previous computation
                             elif searched_as_number in as_providers:
                                 list_provider_encountered = []
-                                for provider_as in as_providers:
+                                for provider_as in as_providers[searched_as_number]:
                                     if provider_as not in list_as_encountered:
                                         list_as_encountered.append(provider_as)
                                     if provider_as not in list_provider_encountered:
@@ -2164,7 +2164,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
         aif.close()
 
         # Creates a reversed sorted list to consult it afterwards
-        os.system("sort -t$\"\t\" -k2 -gr tier1_as_influence_list > tier1_as_influence_list_sorted")
+        os.system("""sort -t$'\t' -k2 -gr tier1_as_influence_list > tier1_as_influence_list_sorted""")
 
         top_tier1_as_adversaries_number = []
         as_influence_computation_list = as_influence
@@ -2194,6 +2194,24 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
         # Takes the two top tier-1 for g-select, may be optimized
         g_select = top_tier1_as_adversaries_number[:2]
         e_select = top_tier1_as_adversaries_number[2:]
+
+        # Creates customer cones for all the DeNASA adversaries we consider
+        customer_cone_files = []
+        for dirpath, dirnames, filenames in os.walk("../out/customer_cone_prefixes", followlinks=True):
+            for filename in filenames:
+                if (filename[0] != '.'):
+                    customer_cone_files.append(os.path.join(dirpath,filename))
+        for customer_cone_file in customer_cone_files:
+            customer_cone_as = re.sub("[^0-9]", "", customer_cone_file)
+            # Takes only specified adversaries into account
+            if customer_cone_as in top_tier1_as_adversaries_number:
+                customer_cone_subnets_adversaries[customer_cone_as] = []
+                guards_in_as[customer_cone_as] = 0.0
+                exits_in_as[customer_cone_as] = 0.0
+                with open(customer_cone_file, 'r') as ccf:
+                    for line in ccf:
+                        customer_cone_subnets_adversaries[customer_cone_as].append(line)
+                ccf.close()
 
     # DeNASA g-select
     if denasa:
