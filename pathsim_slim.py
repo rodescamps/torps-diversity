@@ -2067,7 +2067,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                         #print(len(as_providers))
                         break
             i += 1
-            if i == 20: break
+            if i == 10: break
             print('[{}/{}] cone guards analyzed adversaries'.format(i, len(guards_probabilities)))
         as_influence_exits = dict()
         i = 0
@@ -2135,7 +2135,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                         #print(len(as_providers))
                         break
             i += 1
-            if i == 20: break
+            if i == 10: break
             print('[{}/{}] cone exits analyzed adversaries'.format(i, len(exits_probabilities)))
 
         # Computes the tier-1 AS that has the greater influence on the network paths (guards probabilities * exits probabilities)
