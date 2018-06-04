@@ -2015,11 +2015,12 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
 
                             # Optimization, avoids recursion
                             if searched_as_number in as_providers:
-                                for provider in as_providers[searched_as_number]:
-                                    if provider in as_influence_guards:
-                                        as_influence_guards[provider] += guard_probability
-                                    else:
-                                        as_influence_guards[provider] = guard_probability
+                                if searched_as_number not in list_provider_encountered:
+                                    for provider in as_providers[searched_as_number]:
+                                        if provider in as_influence_guards:
+                                            as_influence_guards[provider] += guard_probability
+                                        else:
+                                            as_influence_guards[provider] = guard_probability
                             else:
                                 url = "http://as-rank.caida.org/api/v1/asns/"+str(searched_as_number)+"/links"
                                 response = urllib.urlopen(url)
@@ -2148,7 +2149,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
         aif.close()
 
         # Creates a reversed sorted list to consult it afterwards
-        os.system("sort -t$\'\t\' -k2 -gr tier1_as_influence_list > tier1_as_influence_list_sorted")
+        os.system("sort -t$\"\t\"-k2 -gr tier1_as_influence_list > tier1_as_influence_list_sorted")
 
         top_tier1_as_adversaries_number = []
         as_influence_computation_list = as_influence
@@ -2515,7 +2516,7 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
 
     return average_number_paths_compromised/len(as_adversaries), average_time_to_first_path_compromised/len(as_adversaries), as_variance, as_adversaries
 
-def country_compromise_path(guards_probabilities, exits_probabilities, country_codes, denasa):
+def country_compromise_path(guards_probabilities, exits_probabilities, country_codes, denasa, e_select):
 
     average_number_paths_compromised = 0.0
     average_time_to_first_path_compromised = 0.0
