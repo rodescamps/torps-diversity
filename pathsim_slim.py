@@ -2009,7 +2009,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                     subnets.append(row['range_start']+','+row['range_end'])
                     if ip_in_as(guard_address, subnets):
 
-                        print(row['AS_number'])
+                        #print(row['AS_number'])
 
                         def add_prefixes(searched_as_number, list_as_encountered, list_provider_encountered):
 
@@ -2056,7 +2056,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                     as_providers[as_encountered] = list_provider_encountered
                         if row['AS_number'] not in as_providers:
                             as_providers[row['AS_number']] = list_provider_encountered
-                        print(len(as_providers))
+                        #print(len(as_providers))
                         break
             i += 1
             print('[{}/{}] cone guards analyzed adversaries'.format(i, len(guards_probabilities)))
