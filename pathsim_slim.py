@@ -1945,7 +1945,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                         exits_bandwidths[address] = [total_bandwidth+bandwidth, old_counter+1]
         if i % 100 == 0: print('[{}/{}]'.format(i, network_states_size))
         i += 1
-        if i == 2: break
+        #if i == 2: break
 
     for address in guards:
         bandwidth_details = guards_bandwidths[address]
@@ -2067,7 +2067,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                         #print(len(as_providers))
                         break
             i += 1
-            if i == 10: break
+            #if i == 10: break
             print('[{}/{}] cone guards analyzed adversaries'.format(i, len(guards_probabilities)))
         as_influence_exits = dict()
         i = 0
@@ -2138,7 +2138,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                         #print(len(as_providers))
                         break
             i += 1
-            if i == 10: break
+            #if i == 10: break
             print('[{}/{}] cone exits analyzed adversaries'.format(i, len(exits_probabilities)))
 
         # Computes the tier-1 AS that has the greater influence on the network paths (guards probabilities * exits probabilities)
@@ -2178,14 +2178,11 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                 aif.write("%s,%s\n" % (as_number, as_probability))
         aif.close()
 
-        # Creates a reversed sorted list to consult it afterwards
-        call(["sort", "-t, -k2 -gr tier1_as_influence_list > tier1_as_influence_list_sorted"])
-
         top_tier1_as_adversaries_number = []
         as_influence_computation_list = as_influence
         as_probability_sum = 0.0
         # Takes the top tier-1 adversaries until we control half of the network, as advised by DeNASA
-        while as_probability_sum < 0.05:
+        while as_probability_sum < 50.0:
             top_as_adversary_number = ''
             top_as_adversary_probability = 0.0
             for as_number, as_probability in as_influence.items():
