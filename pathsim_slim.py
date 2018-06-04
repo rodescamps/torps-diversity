@@ -1945,7 +1945,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                         exits_bandwidths[address] = [total_bandwidth+bandwidth, old_counter+1]
         if i % 100 == 0: print('[{}/{}]'.format(i, network_states_size))
         i += 1
-        #if i == 2: break
+        if i == 2: break
 
     for address in guards:
         bandwidth_details = guards_bandwidths[address]
