@@ -2129,25 +2129,27 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
             # Probability is 0 if only guard or only exit is controlled (correlation not possible)
             probability = 0.0
             # Keep only tier-1 ASes
-            for as_provider in as_providers:
-                if as_number == as_provider:
-                    print("-------------------------------")
-                print(as_provider)
-            if not as_providers[as_number]:
-                if as_number in as_influence_guards:
-                    # Probability in percentage
-                    probability = (as_probability * as_influence_guards[as_number])*100
-                as_influence[as_number] = probability
-                list_probabilities.append(probability)
+            if as_number in as_providers:
+                if not as_providers[as_number]:
+                    if as_number in as_influence_guards:
+                        # Probability in percentage
+                        probability = (as_probability * as_influence_guards[as_number])*100
+                    as_influence[as_number] = probability
+                    list_probabilities.append(probability)
+            else:
+                print("AS {} not found".format(as_number))
         # Takes also into account the last set: guards AS cones that do not appear in exit tier-1 AS cones
         for as_number, as_probability in as_influence_guards.items():
             # Probability is 0 if only guard or only exit is controlled (correlation not possible)
             probability = 0.0
             # Keep only tier-1 ASes
-            if not as_providers[as_number]:
-                if as_number not in as_influence_exits:
-                    as_influence[as_number] = probability
-                    list_probabilities.append(probability)
+            if as_number in as_providers:
+                if not as_providers[as_number]:
+                    if as_number not in as_influence_exits:
+                        as_influence[as_number] = probability
+                        list_probabilities.append(probability)
+            else:
+                print("AS {} not found".format(as_number))
 
         # Compute probability mean
         m = sum(list_probabilities) / float(len(list_probabilities))
