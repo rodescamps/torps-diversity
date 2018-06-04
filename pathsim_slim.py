@@ -2024,10 +2024,8 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                 url = "http://as-rank.caida.org/api/v1/asns/"+str(searched_as_number)+"/links"
                                 response = urllib.urlopen(url)
                                 links = json.loads(response.read())
-                                provider_found = False
                                 for link in links["data"]:
                                     if link["relationship"] == "provider":
-                                        provider_found = True
                                         provider_as = str(link["asn"])
                                         if provider_as not in list_as_encountered:
                                             list_as_encountered.append(provider_as)
@@ -2035,13 +2033,12 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                             for as_encountered in as_encountered_to_add:
                                                 if as_encountered not in list_as_encountered:
                                                     list_as_encountered.append(as_encountered)
-                                if not provider_found:
-                                    if searched_as_number not in list_provider_encountered:
-                                        list_provider_encountered.append(searched_as_number)
-                                        if searched_as_number in as_influence_guards:
-                                            as_influence_guards[searched_as_number] += guard_probability
-                                        else:
-                                            as_influence_guards[searched_as_number] = guard_probability
+                                if searched_as_number not in list_provider_encountered:
+                                    list_provider_encountered.append(searched_as_number)
+                                    if searched_as_number in as_influence_guards:
+                                        as_influence_guards[searched_as_number] += guard_probability
+                                    else:
+                                        as_influence_guards[searched_as_number] = guard_probability
                             return list_as_encountered, list_provider_encountered
 
                         list_as_encountered, list_provider_encountered = add_prefixes(row['AS_number'], [], [])
@@ -2084,10 +2081,8 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                 url = "http://as-rank.caida.org/api/v1/asns/"+str(searched_as_number)+"/links"
                                 response = urllib.urlopen(url)
                                 links = json.loads(response.read())
-                                provider_found = False
                                 for link in links["data"]:
                                     if link["relationship"] == "provider":
-                                        provider_found = True
                                         provider_as = str(link["asn"])
                                         if provider_as not in list_as_encountered:
                                             list_as_encountered.append(provider_as)
@@ -2095,13 +2090,12 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                             for as_encountered in as_encountered_to_add:
                                                 if as_encountered not in list_as_encountered:
                                                     list_as_encountered.append(as_encountered)
-                                if not provider_found:
-                                    if searched_as_number not in list_provider_encountered:
-                                        list_provider_encountered.append(searched_as_number)
-                                        if searched_as_number in as_influence_exits:
-                                            as_influence_exits[searched_as_number] += exit_probability
-                                        else:
-                                            as_influence_exits[searched_as_number] = exit_probability
+                                if searched_as_number not in list_provider_encountered:
+                                    list_provider_encountered.append(searched_as_number)
+                                    if searched_as_number in as_influence_exits:
+                                        as_influence_exits[searched_as_number] += exit_probability
+                                    else:
+                                        as_influence_exits[searched_as_number] = exit_probability
                             return list_as_encountered, list_provider_encountered
 
                         list_as_encountered, list_provider_encountered = add_prefixes(row['AS_number'], [], [])
@@ -2154,7 +2148,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
         aif.close()
 
         # Creates a reversed sorted list to consult it afterwards
-        os.system("sort -t$'\t' -k2 -gr tier1_as_influence_list > tier1_as_influence_list_sorted")
+        os.system("sort -t$\'\t\' -k2 -gr tier1_as_influence_list > tier1_as_influence_list_sorted")
 
         top_tier1_as_adversaries_number = []
         as_influence_computation_list = as_influence
@@ -2175,9 +2169,11 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
 
         # If a customer cone is not already computed, compute it
         for tier1_as_adversary in top_tier1_as_adversaries_number:
-            if not os.path.exists("../out/customer_cone_prefixes"+tier1_as_adversary+"_customer_cone_prefixes"):
+            if not os.path.exists("../out/customer_cone_prefixes/"+tier1_as_adversary+"_customer_cone_prefixes"):
                 print("Computing {} customer cone".format(tier1_as_adversary))
                 compute_customer_cone(tier1_as_adversary, "../out/customer_cone_prefixes")
+            else:
+                print("{} customer cone already computed".format(tier1_as_adversary))
 
         # Top tier-1 ASes DeNASA preparation
         customer_cone_files = []
