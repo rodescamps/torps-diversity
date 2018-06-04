@@ -25,6 +25,7 @@ import urllib
 import json
 import operator
 from as_customer_cone import compute_customer_cone
+from subprocess import call
 
 logger = logging.getLogger(__name__)
 _testing = False#True
@@ -2048,7 +2049,13 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                                 as_influence_guards[provider_as] = guard_probability
                                         if provider_as not in list_as_encountered:
                                             list_as_encountered.append(provider_as)
-                                            list_as_encountered, list_provider_encountered = add_prefixes(provider_as, list_as_encountered)
+                                            list_as_encountered_to_add, list_provider_encountered_to_add = add_prefixes(provider_as, list_as_encountered)
+                                            for as_encountered_to_add in list_as_encountered_to_add:
+                                                if as_encountered_to_add not in list_as_encountered:
+                                                    list_as_encountered.append(as_encountered_to_add)
+                                            for provider_encountered_to_add in list_as_encountered_to_add:
+                                                if provider_encountered_to_add not in list_provider_encountered:
+                                                    list_provider_encountered.append(provider_encountered_to_add)
                                 # Add providers of this searched_as_number in memory for future cone research for this as number
                                 if searched_as_number not in as_providers:
                                     as_providers[searched_as_number] = list_provider_encountered
@@ -2108,7 +2115,13 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                                 as_influence_exits[provider_as] = exit_probability
                                         if provider_as not in list_as_encountered:
                                             list_as_encountered.append(provider_as)
-                                            list_as_encountered, list_provider_encountered = add_prefixes(provider_as, list_as_encountered)
+                                            list_as_encountered_to_add, list_provider_encountered_to_add = add_prefixes(provider_as, list_as_encountered)
+                                            for as_encountered_to_add in list_as_encountered_to_add:
+                                                if as_encountered_to_add not in list_as_encountered:
+                                                    list_as_encountered.append(as_encountered_to_add)
+                                            for provider_encountered_to_add in list_as_encountered_to_add:
+                                                if provider_encountered_to_add not in list_provider_encountered:
+                                                    list_provider_encountered.append(provider_encountered_to_add)
                                 # Add providers of this searched_as_number in memory for future cone research for this as number
                                 if searched_as_number not in as_providers:
                                     as_providers[searched_as_number] = list_provider_encountered
@@ -2164,7 +2177,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
         aif.close()
 
         # Creates a reversed sorted list to consult it afterwards
-        os.system("""sort -t$'\t' -k2 -gr tier1_as_influence_list > tier1_as_influence_list_sorted""")
+        call(["sort", "-t$'\t' -k2 -gr tier1_as_influence_list > tier1_as_influence_list_sorted"])
 
         top_tier1_as_adversaries_number = []
         as_influence_computation_list = as_influence
