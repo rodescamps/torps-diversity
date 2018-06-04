@@ -2128,18 +2128,22 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
         for as_number, as_probability in as_influence_exits.items():
             # Probability is 0 if only guard or only exit is controlled (correlation not possible)
             probability = 0.0
-            if as_number in as_influence_guards:
-                # Probability in percentage
-                probability = (as_probability * as_influence_guards[as_number])*100
-            as_influence[as_number] = probability
-            list_probabilities.append(probability)
+            # Keep only tier-1 ASes
+            if not as_providers[as_number]:
+                if as_number in as_influence_guards:
+                    # Probability in percentage
+                    probability = (as_probability * as_influence_guards[as_number])*100
+                as_influence[as_number] = probability
+                list_probabilities.append(probability)
         # Takes also into account the last set: guards AS cones that do not appear in exit tier-1 AS cones
         for as_number, as_probability in as_influence_guards.items():
             # Probability is 0 if only guard or only exit is controlled (correlation not possible)
             probability = 0.0
-            if as_number not in as_influence_exits:
-                as_influence[as_number] = probability
-                list_probabilities.append(probability)
+            # Keep only tier-1 ASes
+            if not as_providers[as_number]:
+                if as_number not in as_influence_exits:
+                    as_influence[as_number] = probability
+                    list_probabilities.append(probability)
 
         # Compute probability mean
         m = sum(list_probabilities) / float(len(list_probabilities))
@@ -2181,23 +2185,6 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
             else:
                 print("{} customer cone already computed".format(tier1_as_adversary))
 
-        # Top tier-1 ASes DeNASA preparation
-        customer_cone_files = []
-        for dirpath, dirnames, filenames in os.walk("../out/customer_cone_prefixes", followlinks=True):
-            for filename in filenames:
-                if (filename[0] != '.'):
-                    customer_cone_files.append(os.path.join(dirpath,filename))
-        for customer_cone_file in customer_cone_files:
-            customer_cone_as = re.sub("[^0-9]", "", customer_cone_file)
-            if customer_cone_as in top_tier1_as_adversaries_number:
-                customer_cone_subnets[customer_cone_as] = []
-                guards_in_as[customer_cone_as] = 0.0
-                exits_in_as[customer_cone_as] = 0.0
-                with open(customer_cone_file, 'r') as ccf:
-                    for line in ccf:
-                        customer_cone_subnets[customer_cone_as].append(line)
-                ccf.close()
-
         # Takes the two top tier-1 for g-select, may be optimized
         g_select = top_tier1_as_adversaries_number[:2]
         e_select = top_tier1_as_adversaries_number[2:]
@@ -2215,57 +2202,35 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
     top_as_probability = 0.0
 
     if denasa:
-        for as_customer_cone, subnets in customer_cone_subnets.items():
+        for as_customer_cone, subnets in customer_cone_subnets_adversaries.items():
             if as_customer_cone not in e_select:
                 print(as_customer_cone)
-                del customer_cone_subnets[as_customer_cone]
-
-        guards_compromised_denasa = dict()
-        exits_compromised_denasa = dict()
-
-        for guard_address, guard_probability in guards_probabilities.items():
-            guards_compromised_denasa[guard_address] = []
-            for as_customer_cone, cc_subnets in customer_cone_subnets.items():
-                if ip_in_as(guard_address, cc_subnets):
-                    guards_compromised_denasa[guard_address].append(as_customer_cone)
-        for exit_address, exit_probability in exits_probabilities.items():
-            exits_compromised_denasa[exit_address] = []
-            for as_customer_cone, cc_subnets in customer_cone_subnets.items():
-                if ip_in_as(exit_address, cc_subnets):
-                    exits_compromised_denasa[exit_address].append(as_customer_cone)
+                del customer_cone_subnets_adversaries[as_customer_cone]
 
         guards_compromised = dict()
         exits_compromised = dict()
-        if denasa_adversaries_considered:
-            guards_compromised = guards_compromised_denasa
-            exits_compromised = exits_compromised_denasa
-        else:
-            for guard_address, guard_probability in guards_probabilities.items():
-                guards_compromised[guard_address] = []
-                for as_customer_cone, cc_subnets in customer_cone_subnets_adversaries.items():
-                    if ip_in_as(guard_address, cc_subnets):
-                        guards_compromised[guard_address].append(as_customer_cone)
-            for exit_address, exit_probability in exits_probabilities.items():
-                exits_compromised[exit_address] = []
-                for as_customer_cone, cc_subnets in customer_cone_subnets_adversaries.items():
-                    if ip_in_as(exit_address, cc_subnets):
-                        exits_compromised[exit_address].append(as_customer_cone)
+
+        for guard_address, guard_probability in guards_probabilities.items():
+            guards_compromised[guard_address] = []
+            for as_customer_cone, cc_subnets in customer_cone_subnets_adversaries.items():
+                if ip_in_as(guard_address, cc_subnets):
+                    guards_compromised[guard_address].append(as_customer_cone)
+        for exit_address, exit_probability in exits_probabilities.items():
+            exits_compromised[exit_address] = []
+            for as_customer_cone, cc_subnets in customer_cone_subnets_adversaries.items():
+                if ip_in_as(exit_address, cc_subnets):
+                    exits_compromised[exit_address].append(as_customer_cone)
 
         # DeNASA e-select:0.0
         for guard_address, guard_probability in guards_probabilities.items():
             for exit_address, exit_probability in exits_probabilities.items():
                 # Applies DeNASA e-select:0.0
-                path_compromised = False
-                for as_customer_cone, cc_subnets in customer_cone_subnets.items():
-                    if as_customer_cone in guards_compromised_denasa[guard_address] and as_customer_cone in exits_compromised_denasa[exit_address]:
-                        path_compromised = True
-                        break
-                if not path_compromised:
-                    for as_customer_cone, cc_subnets in customer_cone_subnets_adversaries.items():
-                        if as_customer_cone in guards_compromised[guard_address] and as_customer_cone in exits_compromised[exit_address]:
-                            top_as_probability += guard_probability * exit_probability
+                for as_customer_cone, cc_subnets in customer_cone_subnets_adversaries.items():
+                    if not (as_customer_cone in guards_compromised[guard_address] and as_customer_cone in exits_compromised[exit_address]):
+                        top_as_probability += guard_probability * exit_probability
 
         top_as_probability = top_as_probability / float(len(customer_cone_subnets_adversaries))
+
     else:
         for guard_address, guard_probability in guards_probabilities.items():
             for as_customer_cone, subnets in customer_cone_subnets_adversaries.items():
