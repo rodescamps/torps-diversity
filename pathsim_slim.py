@@ -2049,7 +2049,6 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                             for provider_encountered_to_add in list_provider_encountered_to_add:
                                                 if provider_encountered_to_add not in list_provider_encountered:
                                                     list_provider_encountered.append(provider_encountered_to_add)
-                                # Tier-1 Case, thus no provider found, add it if it the first time we encounter it
                                 if searched_as_number not in list_as_encountered and searched_as_number not in list_provider_encountered:
                                     list_as_encountered.append(searched_as_number)
                                     list_provider_encountered.append(searched_as_number)
@@ -2057,12 +2056,10 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                         as_influence_guards[searched_as_number] += guard_probability
                                     else:
                                         as_influence_guards[searched_as_number] = guard_probability
-
-                                    if searched_as_number not in as_providers:
-                                        as_providers[searched_as_number] = []
                                 # Add providers of this searched_as_number in memory for future cone research for this as number
                                 if searched_as_number not in as_providers:
-                                    as_providers[searched_as_number] = list_provider_encountered
+                                    as_number_itself = [searched_as_number]
+                                    as_providers[searched_as_number] = list_provider_encountered - as_number_itself
                                 return list_as_encountered, list_provider_encountered
 
                         list_as_encountered, list_provider_encountered = add_prefixes(row['AS_number'], [])
@@ -2120,7 +2117,6 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                             for provider_encountered_to_add in list_provider_encountered_to_add:
                                                 if provider_encountered_to_add not in list_provider_encountered:
                                                     list_provider_encountered.append(provider_encountered_to_add)
-                                # Tier-1 Case, thus no provider found, add it if it the first time we encounter it
                                 if searched_as_number not in list_as_encountered and searched_as_number not in list_provider_encountered:
                                     list_as_encountered.append(searched_as_number)
                                     list_provider_encountered.append(searched_as_number)
@@ -2133,7 +2129,8 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                         as_providers[searched_as_number] = []
                                 # Add providers of this searched_as_number in memory for future cone research for this as number
                                 if searched_as_number not in as_providers:
-                                    as_providers[searched_as_number] = list_provider_encountered
+                                    as_number_itself = [searched_as_number]
+                                    as_providers[searched_as_number] = list_provider_encountered - as_number_itself
                                 return list_as_encountered, list_provider_encountered
 
                         list_as_encountered, list_provider_encountered = add_prefixes(row['AS_number'], [])
