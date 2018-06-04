@@ -2067,8 +2067,8 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                 # Add providers of this searched_as_number in memory for future cone research for this as number
                                 if searched_as_number not in as_providers:
                                     as_providers[searched_as_number] = list_provider_encountered
-                                return list_as_encountered, list_provider_encountered
                                 print(searched_as_number)
+                                return list_as_encountered, list_provider_encountered
 
                         list_as_encountered, list_provider_encountered = add_prefixes(row['AS_number'], [])
 
@@ -2143,6 +2143,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                 # Add providers of this searched_as_number in memory for future cone research for this as number
                                 if searched_as_number not in as_providers:
                                     as_providers[searched_as_number] = list_provider_encountered
+                                print(searched_as_number)
                                 return list_as_encountered, list_provider_encountered
 
                         list_as_encountered, list_provider_encountered = add_prefixes(row['AS_number'], [])
