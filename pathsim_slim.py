@@ -2057,14 +2057,13 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                                 if provider_encountered_to_add not in list_provider_encountered:
                                                     list_provider_encountered.append(provider_encountered_to_add)
                                 # Tier-1 Case, thus no provider found, add it if it the first time we encounter it
-                                for provider_encountered in list_as_encountered:
-                                    if provider_encountered not in list_as_encountered:
-                                        list_as_encountered.append(provider_encountered)
-                                        list_provider_encountered.append(provider_encountered)
-                                        if provider_encountered in as_influence_guards:
-                                            as_influence_guards[provider_encountered] += guard_probability
-                                        else:
-                                            as_influence_guards[provider_encountered] = guard_probability
+                                if searched_as_number not in list_as_encountered and searched_as_number not in list_provider_encountered:
+                                    list_as_encountered.append(searched_as_number)
+                                    list_provider_encountered.append(searched_as_number)
+                                    if searched_as_number in as_influence_guards:
+                                        as_influence_guards[searched_as_number] += guard_probability
+                                    else:
+                                        as_influence_guards[searched_as_number] = guard_probability
                                 # Add providers of this searched_as_number in memory for future cone research for this as number
                                 if searched_as_number not in as_providers:
                                     as_providers[searched_as_number] = list_provider_encountered
@@ -2075,7 +2074,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                         #print(len(as_providers))
                         break
             i += 1
-            if i == 100: break
+            if i == 20: break
             print('[{}/{}] cone guards analyzed adversaries'.format(i, len(guards_probabilities)))
         as_influence_exits = dict()
         i = 0
@@ -2133,14 +2132,13 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                                 if provider_encountered_to_add not in list_provider_encountered:
                                                     list_provider_encountered.append(provider_encountered_to_add)
                                 # Tier-1 Case, thus no provider found, add it if it the first time we encounter it
-                                for provider_encountered in list_as_encountered:
-                                    if provider_encountered not in list_as_encountered:
-                                        list_as_encountered.append(provider_encountered)
-                                        list_provider_encountered.append(provider_encountered)
-                                        if provider_encountered in as_influence_exits:
-                                            as_influence_exits[provider_encountered] += exit_probability
-                                        else:
-                                            as_influence_exits[provider_encountered] = exit_probability
+                                if searched_as_number not in list_as_encountered and searched_as_number not in list_provider_encountered:
+                                    list_as_encountered.append(searched_as_number)
+                                    list_provider_encountered.append(searched_as_number)
+                                    if searched_as_number in as_influence_exits:
+                                        as_influence_exits[searched_as_number] += exit_probability
+                                    else:
+                                        as_influence_exits[searched_as_number] = exit_probability
                                 # Add providers of this searched_as_number in memory for future cone research for this as number
                                 if searched_as_number not in as_providers:
                                     as_providers[searched_as_number] = list_provider_encountered
@@ -2151,7 +2149,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                         #print(len(as_providers))
                         break
             i += 1
-            if i == 100: break
+            if i == 20: break
             print('[{}/{}] cone exits analyzed adversaries'.format(i, len(exits_probabilities)))
 
         # Computes the tier-1 AS that has the greater influence on the network paths (guards probabilities * exits probabilities)
@@ -2193,11 +2191,11 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
         as_influence_file = os.path.join("tier1_as_influence_list")
         with open(as_influence_file, 'w') as aif:
             for as_number, as_probability in as_influence.items():
-                aif.write("%s\t%s\n" % (as_number, as_probability))
+                aif.write("%s,%s\n" % (as_number, as_probability))
         aif.close()
 
         # Creates a reversed sorted list to consult it afterwards
-        call(["sort", "-t $\'\t\' -k2 -gr tier1_as_influence_list > tier1_as_influence_list_sorted"])
+        call(["sort", "-t \',\' -k2 -gr tier1_as_influence_list > tier1_as_influence_list_sorted"])
 
         top_tier1_as_adversaries_number = []
         as_influence_computation_list = as_influence
