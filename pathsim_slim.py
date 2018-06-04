@@ -2060,7 +2060,6 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                 # Add providers of this searched_as_number in memory for future cone research for this as number
                                 if searched_as_number not in as_providers:
                                     as_providers[searched_as_number] = list_provider_encountered
-                                print(searched_as_number)
                                 return list_as_encountered, list_provider_encountered
 
                         list_as_encountered, list_provider_encountered = add_prefixes(row['AS_number'], [])
@@ -2129,7 +2128,6 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                                 # Add providers of this searched_as_number in memory for future cone research for this as number
                                 if searched_as_number not in as_providers:
                                     as_providers[searched_as_number] = list_provider_encountered
-                                print(searched_as_number)
                                 return list_as_encountered, list_provider_encountered
 
                         list_as_encountered, list_provider_encountered = add_prefixes(row['AS_number'], [])
@@ -2148,27 +2146,21 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
             # Probability is 0 if only guard or only exit is controlled (correlation not possible)
             probability = 0.0
             # Keep only tier-1 ASes
-            if as_number in as_providers:
-                if not as_providers[as_number]:
-                    if as_number in as_influence_guards:
-                        # Probability in percentage
-                        probability = (as_probability * as_influence_guards[as_number])*100
-                    as_influence[as_number] = probability
-                    list_probabilities.append(probability)
-            else:
-                print("AS {} not found".format(as_number))
+            if not as_providers[as_number]:
+                if as_number in as_influence_guards:
+                    # Probability in percentage
+                    probability = (as_probability * as_influence_guards[as_number])*100
+                as_influence[as_number] = probability
+                list_probabilities.append(probability)
         # Takes also into account the last set: guards AS cones that do not appear in exit tier-1 AS cones
         for as_number, as_probability in as_influence_guards.items():
             # Probability is 0 if only guard or only exit is controlled (correlation not possible)
             probability = 0.0
             # Keep only tier-1 ASes
-            if as_number in as_providers:
-                if not as_providers[as_number]:
-                    if as_number not in as_influence_exits:
-                        as_influence[as_number] = probability
-                        list_probabilities.append(probability)
-            else:
-                print("AS {} not found".format(as_number))
+            if not as_providers[as_number]:
+                if as_number not in as_influence_exits:
+                    as_influence[as_number] = probability
+                    list_probabilities.append(probability)
 
         # Compute probability mean
         m = sum(list_probabilities) / float(len(list_probabilities))
