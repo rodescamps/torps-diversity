@@ -2175,14 +2175,14 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
         as_influence_file = os.path.join("tier1_as_influence_list")
         with open(as_influence_file, 'w') as aif:
             for as_number, as_probability in as_influence.items():
-                aif.write("%s,%s\n" % (as_number, as_probability))
+                aif.write("%s\t%s\n" % (as_number, as_probability))
         aif.close()
 
         top_tier1_as_adversaries_number = []
         as_influence_computation_list = as_influence
         as_probability_sum = 0.0
-        # Takes the top tier-1 adversaries until we control half of the network, as advised by DeNASA
-        while as_probability_sum < 50.0:
+        # Takes the 5 top tier-1 adversaries
+        while len(top_tier1_as_adversaries_number) < 5:
             top_as_adversary_number = ''
             top_as_adversary_probability = 0.0
             for as_number, as_probability in as_influence.items():
@@ -2425,7 +2425,7 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
         aif.close()
 
         # Creates a reversed sorted list to consult it afterwards
-        os.system("sort -t$'\t' -k2 -gr as_influence_list > as_influence_list_sorted")
+        # os.system("sort -t$'\t' -k2 -gr as_influence_list > as_influence_list_sorted")
 
         top_as_adversary_number = ''
         top_as_adversary_probability = 0.0
@@ -2626,9 +2626,6 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
             for country_code, country_probability in country_influence.items():
                 cif.write("%s\t%s\n" % (country_code, country_probability))
         cif.close()
-
-        # Creates a reversed sorted list to consult it afterwards
-        os.system("sort -t$'\t' -k2 -gr country_influence_list > country_influence_list_sorted")
 
         top_country_adversary_code = ''
         top_country_adversary_probability = 0.0

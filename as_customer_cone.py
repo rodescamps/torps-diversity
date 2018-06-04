@@ -164,7 +164,6 @@ def compute_customer_cone(searched_as_number, out_dir):
                 prefix_to_add = row['range_start']+','+row['range_end']
                 if prefix_to_add not in customer_cone_prefixes:
                     customer_cone_prefixes.append(row['range_start']+','+row['range_end'])
-                    print("prefix added")
 
         url = "http://as-rank.caida.org/api/v1/asns/"+str(searched_as_number)+"/links"
         response = urllib.urlopen(url)
@@ -175,7 +174,6 @@ def compute_customer_cone(searched_as_number, out_dir):
                 customer_as = link["asn"]
                 if customer_as not in customer_cone_as:
                     customer_cone_as.append(customer_as)
-                    print("recursion - AS {}".format(len(customer_cone_as)))
                     add_prefixes(str(customer_as))
             if searched_as_number == sys.argv[1]:
                 print("{}/{}".format(i, len(links["data"])))
