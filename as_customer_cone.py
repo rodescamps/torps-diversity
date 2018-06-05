@@ -145,6 +145,7 @@ def compute_customer_cone(searched_as_number, out_dir):
     list_as = []
     customer_cone_as = []
     customer_cone_prefixes = []
+    explored_as_numbers = []
 
     # Prepare the AS subnets in DictReader
     if not os.path.isfile("ip2asn-v4.tsv.gz"):
@@ -159,25 +160,28 @@ def compute_customer_cone(searched_as_number, out_dir):
 
     def add_prefixes(searched_as_number):
 
-        for row in list_as:
-            if row['AS_number'] == searched_as_number:
-                prefix_to_add = row['range_start']+','+row['range_end']
-                if prefix_to_add not in customer_cone_prefixes:
-                    customer_cone_prefixes.append(row['range_start']+','+row['range_end'])
+        if searched_as_number not in explored_as_numbers:
+            explored_as_numbers.append(searched_as_number)
+            for row in list_as:
+                if row['AS_number'] == searched_as_number:
+                    prefix_to_add = row['range_start']+','+row['range_end']
+                    if prefix_to_add not in customer_cone_prefixes:
+                        customer_cone_prefixes.append(row['range_start']+','+row['range_end'])
 
-        url = "http://as-rank.caida.org/api/v1/asns/"+str(searched_as_number)+"/links"
-        response = urllib.urlopen(url)
-        links = json.loads(response.read())
-        i = 1
-        for link in links["data"]:
-            if link["relationship"] == "customer":
-                customer_as = link["asn"]
-                if customer_as not in customer_cone_as:
-                    customer_cone_as.append(customer_as)
-                    add_prefixes(str(customer_as))
-            if searched_as_number == sys.argv[1]:
-                print("{}/{}".format(i, len(links["data"])))
-                i += 1
+            url = "http://as-rank.caida.org/api/v1/asns/"+str(searched_as_number)+"/links"
+            print(url)
+            response = urllib.urlopen(url)
+            links = json.loads(response.read())
+            i = 1
+            for link in links["data"]:
+                if link["relationship"] == "customer":
+                    customer_as = link["asn"]
+                    if customer_as not in customer_cone_as:
+                        customer_cone_as.append(customer_as)
+                        add_prefixes(str(customer_as))
+                if searched_as_number == sys.argv[1]:
+                    print("{}/{}".format(i, len(links["data"])))
+                    i += 1
 
     add_prefixes(searched_as_number)
 
