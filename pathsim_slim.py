@@ -22,6 +22,7 @@ import pdb
 import multiprocessing
 import itertools
 import urllib
+import requests
 import json
 import operator
 from as_customer_cone import compute_customer_cone
@@ -2035,8 +2036,8 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                             # Recursively computes all the providers above the AS#searched_as_number
                             else:
                                 url = "http://as-rank.caida.org/api/v1/asns/"+searched_as_number+"/links"
-                                response = urllib.urlopen(url)
-                                links = json.loads(response.read())
+                                response = requests.get(url)
+                                links = json.loads(response.text)
                                 list_provider_encountered = []
                                 for link in links["data"]:
                                     if link["relationship"] == "provider":
@@ -2103,8 +2104,8 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                             # Recursively computes all the providers above the AS#searched_as_number
                             else:
                                 url = "http://as-rank.caida.org/api/v1/asns/"+searched_as_number+"/links"
-                                response = urllib.urlopen(url)
-                                links = json.loads(response.read())
+                                response = requests.get(url)
+                                links = json.loads(response.text)
                                 list_provider_encountered = []
                                 for link in links["data"]:
                                     if link["relationship"] == "provider":

@@ -2,7 +2,6 @@ import sys
 import os
 from pathsim import *
 import csv
-import urllib
 import json
 import gzip
 import requests
@@ -121,24 +120,9 @@ def reduce_prefixes(customer_cone_prefixes):
         is_extended, reduced_customer_cone_prefixes = extend(range_start, range_end, reduced_customer_cone_prefixes)
         if not is_included(range_start, range_end, reduced_customer_cone_prefixes):
             reduced_customer_cone_prefixes.append(customer_cone_prefix)
-            #print("{} added".format(customer_cone_prefix))
-            """
-
-            range_start_full, range_end_full = customer_cone_prefix.split(',')
-            range_start = [int(n) for n in range_start_full.split('.')]
-            range_end = [int(n) for n in range_end_full.split('.')]
-
-            is_extended, reduced_customer_cone_prefixes = extend(range_start, range_end, reduced_customer_cone_prefixes)
-            if is_extended:
-                reduced_customer_cone_prefixes.remove(prefix)
-                j += 1
-            """
-            #print("{} discarded".format(customer_cone_prefix))
-        #print(reduced_customer_cone_prefixes)
         if i % 1000 == 0:
             print("{}/{}".format(i, len(customer_cone_prefixes)))
         i += 1
-        #if i == 1000: break
 
     return reduced_customer_cone_prefixes
 
@@ -167,6 +151,7 @@ def compute_customer_cone(searched_as_number, out_dir):
                     customer_cone_prefixes.append(row['range_start']+','+row['range_end'])
 
         url = "http://as-rank.caida.org/api/v1/asns/"+str(searched_as_number)+"/links"
+        #print(url)
         response = requests.get(url)
         #response = urllib.urlopen(url)
         links = json.loads(response.text)
