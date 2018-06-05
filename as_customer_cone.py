@@ -166,6 +166,7 @@ def compute_customer_cone(searched_as_number, out_dir):
                     customer_cone_prefixes.append(row['range_start']+','+row['range_end'])
 
         url = "http://as-rank.caida.org/api/v1/asns/"+str(searched_as_number)+"/links"
+        print(url)
         response = urllib.urlopen(url)
         links = json.loads(response.read())
         i = 1
