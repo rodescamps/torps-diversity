@@ -169,7 +169,7 @@ def compute_customer_cone(searched_as_number, out_dir):
         url = "http://as-rank.caida.org/api/v1/asns/"+str(searched_as_number)+"/links"
         response = requests.get(url)
         #response = urllib.urlopen(url)
-        links = json.loads(response.read())
+        links = json.loads(response.text)
         i = 1
         for link in links["data"]:
             if link["relationship"] == "customer":
