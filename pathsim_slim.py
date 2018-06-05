@@ -3151,7 +3151,7 @@ commands', dest='pathalg_subparser')
         #network_states_it1, network_states_it2 = itertools.tee(network_states, 1)
         #network_states_list = list(network_states)
 
-        tier1_as_adversaries = [] #['3356', '1299', '174', '2914', '3257']
+        tier1_as_adversaries = ['5511', '3491', '1299', '701', '2828'] #['3356', '1299', '174', '2914', '3257']
 
         (guards_probabilities, exits_probabilities,
          guards_number, exits_number,
@@ -3167,7 +3167,7 @@ commands', dest='pathalg_subparser')
         if args.top_as is not None:
             top_as_number.append(int(args.top_as))
         else:
-            top_as_number = [] # [16276, 12876, 24940, 14061]
+            top_as_number = ['16276'] # [16276, 12876, 24940, 14061]
         # Top country are DE (Germany), FR (France), NL (Netherlands), US (United States) by default
         top_country_code = []
         if args.top_country is not None:
