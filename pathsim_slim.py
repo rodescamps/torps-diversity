@@ -1843,7 +1843,8 @@ def compute_average(network_states):
         general_average += average
     return general_average/float(len(averages))
 
-def compute_probabilities(network_states, water_filling, denasa, tier1_as_adversaries, guessing_entropy):
+def compute_probabilities(network_states, water_filling, denasa, tier1_as_adversaries):
+
     guards = []
     guards_bandwidths = dict()
     exits = []
@@ -3053,7 +3054,7 @@ commands', dest='pathalg_subparser')
          guards_number, exits_number,
          guards_total_bandwidth, exits_total_bandwidth,
          top_as_paths_compromised, top_as_first_compromise,
-         tier1_as_variance, e_select) = compute_probabilities(network_states, water_filling, denasa, tier1_as_adversaries, True)
+         tier1_as_variance, e_select) = compute_probabilities(network_states, water_filling, denasa, tier1_as_adversaries)
 
         probabilities_reduction = 2
         guessing_entropy_result = guessing_entropy(guards_probabilities, exits_probabilities, probabilities_reduction, denasa, e_select)
