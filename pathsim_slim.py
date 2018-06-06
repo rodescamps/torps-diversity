@@ -2075,7 +2075,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                         break
             i += 1
             #if i == 10: break
-            print('[{}/{}] cone guards analyzed adversaries'.format(i, len(guards_probabilities)))
+            if i % 500 == 0: print('[{}/{}] cone guards analyzed adversaries'.format(i, len(guards_probabilities)))
         i = 0
         for exit_address, exit_probability in exits_probabilities.items():
             for row in as_list:
@@ -2145,7 +2145,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                         break
             i += 1
             #if i == 10: break
-            print('[{}/{}] cone exits analyzed adversaries'.format(i, len(exits_probabilities)))
+            if i % 500 == 0: print('[{}/{}] cone exits analyzed adversaries'.format(i, len(exits_probabilities)))
 
         # Computes the tier-1 AS that has the greater influence on the network paths (guards probabilities * exits probabilities)
         as_influence = dict()
@@ -2230,8 +2230,14 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
         g_select = top_tier1_as_adversaries_number[:2]
         e_select = top_tier1_as_adversaries_number[2:]
 
+        for as_number in as_influence_guards:
+            if as_number in g_select or as_number in e_select:
+                del as_influence_guards[as_number]
+        for as_number in as_influence_exits:
+            if as_number in g_select or as_number in e_select:
+                del as_influence_exits[as_number]
         # Compute entropy
-        as_variance = guessing_entropy(as_influence_guards, as_influence_exits, 1, denasa, e_select)
+        as_variance = guessing_entropy(as_influence_guards, as_influence_exits, 1, False, e_select)
 
         # Creates customer cones for all the DeNASA adversaries we consider
         customer_cone_files = []
@@ -2254,26 +2260,9 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
     # Analysis of tier-1 ASes compromises
     top_as_probability = 0.0
 
+    # DeNASA case: all tier-1 adversaries deleted, thus no threat
     if denasa:
-        # DeNASA g-select
-        for address in guards_probabilities:
-            for as_customer_cone, subnets in customer_cone_subnets.items():
-                if as_customer_cone in g_select:
-                    if ip_in_as(address, subnets):
-                        guards_probabilities.remove(address)
-                        guards_number -= 1
-                        break
-
-        for as_customer_cone, subnets in customer_cone_subnets_adversaries.items():
-            if as_customer_cone not in e_select:
-                print(as_customer_cone)
-                del customer_cone_subnets_adversaries[as_customer_cone]
-
-        # Recompute entropy
-        as_variance = guessing_entropy(as_influence_guards, as_influence_exits, 1, denasa, e_select)
-
         top_as_probability = 0.0
-
     else:
         for guard_address, guard_probability in guards_probabilities.items():
             for as_customer_cone, subnets in customer_cone_subnets_adversaries.items():
@@ -2387,7 +2376,7 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
                             as_influence_guards[row['AS_number']] = guard_probability
                         break
             i += 1
-            print('[{}/{}] guards analyzed adversaries'.format(i, len(guards_probabilities)))
+            if i % 500 == 0: print('[{}/{}] guards analyzed adversaries'.format(i, len(guards_probabilities)))
         i = 0
         for exit_address, exit_probability in exits_probabilities.items():
             for row in as_list:
@@ -2401,7 +2390,7 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
                             as_influence_exits[row['AS_number']] = exit_probability
                         break
             i += 1
-            print('[{}/{}] exits analyzed adversaries'.format(i, len(guards_probabilities)))
+            if i % 500 == 0: print('[{}/{}] exits analyzed adversaries'.format(i, len(guards_probabilities)))
 
         # Computes the AS that has the greater influence on the network paths (guards probabilities * exits probabilities)
 
@@ -2591,7 +2580,7 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
                             country_influence_guards[row['country_code']] = guard_probability
                         break
             i += 1
-            print('[{}/{}] country guards analyzed adversaries'.format(i, len(guards_probabilities)))
+            if i % 500 == 0: print('[{}/{}] country guards analyzed adversaries'.format(i, len(guards_probabilities)))
         i = 0
         for exit_address, exit_probability in exits_probabilities.items():
             for row in country_list:
@@ -2605,7 +2594,7 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
                             country_influence_exits[row['country_code']] = exit_probability
                         break
             i += 1
-            print('[{}/{}] country exits analyzed adversaries'.format(i, len(exits_probabilities)))
+            if i % 500 == 0: print('[{}/{}] country exits analyzed adversaries'.format(i, len(exits_probabilities)))
 
         # Computes the Country that has the greater influence on the network paths (guards probabilities * exits probabilities)
         country_influence = dict()
