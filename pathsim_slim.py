@@ -2167,6 +2167,10 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                         probability = (as_probability * as_influence_guards[as_number])*100
                     as_influence[as_number] = probability
                     list_probabilities.append(probability)
+                else:
+                    del as_influence_guards[as_number]
+            else:
+                del as_influence_guards[as_number]
         # Takes also into account the last set: guards AS cones that do not appear in exit tier-1 AS cones
         for as_number, as_probability in as_influence_guards.items():
             # Probability is 0 if only guard or only exit is controlled (correlation not possible)
@@ -2185,6 +2189,10 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                     if as_number not in as_influence_exits:
                         as_influence[as_number] = probability
                         list_probabilities.append(probability)
+                else:
+                    del as_influence_guards[as_number]
+            else:
+                del as_influence_guards[as_number]
 
         # Compute entropy
         as_variance = guessing_entropy(as_influence_guards, as_influence_exits, 1, denasa, e_select)
@@ -2492,22 +2500,6 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
                             break
                     as_probability += path_probability
 
-            list_probabilities = []
-
-            for as_number, as_probability in as_influence.items():
-                as_avoided = False
-                for as_provider in g_select:
-                    if as_provider in as_providers[as_number]:
-                        as_influence[as_number] = 0
-                        as_avoided = True
-                        break
-                if not as_avoided:
-                    for as_provider in e_select:
-                        if as_provider in as_providers[as_number]:
-                            as_influence[as_number] = 0
-                            break
-                list_probabilities.append(as_influence[as_number])
-
             # Recompute entropy
             as_variance = guessing_entropy(as_influence_guards, as_influence_exits, 1, denasa, e_select)
 
@@ -2709,22 +2701,6 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
                             path_probability = 0
                             break
                     country_probability += path_probability
-
-            list_probabilities = []
-
-            for as_number, as_probability in country_influence.items():
-                as_avoided = False
-                for as_provider in g_select:
-                    if as_provider in as_providers[as_number]:
-                        country_influence[as_number] = 0
-                        as_avoided = True
-                        break
-                if not as_avoided:
-                    for as_provider in e_select:
-                        if as_provider in as_providers[as_number]:
-                            country_influence[as_number] = 0
-                            break
-                list_probabilities.append(country_influence[as_number])
 
             # Recompute entropy
             country_variance = guessing_entropy(country_influence_guards, country_influence_exits, 1, denasa, e_select)
