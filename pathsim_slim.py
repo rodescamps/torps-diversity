@@ -2608,7 +2608,7 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
                 list_probabilities.append(probability)
 
         # Compute entropy
-        country_variance = guessing_entropy(country_influence_guards, country_influence_exits, 1, False, e_select)
+        country_variance = guessing_entropy(country_influence_guards, country_influence_exits, 1, False, e_select, [])
 
         country_influence_file = os.path.join("country_influence_list")
         with open(country_influence_file, 'w') as cif:
