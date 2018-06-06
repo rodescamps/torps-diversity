@@ -27,6 +27,7 @@ import json
 import operator
 from as_customer_cone import compute_customer_cone
 from subprocess import call
+import numpy as np
 
 logger = logging.getLogger(__name__)
 _testing = False#True
@@ -2185,11 +2186,11 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                         as_influence[as_number] = probability
                         list_probabilities.append(probability)
 
-        # Recompute probability mean
-        m = sum(list_probabilities) / float(len(list_probabilities))
-
-        # Recompute variance using a list comprehension
-        as_variance = sum((xi - m) ** 2 for xi in list_probabilities) / float(len(list_probabilities))
+        # Compute degree of anonymity
+        value,counts = np.unique(list_probabilities, return_counts=True)
+        norm_counts = counts / counts.sum()
+        base = 2
+        as_variance = -(norm_counts * np.log(norm_counts)/np.log(base)).sum()
 
         as_influence_file = os.path.join("tier1_as_influence_list")
         with open(as_influence_file, 'w') as aif:
@@ -2283,11 +2284,11 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                 as_influence[as_number] = 0
             list_probabilities.append(as_influence[as_number])
 
-        # Recompute probability mean
-        m = sum(list_probabilities) / float(len(list_probabilities))
-
-        # Recompute variance using a list comprehension
-        as_variance = sum((xi - m) ** 2 for xi in list_probabilities) / float(len(list_probabilities))
+        # Recompute degree of anonymity
+        value,counts = np.unique(list_probabilities, return_counts=True)
+        norm_counts = counts / counts.sum()
+        base = 2
+        as_variance = -(norm_counts * np.log(norm_counts)/np.log(base)).sum()
 
         top_as_probability = 0.0
 
@@ -2439,11 +2440,11 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
                 as_influence[as_number] = probability
                 list_probabilities.append(probability)
 
-        # Compute probability mean
-        m = sum(list_probabilities) / float(len(list_probabilities))
-
-        # Compute variance using a list comprehension
-        as_variance = sum((xi - m) ** 2 for xi in list_probabilities) / float(len(list_probabilities))
+        # Compute degree of anonymity
+        value,counts = np.unique(list_probabilities, return_counts=True)
+        norm_counts = counts / counts.sum()
+        base = 2
+        as_variance = -(norm_counts * np.log(norm_counts)/np.log(base)).sum()
 
         as_influence_file = os.path.join("as_influence_list")
         with open(as_influence_file, 'w') as aif:
@@ -2538,11 +2539,11 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
                             break
                 list_probabilities.append(as_influence[as_number])
 
-            # Recompute probability mean
-            m = sum(list_probabilities) / float(len(list_probabilities))
-
-            # Recompute variance using a list comprehension
-            as_variance = sum((xi - m) ** 2 for xi in list_probabilities) / float(len(list_probabilities))
+            # Recompute degree of anonymity
+            value,counts = np.unique(list_probabilities, return_counts=True)
+            norm_counts = counts / counts.sum()
+            base = 2
+            as_variance = -(norm_counts * np.log(norm_counts)/np.log(base)).sum()
 
         # Period is one month, and circuits change every 10min
         period = 31*24*60
@@ -2645,7 +2646,7 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
                             country_influence_exits[row['country_code']] = exit_probability
                         break
             i += 1
-            print('[{}/{}] country exits analyzed adversaries'.format(i, len(guards_probabilities)))
+            print('[{}/{}] country exits analyzed adversaries'.format(i, len(exits_probabilities)))
 
         # Computes the Country that has the greater influence on the network paths (guards probabilities * exits probabilities)
         country_influence = dict()
@@ -2667,11 +2668,11 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
                 country_influence[country_code] = probability
                 list_probabilities.append(probability)
 
-        # Compute probability mean
-        m = sum(list_probabilities) / float(len(list_probabilities))
-
-        # Compute variance using a list comprehension
-        country_variance = sum((xi - m) ** 2 for xi in list_probabilities) / float(len(list_probabilities))
+        # Compute degree of anonymity
+        value,counts = np.unique(list_probabilities, return_counts=True)
+        norm_counts = counts / counts.sum()
+        base = 2
+        country_variance = -(norm_counts * np.log(norm_counts)/np.log(base)).sum()
 
         country_influence_file = os.path.join("country_influence_list")
         with open(country_influence_file, 'w') as cif:
@@ -2762,11 +2763,11 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
                             break
                 list_probabilities.append(country_influence[as_number])
 
-            # Recompute probability mean
-            m = sum(list_probabilities) / float(len(list_probabilities))
-
-            # Recompute variance using a list comprehension
-            country_variance = sum((xi - m) ** 2 for xi in list_probabilities) / float(len(list_probabilities))
+            # Recompute degree of anonymity
+            value,counts = np.unique(list_probabilities, return_counts=True)
+            norm_counts = counts / counts.sum()
+            base = 2
+            as_variance = -(norm_counts * np.log(norm_counts)/np.log(base)).sum()
 
         # Period is one month, and circuits change every 10min
         period = 31*24*60
