@@ -2168,9 +2168,9 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                     as_influence[as_number] = probability
                     list_probabilities.append(probability)
                 else:
-                    del as_influence_guards[as_number]
+                    del as_influence_exits[as_number]
             else:
-                del as_influence_guards[as_number]
+                del as_influence_exits[as_number]
         # Takes also into account the last set: guards AS cones that do not appear in exit tier-1 AS cones
         for as_number, as_probability in as_influence_guards.items():
             # Probability is 0 if only guard or only exit is controlled (correlation not possible)
