@@ -1865,6 +1865,8 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
     g_select = []
     e_select = []
 
+    list_probabilities = []
+
     # Top tier-1 ASes ADVERSARIES preparation (may be different than adversaries considered by DeNASA)
     customer_cone_subnets_adversaries = dict()
     customer_cone_files = []
@@ -2144,8 +2146,6 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
 
         # Computes the tier-1 AS that has the greater influence on the network paths (guards probabilities * exits probabilities)
         as_influence = dict()
-        # To compute the variance metric, a list of probabilities is needed
-        list_probabilities = []
         for as_number, as_probability in as_influence_exits.items():
             # Probability is 0 if only guard or only exit is controlled (correlation not possible)
             probability = 0.0
@@ -2184,10 +2184,10 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                         as_influence[as_number] = probability
                         list_probabilities.append(probability)
 
-        # Compute probability mean
+        # Recompute probability mean
         m = sum(list_probabilities) / float(len(list_probabilities))
 
-        # Compute variance using a list comprehension
+        # Recompute variance using a list comprehension
         as_variance = sum((xi - m) ** 2 for xi in list_probabilities) / float(len(list_probabilities))
 
         as_influence_file = os.path.join("tier1_as_influence_list")
@@ -2248,11 +2248,12 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
 
     if denasa:
         # DeNASA g-select
-        for address in guards:
+        for address in guards_probabilities:
             for as_customer_cone, subnets in customer_cone_subnets.items():
                 if as_customer_cone in g_select:
                     if ip_in_as(address, subnets):
-                        guards.remove(address)
+                        guards_probabilities.remove(address)
+                        guards_number -= 1
                         break
 
         for as_customer_cone, subnets in customer_cone_subnets_adversaries.items():
@@ -2274,15 +2275,25 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                 if ip_in_as(exit_address, cc_subnets):
                     exits_compromised[exit_address].append(as_customer_cone)
 
+        list_probabilities = []
+
         # DeNASA e-select:0.0
         for guard_address, guard_probability in guards_probabilities.items():
+            probability = 0.0
             for exit_address, exit_probability in exits_probabilities.items():
                 # Applies DeNASA e-select:0.0
                 for as_customer_cone, cc_subnets in customer_cone_subnets_adversaries.items():
                     if not (as_customer_cone in guards_compromised[guard_address] and as_customer_cone in exits_compromised[exit_address]):
-                        top_as_probability += guard_probability * exit_probability
+                        probability += (guard_probability * exit_probability)*100
+                list_probabilities.append(probability/float(len(customer_cone_subnets_adversaries)))
 
-        top_as_probability = top_as_probability / float(len(customer_cone_subnets_adversaries))
+        # Recompute probability mean
+        m = sum(list_probabilities) / float(len(list_probabilities))
+
+        # Recompute variance using a list comprehension
+        as_variance = sum((xi - m) ** 2 for xi in list_probabilities) / float(len(list_probabilities))
+
+        top_as_probability = 0.0
 
     else:
         for guard_address, guard_probability in guards_probabilities.items():
@@ -2344,6 +2355,8 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
         as_adversaries = as_numbers
 
     as_list = []
+
+    list_probabilities = []
 
     # Prepare the AS subnets in DictReader
     if not os.path.isfile("ip2asn-v4.tsv.gz"):
@@ -2411,8 +2424,7 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
 
         # Computes the AS that has the greater influence on the network paths (guards probabilities * exits probabilities)
         as_influence = dict()
-        # To compute the variance metric, a list of probabilities is needed
-        list_probabilities = []
+
         for as_number, as_probability in as_influence_exits.items():
             # Probability is 0 if only guard or only exit is controlled (correlation not possible)
             probability = 0.0
@@ -2501,8 +2513,11 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
                     if ip_in_as(exit_address, cc_subnets):
                         exits_compromised[exit_address].append(as_customer_cone)
 
+            list_probabilities = []
+
             # DeNASA e-select:0.0, then computes influence of top tier-1 ASes
             for guard_address, guard_probability in guards_list.items():
+                probability = 0.0
                 for exit_address, exit_probability in exits_list.items():
                     path_probability = guard_probability * exit_probability
                     # Applies DeNASA e-select:0.0
@@ -2510,7 +2525,16 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
                         if as_customer_cone in guards_compromised[guard_address] and as_customer_cone in exits_compromised[exit_address]:
                             path_probability = 0
                             break
+                    if path_probability != 0:
+                        probability = (guard_probability * exit_probability)*100
                     as_probability += path_probability
+                    list_probabilities.append(probability)
+
+            # Recompute probability mean
+            m = sum(list_probabilities) / float(len(list_probabilities))
+
+            # Recompute variance using a list comprehension
+            as_variance = sum((xi - m) ** 2 for xi in list_probabilities) / float(len(list_probabilities))
 
         # Period is one month, and circuits change every 10min
         period = 31*24*60
@@ -2548,6 +2572,8 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
         country_adversaries = country_codes
 
     country_list = []
+
+    list_probabilities = []
 
     # Prepare the country subnets in DictReader
     if not os.path.isfile("ip2country-v4.tsv.gz"):
@@ -2700,8 +2726,11 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
                     if ip_in_as(exit_address, cc_subnets):
                         exits_compromised[exit_address].append(as_customer_cone)
 
+            list_probabilities = []
+
             # DeNASA e-select:0.0, then computes influence of top tier-1 ASes
             for guard_address, guard_probability in guards_list.items():
+                probability = 0.0
                 for exit_address, exit_probability in exits_list.items():
                     path_probability = guard_probability * exit_probability
                     # Applies DeNASA e-select:0.0
@@ -2709,7 +2738,16 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
                         if as_customer_cone in guards_compromised[guard_address] and as_customer_cone in exits_compromised[exit_address]:
                             path_probability = 0
                             break
+                    if path_probability != 0:
+                        probability = (guard_probability * exit_probability)*100
                     country_probability += path_probability
+                    list_probabilities.append(probability)
+
+            # Recompute probability mean
+            m = sum(list_probabilities) / float(len(list_probabilities))
+
+            # Recompute variance using a list comprehension
+            country_variance = sum((xi - m) ** 2 for xi in list_probabilities) / float(len(list_probabilities))
 
         # Period is one month, and circuits change every 10min
         period = 31*24*60
