@@ -2230,13 +2230,6 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
         g_select = top_tier1_as_adversaries_number[:2]
         e_select = top_tier1_as_adversaries_number[2:]
 
-        if denasa:
-            for as_number in as_influence_guards:
-                if as_number in g_select or as_number in e_select:
-                    del as_influence_guards[as_number]
-            for as_number in as_influence_exits:
-                if as_number in g_select or as_number in e_select:
-                    del as_influence_exits[as_number]
         # Compute entropy
         as_variance = guessing_entropy(as_influence_guards, as_influence_exits, 1, False, e_select)
 
