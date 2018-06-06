@@ -2150,7 +2150,6 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
             # Probability is 0 if only guard or only exit is controlled (correlation not possible)
             probability = 0.0
             # Keep only tier-1 ASes
-            print("AS {} providers: {}".format(as_number, as_providers[as_number]))
             if not as_providers[as_number]:
                 url = "http://as-rank.caida.org/api/v1/asns/"+as_number+"/links"
                 response = requests.get(url)
@@ -3205,14 +3204,14 @@ commands', dest='pathalg_subparser')
         #print("Scores AS: %s\t%s\t%s" % (guessing_entropy_result, as_paths_compromised, as_first_compromise))
         #print("Scores Country: %s\t%s\t%s" % (guessing_entropy_result, country_paths_compromised, country_first_compromise))
 
-        if not os.path.exists(args.nsf_dir+"/../"+"AS"+str(top_as_number)+"_"+str(top_country_adversary)):
-            os.makedirs(args.nsf_dir+"/../"+"AS"+str(top_as_number)+"_"+str(top_country_adversary))
+        if not os.path.exists(args.nsf_dir+"/../"+"Adversaries-AS"+str(top_as_adversary)+"_"+str(top_country_adversary)):
+            os.makedirs(args.nsf_dir+"/../"+"Adversaries-AS"+str(top_as_adversary)+"_"+str(top_country_adversary))
 
         if args.location is not None:
-            score_file = os.path.join(args.nsf_dir+"/../"+"AS"+str(top_as_adversary)+"_"+str(top_country_adversary),
+            score_file = os.path.join(args.nsf_dir+"/../"+"Adversaries-AS"+str(top_as_adversary)+"_"+str(top_country_adversary),
                                     "score_added_"+args.location+"_"+args.pathalg_subparser)
         else:
-            score_file = os.path.join(args.nsf_dir+"/../"+"AS"+str(top_as_adversary)+"_"+str(top_country_adversary),
+            score_file = os.path.join(args.nsf_dir+"/../"+"Adversaries-AS"+str(top_as_adversary)+"_"+str(top_country_adversary),
                                       "score_"+args.pathalg_subparser)
         with open(score_file, 'a') as sf:
             if args.num_custom_guards != 0:
