@@ -85,7 +85,7 @@ def build_prob_matrix(guards_probabilities, exits_probabilities, probabilities_r
     if denasa:
       if as_providers:
         for as_customer_cone, subnets in customer_cone_subnets.items():
-          if as_customer_cone in as_providers[guard_address]:
+          if as_customer_cone in as_providers[guard_address] or as_customer_cone == guard_address:
             denasa_guard_compromised = True
             customer_cone_subnets_guard_compromised[as_customer_cone] = subnets
       else:
@@ -108,7 +108,7 @@ def build_prob_matrix(guards_probabilities, exits_probabilities, probabilities_r
       if denasa and denasa_guard_compromised:
         if as_providers:
           for as_customer_cone, subnets in customer_cone_subnets_guard_compromised.items():
-            if as_customer_cone in as_providers[exit_address]:
+            if as_customer_cone in as_providers[exit_address] or as_customer_cone == exit_address:
               probabilities_denasa += path_probability
               path_probability = 0
               break
