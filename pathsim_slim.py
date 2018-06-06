@@ -2195,9 +2195,6 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
             else:
                 del as_influence_guards[as_number]
 
-        # Compute entropy
-        as_variance = guessing_entropy(as_influence_guards, as_influence_exits, 1, denasa, e_select)
-
         as_influence_file = os.path.join("tier1_as_influence_list")
         with open(as_influence_file, 'w') as aif:
             for as_number, as_probability in as_influence.items():
@@ -2232,6 +2229,9 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
         # Takes the two top tier-1 for g-select, may be optimized
         g_select = top_tier1_as_adversaries_number[:2]
         e_select = top_tier1_as_adversaries_number[2:]
+
+        # Compute entropy
+        as_variance = guessing_entropy(as_influence_guards, as_influence_exits, 1, denasa, e_select)
 
         # Creates customer cones for all the DeNASA adversaries we consider
         customer_cone_files = []
