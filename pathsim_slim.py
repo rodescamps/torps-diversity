@@ -2230,12 +2230,13 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
         g_select = top_tier1_as_adversaries_number[:2]
         e_select = top_tier1_as_adversaries_number[2:]
 
-        for as_number in as_influence_guards:
-            if as_number in g_select or as_number in e_select:
-                del as_influence_guards[as_number]
-        for as_number in as_influence_exits:
-            if as_number in g_select or as_number in e_select:
-                del as_influence_exits[as_number]
+        if denasa:
+            for as_number in as_influence_guards:
+                if as_number in g_select or as_number in e_select:
+                    del as_influence_guards[as_number]
+            for as_number in as_influence_exits:
+                if as_number in g_select or as_number in e_select:
+                    del as_influence_exits[as_number]
         # Compute entropy
         as_variance = guessing_entropy(as_influence_guards, as_influence_exits, 1, False, e_select)
 
@@ -2411,7 +2412,7 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
                 list_probabilities.append(probability)
 
         # Compute entropy
-        as_variance = guessing_entropy(as_influence_guards, as_influence_exits, 1, denasa, e_select)
+        as_variance = guessing_entropy(as_influence_guards, as_influence_exits, 1, False, e_select)
 
         as_influence_file = os.path.join("as_influence_list")
         with open(as_influence_file, 'w') as aif:
@@ -2489,9 +2490,6 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
                             path_probability = 0
                             break
                     as_probability += path_probability
-
-            # Recompute entropy
-            as_variance = guessing_entropy(as_influence_guards, as_influence_exits, 1, denasa, e_select)
 
         # Period is one month, and circuits change every 10min
         period = 31*24*60
@@ -2617,7 +2615,7 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
                 list_probabilities.append(probability)
 
         # Compute entropy
-        country_variance = guessing_entropy(country_influence_guards, country_influence_exits, 1, denasa, e_select)
+        country_variance = guessing_entropy(country_influence_guards, country_influence_exits, 1, False, e_select)
 
         country_influence_file = os.path.join("country_influence_list")
         with open(country_influence_file, 'w') as cif:
@@ -2691,9 +2689,6 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
                             path_probability = 0
                             break
                     country_probability += path_probability
-
-            # Recompute entropy
-            country_variance = guessing_entropy(country_influence_guards, country_influence_exits, 1, denasa, e_select)
 
         # Period is one month, and circuits change every 10min
         period = 31*24*60
