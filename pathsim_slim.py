@@ -1866,6 +1866,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
     e_select = []
 
     list_probabilities = []
+    as_influence = []
 
     # Top tier-1 ASes ADVERSARIES preparation (may be different than adversaries considered by DeNASA)
     customer_cone_subnets_adversaries = dict()
@@ -2277,15 +2278,10 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
 
         list_probabilities = []
 
-        # DeNASA e-select:0.0
-        for guard_address, guard_probability in guards_probabilities.items():
-            probability = 0.0
-            for exit_address, exit_probability in exits_probabilities.items():
-                # Applies DeNASA e-select:0.0
-                for as_customer_cone, cc_subnets in customer_cone_subnets_adversaries.items():
-                    if not (as_customer_cone in guards_compromised[guard_address] and as_customer_cone in exits_compromised[exit_address]):
-                        probability += (guard_probability * exit_probability)*100
-                list_probabilities.append(probability/float(len(customer_cone_subnets_adversaries)))
+        for as_number, as_probability in as_influence.items():
+            if as_number in g_select or as_number in e_select:
+                as_influence[as_number] = 0
+            list_probabilities.append(as_influence[as_number])
 
         # Recompute probability mean
         m = sum(list_probabilities) / float(len(list_probabilities))
@@ -2342,9 +2338,10 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
            guards_number, exits_number, \
            guards_total_bandwidth, exits_total_bandwidth, \
            number_paths_compromised, time_to_first_path_compromised, \
-           as_variance, e_select
+           as_variance, as_providers, \
+           g_select, e_select
 
-def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, denasa, e_select):
+def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, denasa, as_providers, g_select, e_select):
 
     average_number_paths_compromised = 0.0
     average_time_to_first_path_compromised = 0.0
@@ -2357,6 +2354,7 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
     as_list = []
 
     list_probabilities = []
+    as_influence = []
 
     # Prepare the AS subnets in DictReader
     if not os.path.isfile("ip2asn-v4.tsv.gz"):
@@ -2513,11 +2511,8 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
                     if ip_in_as(exit_address, cc_subnets):
                         exits_compromised[exit_address].append(as_customer_cone)
 
-            list_probabilities = []
-
             # DeNASA e-select:0.0, then computes influence of top tier-1 ASes
             for guard_address, guard_probability in guards_list.items():
-                probability = 0.0
                 for exit_address, exit_probability in exits_list.items():
                     path_probability = guard_probability * exit_probability
                     # Applies DeNASA e-select:0.0
@@ -2525,10 +2520,23 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
                         if as_customer_cone in guards_compromised[guard_address] and as_customer_cone in exits_compromised[exit_address]:
                             path_probability = 0
                             break
-                    if path_probability != 0:
-                        probability = (guard_probability * exit_probability)*100
                     as_probability += path_probability
-                    list_probabilities.append(probability)
+
+            list_probabilities = []
+
+            for as_number, as_probability in as_influence.items():
+                as_avoided = False
+                for as_provider in g_select:
+                    if as_provider in as_providers[as_number]:
+                        as_influence[as_number] = 0
+                        as_avoided = True
+                        break
+                if not as_avoided:
+                    for as_provider in e_select:
+                        if as_provider in as_providers[as_number]:
+                            as_influence[as_number] = 0
+                            break
+                list_probabilities.append(as_influence[as_number])
 
             # Recompute probability mean
             m = sum(list_probabilities) / float(len(list_probabilities))
@@ -2561,7 +2569,7 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
 
     return average_number_paths_compromised/len(as_adversaries), average_time_to_first_path_compromised/len(as_adversaries), as_variance, as_adversaries
 
-def country_compromise_path(guards_probabilities, exits_probabilities, country_codes, denasa, e_select):
+def country_compromise_path(guards_probabilities, exits_probabilities, country_codes, denasa, as_providers, g_select, e_select):
 
     average_number_paths_compromised = 0.0
     average_time_to_first_path_compromised = 0.0
@@ -2574,6 +2582,7 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
     country_list = []
 
     list_probabilities = []
+    country_influence = []
 
     # Prepare the country subnets in DictReader
     if not os.path.isfile("ip2country-v4.tsv.gz"):
@@ -2726,11 +2735,8 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
                     if ip_in_as(exit_address, cc_subnets):
                         exits_compromised[exit_address].append(as_customer_cone)
 
-            list_probabilities = []
-
             # DeNASA e-select:0.0, then computes influence of top tier-1 ASes
             for guard_address, guard_probability in guards_list.items():
-                probability = 0.0
                 for exit_address, exit_probability in exits_list.items():
                     path_probability = guard_probability * exit_probability
                     # Applies DeNASA e-select:0.0
@@ -2738,10 +2744,23 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
                         if as_customer_cone in guards_compromised[guard_address] and as_customer_cone in exits_compromised[exit_address]:
                             path_probability = 0
                             break
-                    if path_probability != 0:
-                        probability = (guard_probability * exit_probability)*100
                     country_probability += path_probability
-                    list_probabilities.append(probability)
+
+            list_probabilities = []
+
+            for as_number, as_probability in country_influence.items():
+                as_avoided = False
+                for as_provider in g_select:
+                    if as_provider in as_providers[as_number]:
+                        country_influence[as_number] = 0
+                        as_avoided = True
+                        break
+                if not as_avoided:
+                    for as_provider in e_select:
+                        if as_provider in as_providers[as_number]:
+                            country_influence[as_number] = 0
+                            break
+                list_probabilities.append(country_influence[as_number])
 
             # Recompute probability mean
             m = sum(list_probabilities) / float(len(list_probabilities))
@@ -3211,7 +3230,8 @@ commands', dest='pathalg_subparser')
          guards_number, exits_number,
          guards_total_bandwidth, exits_total_bandwidth,
          top_as_paths_compromised, top_as_first_compromise,
-         tier1_as_variance, e_select) = compute_probabilities(network_states, water_filling, denasa, tier1_as_adversaries, False)
+         tier1_as_variance, g_select, e_select,
+         as_providers) = compute_probabilities(network_states, water_filling, denasa, tier1_as_adversaries, False)
 
         #probabilities_reduction = 1
         #guessing_entropy_result = guessing_entropy(guards_probabilities, exits_probabilities, probabilities_reduction)*probabilities_reduction
@@ -3232,12 +3252,14 @@ commands', dest='pathalg_subparser')
         (as_paths_compromised, as_first_compromise, as_variance, top_as_adversary) = as_compromise_path(guards_probabilities,
                                                                          exits_probabilities,
                                                                          top_as_number,
-                                                                         denasa, e_select)
+                                                                         denasa, as_providers,
+                                                                         g_select, e_select)
 
         (country_paths_compromised, country_first_compromise, country_variance, top_country_adversary) = country_compromise_path(guards_probabilities,
                                                                                         exits_probabilities,
                                                                                         top_country_code,
-                                                                                        denasa, e_select)
+                                                                                        denasa, as_providers,
+                                                                                        g_select, e_select)
 
         #print("Scores AS: %s\t%s\t%s" % (guessing_entropy_result, as_paths_compromised, as_first_compromise))
         #print("Scores Country: %s\t%s\t%s" % (guessing_entropy_result, country_paths_compromised, country_first_compromise))
