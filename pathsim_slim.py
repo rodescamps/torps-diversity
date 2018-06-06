@@ -1866,8 +1866,11 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
     g_select = []
     e_select = []
 
+    as_providers = dict()
     list_probabilities = []
     as_influence = []
+    as_influence_guards = dict()
+    as_influence_exits = dict()
 
     # Top tier-1 ASes ADVERSARIES preparation (may be different than adversaries considered by DeNASA)
     customer_cone_subnets_adversaries = dict()
@@ -2002,11 +2005,9 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
         csvfile.close()
 
         # Prints all ASes influence on Tor network by decreasing probabilities on guard and exit nodes distinctly
-        as_influence_guards = dict()
         i = 0
 
         # To optimize the provider links recursion, keeps tier-1 providers in memory for all ASes encountered
-        as_providers = dict()
 
         for guard_address, guard_probability in guards_probabilities.items():
             for row in as_list:
@@ -2074,7 +2075,6 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
             i += 1
             #if i == 10: break
             print('[{}/{}] cone guards analyzed adversaries'.format(i, len(guards_probabilities)))
-        as_influence_exits = dict()
         i = 0
         for exit_address, exit_probability in exits_probabilities.items():
             for row in as_list:
@@ -2186,11 +2186,8 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                         as_influence[as_number] = probability
                         list_probabilities.append(probability)
 
-        # Compute degree of anonymity
-        value,counts = np.unique(list_probabilities, return_counts=True)
-        norm_counts = counts / counts.sum()
-        base = 2
-        as_variance = -(norm_counts * np.log(norm_counts)/np.log(base)).sum()
+        # Compute entropy
+        as_variance = guessing_entropy(as_influence_guards, as_influence_exits, 1, denasa, e_select)
 
         as_influence_file = os.path.join("tier1_as_influence_list")
         with open(as_influence_file, 'w') as aif:
@@ -2263,32 +2260,8 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                 print(as_customer_cone)
                 del customer_cone_subnets_adversaries[as_customer_cone]
 
-        guards_compromised = dict()
-        exits_compromised = dict()
-
-        for guard_address, guard_probability in guards_probabilities.items():
-            guards_compromised[guard_address] = []
-            for as_customer_cone, cc_subnets in customer_cone_subnets_adversaries.items():
-                if ip_in_as(guard_address, cc_subnets):
-                    guards_compromised[guard_address].append(as_customer_cone)
-        for exit_address, exit_probability in exits_probabilities.items():
-            exits_compromised[exit_address] = []
-            for as_customer_cone, cc_subnets in customer_cone_subnets_adversaries.items():
-                if ip_in_as(exit_address, cc_subnets):
-                    exits_compromised[exit_address].append(as_customer_cone)
-
-        list_probabilities = []
-
-        for as_number, as_probability in as_influence.items():
-            if as_number in g_select or as_number in e_select:
-                as_influence[as_number] = 0
-            list_probabilities.append(as_influence[as_number])
-
-        # Recompute degree of anonymity
-        value,counts = np.unique(list_probabilities, return_counts=True)
-        norm_counts = counts / counts.sum()
-        base = 2
-        as_variance = -(norm_counts * np.log(norm_counts)/np.log(base)).sum()
+        # Recompute entropy
+        as_variance = guessing_entropy(as_influence_guards, as_influence_exits, 1, denasa, e_select)
 
         top_as_probability = 0.0
 
@@ -2355,6 +2328,8 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
     as_list = []
 
     list_probabilities = []
+    as_influence_guards = dict()
+    as_influence_exits = dict()
     as_influence = []
 
     # Prepare the AS subnets in DictReader
@@ -2390,7 +2365,6 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
     # If no AS adversary(ies) is (are) specified, consider the top AS as the adversary
     if not as_adversaries:
         # Prints all ASes influence on Tor network by decreasing probabilities on guard and exit nodes distinctly
-        as_influence_guards = dict()
         i = 0
         for guard_address, guard_probability in guards_probabilities.items():
             for row in as_list:
@@ -2405,7 +2379,6 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
                         break
             i += 1
             print('[{}/{}] guards analyzed adversaries'.format(i, len(guards_probabilities)))
-        as_influence_exits = dict()
         i = 0
         for exit_address, exit_probability in exits_probabilities.items():
             for row in as_list:
@@ -2422,7 +2395,6 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
             print('[{}/{}] exits analyzed adversaries'.format(i, len(guards_probabilities)))
 
         # Computes the AS that has the greater influence on the network paths (guards probabilities * exits probabilities)
-        as_influence = dict()
 
         for as_number, as_probability in as_influence_exits.items():
             # Probability is 0 if only guard or only exit is controlled (correlation not possible)
@@ -2440,11 +2412,8 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
                 as_influence[as_number] = probability
                 list_probabilities.append(probability)
 
-        # Compute degree of anonymity
-        value,counts = np.unique(list_probabilities, return_counts=True)
-        norm_counts = counts / counts.sum()
-        base = 2
-        as_variance = -(norm_counts * np.log(norm_counts)/np.log(base)).sum()
+        # Compute entropy
+        as_variance = guessing_entropy(as_influence_guards, as_influence_exits, 1, denasa, e_select)
 
         as_influence_file = os.path.join("as_influence_list")
         with open(as_influence_file, 'w') as aif:
@@ -2539,11 +2508,8 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
                             break
                 list_probabilities.append(as_influence[as_number])
 
-            # Recompute degree of anonymity
-            value,counts = np.unique(list_probabilities, return_counts=True)
-            norm_counts = counts / counts.sum()
-            base = 2
-            as_variance = -(norm_counts * np.log(norm_counts)/np.log(base)).sum()
+            # Recompute entropy
+            as_variance = guessing_entropy(as_influence_guards, as_influence_exits, 1, denasa, e_select)
 
         # Period is one month, and circuits change every 10min
         period = 31*24*60
@@ -2583,6 +2549,8 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
     country_list = []
 
     list_probabilities = []
+    country_influence_guards = dict()
+    country_influence_exits = dict()
     country_influence = []
 
     # Prepare the country subnets in DictReader
@@ -2617,7 +2585,6 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
 
     if not country_adversaries:
         # Prints all Countries influence on Tor network by decreasing probabilities on guard and exit nodes distinctly
-        country_influence_guards = dict()
         i = 0
         for guard_address, guard_probability in guards_probabilities.items():
             for row in country_list:
@@ -2632,7 +2599,6 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
                         break
             i += 1
             print('[{}/{}] country guards analyzed adversaries'.format(i, len(guards_probabilities)))
-        country_influence_exits = dict()
         i = 0
         for exit_address, exit_probability in exits_probabilities.items():
             for row in country_list:
@@ -2668,11 +2634,8 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
                 country_influence[country_code] = probability
                 list_probabilities.append(probability)
 
-        # Compute degree of anonymity
-        value,counts = np.unique(list_probabilities, return_counts=True)
-        norm_counts = counts / counts.sum()
-        base = 2
-        country_variance = -(norm_counts * np.log(norm_counts)/np.log(base)).sum()
+        # Compute entropy
+        country_variance = guessing_entropy(country_influence_guards, country_influence_exits, 1, denasa, e_select)
 
         country_influence_file = os.path.join("country_influence_list")
         with open(country_influence_file, 'w') as cif:
@@ -2763,11 +2726,8 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
                             break
                 list_probabilities.append(country_influence[as_number])
 
-            # Recompute degree of anonymity
-            value,counts = np.unique(list_probabilities, return_counts=True)
-            norm_counts = counts / counts.sum()
-            base = 2
-            as_variance = -(norm_counts * np.log(norm_counts)/np.log(base)).sum()
+            # Recompute entropy
+            country_variance = guessing_entropy(country_influence_guards, country_influence_exits, 1, denasa, e_select)
 
         # Period is one month, and circuits change every 10min
         period = 31*24*60
