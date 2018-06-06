@@ -10,7 +10,7 @@ import re
 def consensusname(log_file):
   return log_file.split('.')[1]
 
-def build_prob_matrix(guards_probabilities, exits_probabilities, probabilities_reduction, denasa, e_select):
+def build_prob_matrix(guards_probabilities, exits_probabilities, probabilities_reduction, denasa, e_select, as_providers):
 
   prob_matrix = {}
   guards = {}
@@ -83,10 +83,16 @@ def build_prob_matrix(guards_probabilities, exits_probabilities, probabilities_r
     denasa_guard_compromised = False
     customer_cone_subnets_guard_compromised = dict()
     if denasa:
-      for as_customer_cone, subnets in customer_cone_subnets.items():
-        if ip_in_as(guard_address, subnets):
-          denasa_guard_compromised = True
-          customer_cone_subnets_guard_compromised[as_customer_cone] = subnets
+      if as_providers:
+        for as_customer_cone, subnets in customer_cone_subnets.items():
+          if as_customer_cone in as_providers[guard_address]:
+            denasa_guard_compromised = True
+            customer_cone_subnets_guard_compromised[as_customer_cone] = subnets
+      else:
+        for as_customer_cone, subnets in customer_cone_subnets.items():
+          if ip_in_as(guard_address, subnets):
+            denasa_guard_compromised = True
+            customer_cone_subnets_guard_compromised[as_customer_cone] = subnets
     for exit_address, exit_probability in aggregated_exits_probabilities.items():
 
       if guard_address not in guards :
@@ -100,11 +106,18 @@ def build_prob_matrix(guards_probabilities, exits_probabilities, probabilities_r
 
       # Applies DeNASA e-select:0.0
       if denasa and denasa_guard_compromised:
-        for as_customer_cone, subnets in customer_cone_subnets_guard_compromised.items():
-          if ip_in_as(exit_address, customer_cone_subnets_guard_compromised[as_customer_cone]):
-            probabilities_denasa += path_probability
-            path_probability = 0
-            break
+        if as_providers:
+          for as_customer_cone, subnets in customer_cone_subnets_guard_compromised.items():
+            if as_customer_cone in as_providers[exit_address]:
+              probabilities_denasa += path_probability
+              path_probability = 0
+              break
+        else:
+          for as_customer_cone, subnets in customer_cone_subnets_guard_compromised.items():
+            if ip_in_as(exit_address, customer_cone_subnets_guard_compromised[as_customer_cone]):
+              probabilities_denasa += path_probability
+              path_probability = 0
+              break
 
       if guard_address not in prob_matrix:
         prob_matrix[guard_address] = {}
@@ -163,9 +176,9 @@ def build_prob_matrix(guards_probabilities, exits_probabilities, probabilities_r
   return prob_matrix, guards, exits
 
 
-def guessing_entropy(guards_prob, exits_prob, probabilities_reduction, denasa, e_select):
+def guessing_entropy(guards_prob, exits_prob, probabilities_reduction, denasa, e_select, as_providers):
 
-  (prob_matrix, guards, exits) = build_prob_matrix(guards_prob, exits_prob, probabilities_reduction, denasa, e_select)
+  (prob_matrix, guards, exits) = build_prob_matrix(guards_prob, exits_prob, probabilities_reduction, denasa, e_select, as_providers)
 
   all_nodes = len(guards)
   for exit in exits:

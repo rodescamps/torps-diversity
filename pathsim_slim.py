@@ -1954,7 +1954,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                         exits_bandwidths[address] = [total_bandwidth+bandwidth, old_counter+1]
         if i % 100 == 0: print('[{}/{}]'.format(i, network_states_size))
         i += 1
-        #if i == 2: break
+        if i == 2: break
 
     for address in guards:
         bandwidth_details = guards_bandwidths[address]
@@ -2074,7 +2074,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                         #print(len(as_providers))
                         break
             i += 1
-            #if i == 10: break
+            if i == 10: break
             if i % 500 == 0: print('[{}/{}] cone guards analyzed adversaries'.format(i, len(guards_probabilities)))
         i = 0
         for exit_address, exit_probability in exits_probabilities.items():
@@ -2144,7 +2144,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                         #print(len(as_providers))
                         break
             i += 1
-            #if i == 10: break
+            if i == 10: break
             if i % 500 == 0: print('[{}/{}] cone exits analyzed adversaries'.format(i, len(exits_probabilities)))
 
         # Computes the tier-1 AS that has the greater influence on the network paths (guards probabilities * exits probabilities)
@@ -2231,7 +2231,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
         e_select = top_tier1_as_adversaries_number[2:]
 
         # Compute entropy
-        as_variance = guessing_entropy(as_influence_guards, as_influence_exits, 1, False, e_select)
+        as_variance = guessing_entropy(as_influence_guards, as_influence_exits, 1, denasa, e_select, as_providers)
 
         # Creates customer cones for all the DeNASA adversaries we consider
         customer_cone_files = []
