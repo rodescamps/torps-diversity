@@ -1869,7 +1869,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
 
     as_providers = dict()
     list_probabilities = []
-    as_influence = []
+    as_influence = dict()
     as_influence_guards = dict()
     as_influence_exits = dict()
 
@@ -2322,7 +2322,7 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
     list_probabilities = []
     as_influence_guards = dict()
     as_influence_exits = dict()
-    as_influence = []
+    as_influence = dict()
 
     # Prepare the AS subnets in DictReader
     if not os.path.isfile("ip2asn-v4.tsv.gz"):
@@ -2524,7 +2524,7 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
     list_probabilities = []
     country_influence_guards = dict()
     country_influence_exits = dict()
-    country_influence = []
+    country_influence = dict()
 
     # Prepare the country subnets in DictReader
     if not os.path.isfile("ip2country-v4.tsv.gz"):
