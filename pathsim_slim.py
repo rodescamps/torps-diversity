@@ -3042,11 +3042,12 @@ commands', dest='pathalg_subparser')
          guards_number, exits_number,
          guards_total_bandwidth, exits_total_bandwidth,
          top_as_paths_compromised, top_as_first_compromise,
-         tier1_as_guessing_entropy, e_select,
+         tier1_as_guessing_entropy, as_providers,
+         g_select, e_select,
          top_tier1_as_adversaries_number) = compute_probabilities(network_states, water_filling, denasa, tier1_as_adversaries)
 
         probabilities_reduction = 2
-        guessing_entropy_result = guessing_entropy(guards_probabilities, exits_probabilities, probabilities_reduction, denasa, e_select)
+        guessing_entropy_result = guessing_entropy(guards_probabilities, exits_probabilities, probabilities_reduction, denasa, e_select, as_providers)
 
         score_file = os.path.join(args.nsf_dir+"/../"+"guessing_entropy_"+args.pathalg_subparser)
         if args.num_custom_guards != 0:
