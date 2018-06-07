@@ -1872,6 +1872,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
     as_influence = dict()
     as_influence_guards = dict()
     as_influence_exits = dict()
+    top_tier1_as_adversaries_number = []
 
     # Top tier-1 ASes ADVERSARIES preparation (may be different than adversaries considered by DeNASA)
     customer_cone_subnets_adversaries = dict()
@@ -2211,7 +2212,6 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                 aief.write("%s\t%s\n" % (as_number, as_probability))
         aief.close()
 
-        top_tier1_as_adversaries_number = []
         as_influence_computation_list = as_influence
         as_probability_sum = 0.0
         # Takes the 5 top tier-1 adversaries
@@ -2315,7 +2315,8 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
            guards_total_bandwidth, exits_total_bandwidth, \
            number_paths_compromised, time_to_first_path_compromised, \
            as_variance, as_providers, \
-           g_select, e_select
+           g_select, e_select, \
+           top_tier1_as_adversaries_number
 
 def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, denasa, as_providers, g_select, e_select):
 
@@ -3041,7 +3042,8 @@ commands', dest='pathalg_subparser')
          guards_number, exits_number,
          guards_total_bandwidth, exits_total_bandwidth,
          top_as_paths_compromised, top_as_first_compromise,
-         tier1_as_variance, e_select) = compute_probabilities(network_states, water_filling, denasa, tier1_as_adversaries)
+         tier1_as_guessing_entropy, e_select,
+         top_tier1_as_adversaries_number) = compute_probabilities(network_states, water_filling, denasa, tier1_as_adversaries)
 
         probabilities_reduction = 2
         guessing_entropy_result = guessing_entropy(guards_probabilities, exits_probabilities, probabilities_reduction, denasa, e_select)
@@ -3155,8 +3157,9 @@ commands', dest='pathalg_subparser')
          guards_number, exits_number,
          guards_total_bandwidth, exits_total_bandwidth,
          top_as_paths_compromised, top_as_first_compromise,
-         tier1_as_variance, as_providers,
-         g_select, e_select) = compute_probabilities(network_states, water_filling, denasa, tier1_as_adversaries)
+         tier1_as_guessing_entropy, as_providers,
+         g_select, e_select,
+         top_tier1_as_adversaries_number) = compute_probabilities(network_states, water_filling, denasa, tier1_as_adversaries)
 
         #probabilities_reduction = 1
         #guessing_entropy_result = guessing_entropy(guards_probabilities, exits_probabilities, probabilities_reduction)*probabilities_reduction
@@ -3174,52 +3177,52 @@ commands', dest='pathalg_subparser')
         else:
             top_country_code = [] # ['DE', 'FR']
 
-        (as_paths_compromised, as_first_compromise, as_variance, top_as_adversary) = as_compromise_path(guards_probabilities,
-                                                                         exits_probabilities,
-                                                                         top_as_number,
-                                                                         denasa, as_providers,
-                                                                         g_select, e_select)
+        (as_paths_compromised, as_first_compromise, as_guessing_entropy, top_as_adversary) = as_compromise_path(guards_probabilities,
+                                                                                                                exits_probabilities,
+                                                                                                                top_as_number,
+                                                                                                                denasa, as_providers,
+                                                                                                                g_select, e_select)
 
-        (country_paths_compromised, country_first_compromise, country_variance, top_country_adversary) = country_compromise_path(guards_probabilities,
-                                                                                        exits_probabilities,
-                                                                                        top_country_code,
-                                                                                        denasa, as_providers,
-                                                                                        g_select, e_select)
+        (country_paths_compromised, country_first_compromise, country_guessing_entropy, top_country_adversary) = country_compromise_path(guards_probabilities,
+                                                                                                                                         exits_probabilities,
+                                                                                                                                         top_country_code,
+                                                                                                                                         denasa, as_providers,
+                                                                                                                                         g_select, e_select)
 
         #print("Scores AS: %s\t%s\t%s" % (guessing_entropy_result, as_paths_compromised, as_first_compromise))
         #print("Scores Country: %s\t%s\t%s" % (guessing_entropy_result, country_paths_compromised, country_first_compromise))
 
-        if not os.path.exists(args.nsf_dir+"/../"+"Adversaries-AS"+str(top_as_adversary)+"_"+str(top_country_adversary)):
-            os.makedirs(args.nsf_dir+"/../"+"Adversaries-AS"+str(top_as_adversary)+"_"+str(top_country_adversary))
+        if not os.path.exists(args.nsf_dir+"/../"+"Adversaries-AS"+str(top_as_adversary)+"_"+str(top_country_adversary)+"_"+str(top_tier1_as_adversaries_number)):
+            os.makedirs(args.nsf_dir+"/../"+"Adversaries-AS"+str(top_as_adversary)+"_"+str(top_country_adversary)+"_"+str(top_tier1_as_adversaries_number))
 
         if args.location is not None:
-            score_file = os.path.join(args.nsf_dir+"/../"+"Adversaries-AS"+str(top_as_adversary)+"_"+str(top_country_adversary),
+            score_file = os.path.join(args.nsf_dir+"/../"+"Adversaries-AS"+str(top_as_adversary)+"_"+str(top_country_adversary)+"_"+str(top_tier1_as_adversaries_number),
                                     "score_added_"+args.location+"_"+args.pathalg_subparser)
         else:
-            score_file = os.path.join(args.nsf_dir+"/../"+"Adversaries-AS"+str(top_as_adversary)+"_"+str(top_country_adversary),
+            score_file = os.path.join(args.nsf_dir+"/../"+"Adversaries-AS"+str(top_as_adversary)+"_"+str(top_country_adversary)+"_"+str(top_tier1_as_adversaries_number),
                                       "score_"+args.pathalg_subparser)
         with open(score_file, 'a') as sf:
             if args.num_custom_guards != 0:
                 sf.write("Guards\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (args.location,
-                                                          args.num_custom_guards, args.custom_guard_cons_bw,
-                                                          as_paths_compromised, as_first_compromise, as_variance,
-                                                          country_paths_compromised, country_first_compromise, country_variance,
-                                                          top_as_paths_compromised, top_as_first_compromise, tier1_as_variance))
+                                                                                       args.num_custom_guards, args.custom_guard_cons_bw,
+                                                                                       as_paths_compromised, as_first_compromise, as_guessing_entropy,
+                                                                                       country_paths_compromised, country_first_compromise, country_guessing_entropy,
+                                                                                       top_as_paths_compromised, top_as_first_compromise, tier1_as_guessing_entropy))
             elif args.num_custom_exits != 0:
                 sf.write("Exits\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (args.location,
-                                                         args.num_custom_exits, args.custom_exit_cons_bw,
-                                                         as_paths_compromised, as_first_compromise, as_variance,
-                                                         country_paths_compromised, country_first_compromise, country_variance,
-                                                         top_as_paths_compromised, top_as_first_compromise, tier1_as_variance))
+                                                                                      args.num_custom_exits, args.custom_exit_cons_bw,
+                                                                                      as_paths_compromised, as_first_compromise, as_guessing_entropy,
+                                                                                      country_paths_compromised, country_first_compromise, country_guessing_entropy,
+                                                                                      top_as_paths_compromised, top_as_first_compromise, tier1_as_guessing_entropy))
             elif args.num_custom_guardsexits != 0:
                 sf.write("GuardExits\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (args.location,
-                                                              args.num_custom_guardsexits, args.custom_guardexit_cons_bw,
-                                                              as_paths_compromised, as_first_compromise, as_variance,
-                                                              country_paths_compromised, country_first_compromise, country_variance,
-                                                              top_as_paths_compromised, top_as_first_compromise, tier1_as_variance))
+                                                                                           args.num_custom_guardsexits, args.custom_guardexit_cons_bw,
+                                                                                           as_paths_compromised, as_first_compromise, as_guessing_entropy,
+                                                                                           country_paths_compromised, country_first_compromise, country_guessing_entropy,
+                                                                                           top_as_paths_compromised, top_as_first_compromise, tier1_as_guessing_entropy))
             else:
-                sf.write("Vanilla\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (as_paths_compromised, as_first_compromise, as_variance,
-                                                        country_paths_compromised, country_first_compromise, country_variance,
-                                                        top_as_paths_compromised, top_as_first_compromise, tier1_as_variance))
+                sf.write("Vanilla\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (as_paths_compromised, as_first_compromise, as_guessing_entropy,
+                                                                            country_paths_compromised, country_first_compromise, country_guessing_entropy,
+                                                                            top_as_paths_compromised, top_as_first_compromise, tier1_as_guessing_entropy))
         sf.close()
 
