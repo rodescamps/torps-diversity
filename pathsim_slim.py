@@ -3145,8 +3145,8 @@ commands', dest='pathalg_subparser')
          guards_number, exits_number,
          guards_total_bandwidth, exits_total_bandwidth,
          top_as_paths_compromised, top_as_first_compromise,
-         tier1_as_variance, g_select, e_select,
-         as_providers) = compute_probabilities(network_states, water_filling, denasa, tier1_as_adversaries)
+         tier1_as_variance, as_providers,
+         g_select, e_select) = compute_probabilities(network_states, water_filling, denasa, tier1_as_adversaries)
 
         #probabilities_reduction = 1
         #guessing_entropy_result = guessing_entropy(guards_probabilities, exits_probabilities, probabilities_reduction)*probabilities_reduction
