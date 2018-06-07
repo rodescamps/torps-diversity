@@ -130,6 +130,13 @@ def build_prob_matrix(guards_probabilities, exits_probabilities, probabilities_r
         i += 1
         # print("({}/{}) guards defined".format(i, len(aggregated_guards_probabilities)))
     print("Matrix prob total = " + str(total))
+    total_corrected = 0
+    if total != 1.0:
+        for guard_address, guard_probability in aggregated_guards_probabilities.items():
+            for exit_address, exit_probability in aggregated_exits_probabilities.items():
+                prob_matrix[guard_address][exit_address] /= total
+                total_corrected += prob_matrix[guard_address][exit_address]
+    print("Matrix prob total corrected = " + str(total_corrected))
 
     if denasa:
         total = 0
@@ -138,6 +145,13 @@ def build_prob_matrix(guards_probabilities, exits_probabilities, probabilities_r
                 prob_matrix[guard_address][exit_address] /= (1.0 - probabilities_denasa)
                 total += prob_matrix[guard_address][exit_address]
         print("Matrix prob total DeNASA = " + str(total))
+        total_corrected = 0
+        if total != 1.0:
+            for guard_address, guard_probability in aggregated_guards_probabilities.items():
+                for exit_address, exit_probability in aggregated_exits_probabilities.items():
+                    prob_matrix[guard_address][exit_address] /= total
+                    total_corrected += prob_matrix[guard_address][exit_address]
+        print("Matrix prob total DeNASA corrected = " + str(total_corrected))
     """
     #exits = {}
     #guards = {}
