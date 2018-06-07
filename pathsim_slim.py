@@ -2030,9 +2030,8 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                             elif searched_as_number in as_providers:
                                 list_provider_encountered = []
                                 for provider_as in as_providers[searched_as_number]:
-                                    if provider_as not in list_as_encountered:
+                                    if provider_as not in list_as_encountered and provider_as not in list_provider_encountered:
                                         list_as_encountered.append(provider_as)
-                                    if provider_as not in list_provider_encountered:
                                         list_provider_encountered.append(provider_as)
                                         if provider_as in as_influence_guards:
                                             as_influence_guards[provider_as] += guard_probability
@@ -2097,9 +2096,8 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                             elif searched_as_number in as_providers:
                                 list_provider_encountered = []
                                 for provider_as in as_providers[searched_as_number]:
-                                    if provider_as not in list_as_encountered:
+                                    if provider_as not in list_as_encountered and provider_as not in list_provider_encountered:
                                         list_as_encountered.append(provider_as)
-                                    if provider_as not in list_provider_encountered:
                                         list_provider_encountered.append(provider_as)
                                         if provider_as in as_influence_exits:
                                             as_influence_exits[provider_as] += exit_probability
@@ -2200,6 +2198,18 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
             for as_number, as_probability in as_influence.items():
                 aif.write("%s\t%s\n" % (as_number, as_probability))
         aif.close()
+
+        as_influence_guards_file = os.path.join("tier1_as_influence_guards_list")
+        with open(as_influence_guards_file, 'w') as aigf:
+            for as_number, as_probability in as_influence_guards.items():
+                aif.write("%s\t%s\n" % (as_number, as_probability))
+        aigf.close()
+
+        as_influence_exits_file = os.path.join("tier1_as_influence_exits_list")
+        with open(as_influence_exits_file, 'w') as aief:
+            for as_number, as_probability in as_influence_exits.items():
+                aif.write("%s\t%s\n" % (as_number, as_probability))
+        aief.close()
 
         top_tier1_as_adversaries_number = []
         as_influence_computation_list = as_influence
