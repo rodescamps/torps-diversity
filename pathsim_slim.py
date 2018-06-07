@@ -2202,13 +2202,13 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
         as_influence_guards_file = os.path.join("tier1_as_influence_guards_list")
         with open(as_influence_guards_file, 'w') as aigf:
             for as_number, as_probability in as_influence_guards.items():
-                aif.write("%s\t%s\n" % (as_number, as_probability))
+                aigf.write("%s\t%s\n" % (as_number, as_probability))
         aigf.close()
 
         as_influence_exits_file = os.path.join("tier1_as_influence_exits_list")
         with open(as_influence_exits_file, 'w') as aief:
             for as_number, as_probability in as_influence_exits.items():
-                aif.write("%s\t%s\n" % (as_number, as_probability))
+                aief.write("%s\t%s\n" % (as_number, as_probability))
         aief.close()
 
         top_tier1_as_adversaries_number = []
