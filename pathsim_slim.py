@@ -3047,7 +3047,7 @@ commands', dest='pathalg_subparser')
          top_tier1_as_adversaries_number) = compute_probabilities(network_states, water_filling, denasa, tier1_as_adversaries)
 
         probabilities_reduction = 2
-        guessing_entropy_result = guessing_entropy(guards_probabilities, exits_probabilities, probabilities_reduction, denasa, e_select, as_providers)
+        guessing_entropy_result = guessing_entropy(guards_probabilities, exits_probabilities, probabilities_reduction, denasa, e_select, [])
 
         score_file = os.path.join(args.nsf_dir+"/../"+"guessing_entropy_"+args.pathalg_subparser)
         if args.num_custom_guards != 0:
