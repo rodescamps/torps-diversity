@@ -3417,8 +3417,8 @@ commands', dest='pathalg_subparser')
                                       "_"+str(args.num_custom_guardsexits)+"guardexit"+str(args.custom_guardexit_cons_bw))
         print(score_file)
         print(guessing_entropy_result)
-        with open(score_file, 'w') as sf:
-            sf.write("%s" % (guessing_entropy_result))
+        with open(score_file, 'a') as sf:
+            sf.write("%s\n" % (guessing_entropy_result))
         sf.close()
 
     elif (args.subparser == 'score'):
