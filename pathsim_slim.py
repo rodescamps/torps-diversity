@@ -2199,24 +2199,42 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                     del as_influence_guards[as_number]
             else:
                 del as_influence_guards[as_number]
+        if water_filling:
+            as_influence_file = os.path.join("tier1_as_influence_list_wf")
+            with open(as_influence_file, 'w') as aif:
+                for as_number, as_probability in as_influence.items():
+                    aif.write("%s\t%s\n" % (as_number, as_probability))
+            aif.close()
 
-        as_influence_file = os.path.join("tier1_as_influence_list")
-        with open(as_influence_file, 'w') as aif:
-            for as_number, as_probability in as_influence.items():
-                aif.write("%s\t%s\n" % (as_number, as_probability))
-        aif.close()
+            as_influence_guards_file = os.path.join("tier1_as_influence_guards_list_wf")
+            with open(as_influence_guards_file, 'w') as aigf:
+                for as_number, as_probability in as_influence_guards.items():
+                    aigf.write("%s\t%s\n" % (as_number, as_probability))
+            aigf.close()
 
-        as_influence_guards_file = os.path.join("tier1_as_influence_guards_list")
-        with open(as_influence_guards_file, 'w') as aigf:
-            for as_number, as_probability in as_influence_guards.items():
-                aigf.write("%s\t%s\n" % (as_number, as_probability))
-        aigf.close()
+            as_influence_exits_file = os.path.join("tier1_as_influence_exits_list_wf")
+            with open(as_influence_exits_file, 'w') as aief:
+                for as_number, as_probability in as_influence_exits.items():
+                    aief.write("%s\t%s\n" % (as_number, as_probability))
+            aief.close()
+        else:
+            as_influence_file = os.path.join("tier1_as_influence_list")
+            with open(as_influence_file, 'w') as aif:
+                for as_number, as_probability in as_influence.items():
+                    aif.write("%s\t%s\n" % (as_number, as_probability))
+            aif.close()
 
-        as_influence_exits_file = os.path.join("tier1_as_influence_exits_list")
-        with open(as_influence_exits_file, 'w') as aief:
-            for as_number, as_probability in as_influence_exits.items():
-                aief.write("%s\t%s\n" % (as_number, as_probability))
-        aief.close()
+            as_influence_guards_file = os.path.join("tier1_as_influence_guards_list")
+            with open(as_influence_guards_file, 'w') as aigf:
+                for as_number, as_probability in as_influence_guards.items():
+                    aigf.write("%s\t%s\n" % (as_number, as_probability))
+            aigf.close()
+
+            as_influence_exits_file = os.path.join("tier1_as_influence_exits_list")
+            with open(as_influence_exits_file, 'w') as aief:
+                for as_number, as_probability in as_influence_exits.items():
+                    aief.write("%s\t%s\n" % (as_number, as_probability))
+            aief.close()
 
         as_influence_computation_list = as_influence
         as_probability_sum = 0.0
@@ -2669,7 +2687,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
            g_select, e_select, \
            top_tier1_as_adversaries_number
 
-def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, denasa, as_providers, g_select, e_select):
+def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, denasa, as_providers, g_select, e_select, water_filling):
 
     average_number_paths_compromised = 0.0
     average_time_to_first_path_compromised = 0.0
@@ -2766,11 +2784,18 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
                 as_influence[as_number] = probability
                 list_probabilities.append(probability)
 
-        as_influence_file = os.path.join("as_influence_list")
-        with open(as_influence_file, 'w') as aif:
-            for as_number, as_probability in as_influence.items():
-                aif.write("%s\t%s\n" % (as_number, as_probability))
-        aif.close()
+        if water_filling:
+            as_influence_file = os.path.join("as_influence_list_wf")
+            with open(as_influence_file, 'w') as aif:
+                for as_number, as_probability in as_influence.items():
+                    aif.write("%s\t%s\n" % (as_number, as_probability))
+            aif.close()
+        else:
+            as_influence_file = os.path.join("as_influence_list")
+            with open(as_influence_file, 'w') as aif:
+                for as_number, as_probability in as_influence.items():
+                    aif.write("%s\t%s\n" % (as_number, as_probability))
+            aif.close()
 
         # Creates a reversed sorted list to consult it afterwards
         # os.system("sort -t$'\t' -k2 -gr as_influence_list > as_influence_list_sorted")
@@ -2872,7 +2897,7 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
 
     return average_number_paths_compromised/len(as_adversaries), average_time_to_first_path_compromised/len(as_adversaries), as_variance/len(as_adversaries), as_adversaries
 
-def country_compromise_path(guards_probabilities, exits_probabilities, country_codes, denasa, as_providers, g_select, e_select):
+def country_compromise_path(guards_probabilities, exits_probabilities, country_codes, denasa, as_providers, g_select, e_select, water_filling):
 
     average_number_paths_compromised = 0.0
     average_time_to_first_path_compromised = 0.0
@@ -2970,11 +2995,18 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
                 country_influence[country_code] = probability
                 list_probabilities.append(probability)
 
-        country_influence_file = os.path.join("country_influence_list")
-        with open(country_influence_file, 'w') as cif:
-            for country_code, country_probability in country_influence.items():
-                cif.write("%s\t%s\n" % (country_code, country_probability))
-        cif.close()
+        if water_filling:
+            country_influence_file = os.path.join("country_influence_list_wf")
+            with open(country_influence_file, 'w') as cif:
+                for country_code, country_probability in country_influence.items():
+                    cif.write("%s\t%s\n" % (country_code, country_probability))
+            cif.close()
+        else:
+            country_influence_file = os.path.join("country_influence_list")
+            with open(country_influence_file, 'w') as cif:
+                for country_code, country_probability in country_influence.items():
+                    cif.write("%s\t%s\n" % (country_code, country_probability))
+            cif.close()
 
         top_country_adversary_code = ''
         top_country_adversary_probability = 0.0
@@ -3537,13 +3569,15 @@ commands', dest='pathalg_subparser')
                                                                                                                 exits_probabilities,
                                                                                                                 top_as_number,
                                                                                                                 denasa, as_providers,
-                                                                                                                g_select, e_select)
+                                                                                                                g_select, e_select,
+                                                                                                                water_filling)
 
         (country_paths_compromised, country_first_compromise, country_guessing_entropy, top_country_adversary) = country_compromise_path(guards_probabilities,
                                                                                                                                          exits_probabilities,
                                                                                                                                          top_country_code,
                                                                                                                                          denasa, as_providers,
-                                                                                                                                         g_select, e_select)
+                                                                                                                                         g_select, e_select,
+                                                                                                                                         water_filling)
 
         #print("Scores AS: %s\t%s\t%s" % (guessing_entropy_result, as_paths_compromised, as_first_compromise))
         #print("Scores Country: %s\t%s\t%s" % (guessing_entropy_result, country_paths_compromised, country_first_compromise))
