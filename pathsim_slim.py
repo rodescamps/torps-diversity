@@ -2370,7 +2370,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
 
             # DeNASA integrated in probabilities, do not apply it again for this test
             g_select = []
-            e_Select = []
+            e_select = []
 
             i = 0
             # Determine the new tier-1 AS adversaries after DeNASA
