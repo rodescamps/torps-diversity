@@ -1874,6 +1874,11 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
     as_influence_exits = dict()
     top_tier1_as_adversaries_number = []
 
+    denasa_guard_probabilities = dict()
+    denasa_exit_probabilities = dict()
+
+    top_as_probability = 0.0
+
     # Top tier-1 ASes ADVERSARIES preparation (may be different than adversaries considered by DeNASA)
     customer_cone_subnets_adversaries = dict()
     customer_cone_files = []
@@ -2148,6 +2153,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
 
         # Computes the tier-1 AS that has the greater influence on the network paths (guards probabilities * exits probabilities)
         as_influence = dict()
+
         for as_number, as_probability in as_influence_exits.items():
             # Probability is 0 if only guard or only exit is controlled (correlation not possible)
             probability = 0.0
@@ -2240,55 +2246,371 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
         g_select = top_tier1_as_adversaries_number[:2]
         e_select = top_tier1_as_adversaries_number[2:]
 
-        # Compute entropy
-        as_variance = guessing_entropy(as_influence_guards, as_influence_exits, 1, denasa, e_select, as_providers)
+        if not denasa:
+            # Compute entropy
+            as_variance = guessing_entropy(as_influence_guards, as_influence_exits, 1, denasa, e_select, as_providers)
 
-        # Creates customer cones for all the DeNASA adversaries we consider
-        customer_cone_files = []
-        for dirpath, dirnames, filenames in os.walk("../out/customer_cone_prefixes", followlinks=True):
-            for filename in filenames:
-                if (filename[0] != '.'):
-                    customer_cone_files.append(os.path.join(dirpath,filename))
-        for customer_cone_file in customer_cone_files:
-            customer_cone_as = re.sub("[^0-9]", "", customer_cone_file)
-            # Takes only specified adversaries into account
-            if customer_cone_as in top_tier1_as_adversaries_number:
-                customer_cone_subnets_adversaries[customer_cone_as] = []
-                guards_in_as[customer_cone_as] = 0.0
-                exits_in_as[customer_cone_as] = 0.0
-                with open(customer_cone_file, 'r') as ccf:
-                    for line in ccf:
-                        customer_cone_subnets_adversaries[customer_cone_as].append(line)
-                ccf.close()
+            for guard_address, guard_probability in guards_probabilities.items():
+                for as_customer_cone, subnets in customer_cone_subnets_adversaries.items():
+                    if ip_in_as(guard_address, subnets):
+                        guards_in_as[as_customer_cone] += guard_probability
+            for exit_address, exit_probability in exits_probabilities.items():
+                for as_customer_cone, subnets in customer_cone_subnets_adversaries.items():
+                    if ip_in_as(exit_address, subnets):
+                        exits_in_as[as_customer_cone] += exit_probability
 
-    # Analysis of tier-1 ASes compromises
-    top_as_probability = 0.0
+            # Top AS customer cone average
+            top_as_guards_total_probability = 0.0
+            for as_customer_cone, probability in guards_in_as.items():
+                top_as_guards_total_probability += probability
+            average_top_as_guards_probability = top_as_guards_total_probability / float(len(guards_in_as))
 
-    # DeNASA case: all tier-1 adversaries deleted, thus no threat
-    if denasa:
-        top_as_probability = 0.0
-    else:
-        for guard_address, guard_probability in guards_probabilities.items():
-            for as_customer_cone, subnets in customer_cone_subnets_adversaries.items():
-                if ip_in_as(guard_address, subnets):
-                    guards_in_as[as_customer_cone] += guard_probability
-        for exit_address, exit_probability in exits_probabilities.items():
-            for as_customer_cone, subnets in customer_cone_subnets_adversaries.items():
-                if ip_in_as(exit_address, subnets):
-                    exits_in_as[as_customer_cone] += exit_probability
+            top_as_exits_total_probability = 0.0
+            for as_customer_cone, probability in exits_in_as.items():
+                top_as_exits_total_probability += probability
+            average_top_as_exits_probability = top_as_exits_total_probability / float(len(exits_in_as))
 
-        # Top AS customer cone average
-        top_as_guards_total_probability = 0.0
-        for as_customer_cone, probability in guards_in_as.items():
-            top_as_guards_total_probability += probability
-        average_top_as_guards_probability = top_as_guards_total_probability / float(len(guards_in_as))
+            top_as_probability = average_top_as_guards_probability * average_top_as_exits_probability
 
-        top_as_exits_total_probability = 0.0
-        for as_customer_cone, probability in exits_in_as.items():
-            top_as_exits_total_probability += probability
-        average_top_as_exits_probability = top_as_exits_total_probability / float(len(exits_in_as))
+        # DeNASA g-select
+        if denasa:
+            # Creates customer cones for all the DeNASA adversaries we consider
+            customer_cone_files = []
+            for dirpath, dirnames, filenames in os.walk("../out/customer_cone_prefixes", followlinks=True):
+                for filename in filenames:
+                    if (filename[0] != '.'):
+                        customer_cone_files.append(os.path.join(dirpath,filename))
+            for customer_cone_file in customer_cone_files:
+                customer_cone_as = re.sub("[^0-9]", "", customer_cone_file)
+                # Takes only specified adversaries into account
+                if customer_cone_as in top_tier1_as_adversaries_number:
+                    customer_cone_subnets_adversaries[customer_cone_as] = []
+                    guards_in_as[customer_cone_as] = 0.0
+                    exits_in_as[customer_cone_as] = 0.0
+                    with open(customer_cone_file, 'r') as ccf:
+                        for line in ccf:
+                            customer_cone_subnets_adversaries[customer_cone_as].append(line)
+                    ccf.close()
 
-        top_as_probability = average_top_as_guards_probability * average_top_as_exits_probability
+            for address in guards_probabilities:
+                for as_customer_cone, subnets in customer_cone_subnets.items():
+                    if as_customer_cone in g_select:
+                        if ip_in_as(address, subnets):
+                            guards_probabilities.remove(address)
+                            break
+
+            guards_compromised = dict()
+            exits_compromised = dict()
+
+            as_influence_guards = dict()
+            as_influence_exits = dict()
+
+            for guard_address, guard_probability in guards_probabilities.items():
+                guards_compromised[guard_address] = []
+                for as_customer_cone, cc_subnets in customer_cone_subnets.items():
+                    if ip_in_as(guard_address, cc_subnets):
+                        guards_compromised[guard_address].append(as_customer_cone)
+            for exit_address, exit_probability in exits_probabilities.items():
+                exits_compromised[exit_address] = []
+                for as_customer_cone, cc_subnets in customer_cone_subnets.items():
+                    if ip_in_as(exit_address, cc_subnets):
+                        exits_compromised[exit_address].append(as_customer_cone)
+
+            # DeNASA e-select:0.0, then computes influence of top tier-1 ASes
+            for guard_address, guard_probability in guards_probabilities.items():
+                exits_allowed = 0
+                for exit_address, exit_probability in exits_probabilities.items():
+                    exit_allowed = True
+                    # Applies DeNASA e-select:0.0
+                    for as_customer_cone, cc_subnets in customer_cone_subnets.items():
+                        if as_customer_cone in guards_compromised[guard_address] and as_customer_cone in exits_compromised[exit_address]:
+                            exit_allowed = False
+                            break
+                    if exit_allowed:
+                        exits_allowed += 1
+                denasa_guard_probabilities[guard_address] = guard_probability * (exits_allowed/float(len(exits_probabilities)))
+            for exit_address, exit_probability in exits_probabilities.items():
+                guards_allowed = 0
+                for guard_address, guard_probability in guards_probabilities.items():
+                    guard_allowed = True
+                    # Applies DeNASA e-select:0.0
+                    for as_customer_cone, cc_subnets in customer_cone_subnets.items():
+                        if as_customer_cone in guards_compromised[guard_address] and as_customer_cone in exits_compromised[exit_address]:
+                            guard_allowed = False
+                            break
+                    if guard_allowed:
+                        guards_allowed += 1
+                denasa_exit_probabilities[exit_address] = exit_probability * (guards_allowed/float(len(guards_probabilities)))
+            i = 0
+            # Determine the new tier-1 AS adversaries after DeNASA
+            for guard_address, guard_probability in denasa_guard_probabilities.items():
+                for row in as_list:
+                    subnets = []
+                    if row['AS_number'] != '0':
+                        subnets.append(row['range_start']+','+row['range_end'])
+                        if ip_in_as(guard_address, subnets):
+
+                            #print(row['AS_number'])
+
+                            # list_as_encountered are all the ASes we observe towards all the tier-1 ASes
+                            # list_provider_encountered are all ASes we already added the influence (we only add each provider once per node)
+                            def add_prefixes(searched_as_number, list_as_encountered):
+
+                                # Already added providers for this searched_as_number, only add them once
+                                if searched_as_number in list_as_encountered:
+                                    return list_as_encountered, []
+                                # Optimization: avoids recursion, all providers already known by previous computation
+                                elif searched_as_number in as_providers:
+                                    list_provider_encountered = []
+                                    for provider_as in as_providers[searched_as_number]:
+                                        if provider_as not in list_as_encountered and provider_as not in list_provider_encountered:
+                                            list_as_encountered.append(provider_as)
+                                            list_provider_encountered.append(provider_as)
+                                            if provider_as in as_influence_guards:
+                                                as_influence_guards[provider_as] += guard_probability
+                                            else:
+                                                as_influence_guards[provider_as] = guard_probability
+                                    return list_as_encountered, list_provider_encountered
+                                # Recursively computes all the providers above the AS#searched_as_number
+                                else:
+                                    url = "http://as-rank.caida.org/api/v1/asns/"+searched_as_number+"/links"
+                                    response = requests.get(url)
+                                    links = json.loads(response.text)
+                                    list_provider_encountered = []
+                                    for link in links["data"]:
+                                        if link["relationship"] == "provider":
+                                            provider_as = str(link["asn"])
+                                            if provider_as not in list_as_encountered:
+                                                list_as_encountered_to_add, list_provider_encountered_to_add = add_prefixes(provider_as, list_as_encountered)
+                                                for as_encountered_to_add in list_as_encountered_to_add:
+                                                    if as_encountered_to_add not in list_as_encountered:
+                                                        list_as_encountered.append(as_encountered_to_add)
+                                                for provider_encountered_to_add in list_provider_encountered_to_add:
+                                                    if provider_encountered_to_add not in list_provider_encountered:
+                                                        list_provider_encountered.append(provider_encountered_to_add)
+                                    if searched_as_number not in list_as_encountered and searched_as_number not in list_provider_encountered:
+                                        list_as_encountered.append(searched_as_number)
+                                        list_provider_encountered.append(searched_as_number)
+                                        if searched_as_number in as_influence_guards:
+                                            as_influence_guards[searched_as_number] += guard_probability
+                                        else:
+                                            as_influence_guards[searched_as_number] = guard_probability
+                                    # Add providers of this searched_as_number in memory for future cone research for this as number
+                                    if searched_as_number not in as_providers:
+                                        as_number_itself = [searched_as_number]
+                                        as_providers[searched_as_number] = [item for item in list_provider_encountered if item not in as_number_itself]
+                                    return list_as_encountered, list_provider_encountered
+
+                            list_as_encountered, list_provider_encountered = add_prefixes(row['AS_number'], [])
+
+                            #print(len(as_providers))
+                            break
+            i += 1
+            #if i == 20: break
+            if i % 500 == 0: print('[{}/{}] cone guards analyzed adversaries'.format(i, len(guards_probabilities)))
+            i = 0
+            for exit_address, exit_probability in denasa_exit_probabilities.items():
+                for row in as_list:
+                    subnets = []
+                    if row['AS_number'] != '0':
+                        subnets.append(row['range_start']+','+row['range_end'])
+                        if ip_in_as(exit_address, subnets):
+
+                            #print(row['AS_number'])
+
+                            # list_as_encountered are all the ASes we observe towards all the tier-1 ASes
+                            # list_provider_encountered are all ASes we already added the influence (we only add each provider once per node)
+                            def add_prefixes(searched_as_number, list_as_encountered):
+
+                                # Already added providers for this searched_as_number, only add them once
+                                if searched_as_number in list_as_encountered:
+                                    return list_as_encountered, []
+                                # Optimization: avoids recursion, all providers already known by previous computation
+                                elif searched_as_number in as_providers:
+                                    list_provider_encountered = []
+                                    for provider_as in as_providers[searched_as_number]:
+                                        if provider_as not in list_as_encountered and provider_as not in list_provider_encountered:
+                                            list_as_encountered.append(provider_as)
+                                            list_provider_encountered.append(provider_as)
+                                            if provider_as in as_influence_exits:
+                                                as_influence_exits[provider_as] += exit_probability
+                                            else:
+                                                as_influence_exits[provider_as] = exit_probability
+                                    return list_as_encountered, list_provider_encountered
+                                # Recursively computes all the providers above the AS#searched_as_number
+                                else:
+                                    url = "http://as-rank.caida.org/api/v1/asns/"+searched_as_number+"/links"
+                                    response = requests.get(url)
+                                    links = json.loads(response.text)
+                                    list_provider_encountered = []
+                                    for link in links["data"]:
+                                        if link["relationship"] == "provider":
+                                            provider_as = str(link["asn"])
+                                            if provider_as not in list_as_encountered:
+                                                list_as_encountered_to_add, list_provider_encountered_to_add = add_prefixes(provider_as, list_as_encountered)
+                                                for as_encountered_to_add in list_as_encountered_to_add:
+                                                    if as_encountered_to_add not in list_as_encountered:
+                                                        list_as_encountered.append(as_encountered_to_add)
+                                                for provider_encountered_to_add in list_provider_encountered_to_add:
+                                                    if provider_encountered_to_add not in list_provider_encountered:
+                                                        list_provider_encountered.append(provider_encountered_to_add)
+                                    if searched_as_number not in list_as_encountered and searched_as_number not in list_provider_encountered:
+                                        list_as_encountered.append(searched_as_number)
+                                        list_provider_encountered.append(searched_as_number)
+                                        if searched_as_number in as_influence_exits:
+                                            as_influence_exits[searched_as_number] += exit_probability
+                                        else:
+                                            as_influence_exits[searched_as_number] = exit_probability
+
+                                        if searched_as_number not in as_providers:
+                                            as_providers[searched_as_number] = []
+                                    # Add providers of this searched_as_number in memory for future cone research for this as number
+                                    if searched_as_number not in as_providers:
+                                        as_number_itself = [searched_as_number]
+                                        as_providers[searched_as_number] = [item for item in list_provider_encountered if item not in as_number_itself]
+                                    return list_as_encountered, list_provider_encountered
+
+                            list_as_encountered, list_provider_encountered = add_prefixes(row['AS_number'], [])
+
+                            #print(len(as_providers))
+                            break
+                i += 1
+                #if i == 20: break
+                if i % 500 == 0: print('[{}/{}] cone exits analyzed adversaries'.format(i, len(exits_probabilities)))
+
+            # Compute entropy
+            as_variance = guessing_entropy(as_influence_guards, as_influence_exits, 1, denasa, e_select, as_providers)
+
+            # Computes the tier-1 AS that has the greater influence on the network paths (guards probabilities * exits probabilities)
+            as_influence = dict()
+
+            for as_number, as_probability in as_influence_exits.items():
+                # Probability is 0 if only guard or only exit is controlled (correlation not possible)
+                probability = 0.0
+                # Keep only tier-1 ASes
+                if not as_providers[as_number]:
+                    url = "http://as-rank.caida.org/api/v1/asns/"+as_number+"/links"
+                    response = requests.get(url)
+                    links = json.loads(response.text)
+                    is_tier1 = True
+                    for link in links["data"]:
+                        if link["relationship"] == "provider":
+                            is_tier1 = False
+                            break
+                    if is_tier1:
+                        if as_number in as_influence_guards:
+                            # Probability in percentage
+                            probability = (as_probability * as_influence_guards[as_number])*100
+                        as_influence[as_number] = probability
+                        list_probabilities.append(probability)
+                    else:
+                        del as_influence_exits[as_number]
+                else:
+                    del as_influence_exits[as_number]
+            # Takes also into account the last set: guards AS cones that do not appear in exit tier-1 AS cones
+            for as_number, as_probability in as_influence_guards.items():
+                # Probability is 0 if only guard or only exit is controlled (correlation not possible)
+                probability = 0.0
+                # Keep only tier-1 ASes
+                if not as_providers[as_number]:
+                    url = "http://as-rank.caida.org/api/v1/asns/"+as_number+"/links"
+                    response = requests.get(url)
+                    links = json.loads(response.text)
+                    is_tier1 = True
+                    for link in links["data"]:
+                        if link["relationship"] == "provider":
+                            is_tier1 = False
+                            break
+                    if is_tier1:
+                        if as_number not in as_influence_exits:
+                            as_influence[as_number] = probability
+                            list_probabilities.append(probability)
+                    else:
+                        del as_influence_guards[as_number]
+                else:
+                    del as_influence_guards[as_number]
+
+            as_influence_file = os.path.join("tier1_as_influence_list")
+            with open(as_influence_file, 'w') as aif:
+                for as_number, as_probability in as_influence.items():
+                    aif.write("%s\t%s\n" % (as_number, as_probability))
+            aif.close()
+
+            as_influence_guards_file = os.path.join("tier1_as_influence_guards_list")
+            with open(as_influence_guards_file, 'w') as aigf:
+                for as_number, as_probability in as_influence_guards.items():
+                    aigf.write("%s\t%s\n" % (as_number, as_probability))
+            aigf.close()
+
+            as_influence_exits_file = os.path.join("tier1_as_influence_exits_list")
+            with open(as_influence_exits_file, 'w') as aief:
+                for as_number, as_probability in as_influence_exits.items():
+                    aief.write("%s\t%s\n" % (as_number, as_probability))
+            aief.close()
+
+            top_as_adversary_number = ''
+            top_as_adversary_probability = 0.0
+            for as_number, as_probability in as_influence.items():
+                if as_probability > top_as_adversary_probability:
+                    top_as_adversary_probability = as_probability
+                    top_as_adversary_number = as_number
+
+            top_tier1_as_adversaries_number = []
+            top_tier1_as_adversaries_number.append(top_as_adversary_number)
+
+            print("Top tier-1 AS DeNASA adversary ({} influence on Tor network): {}".format(top_as_adversary_probability, top_as_adversary_number))
+
+            # If customer cone is not already computed, compute it
+            if not os.path.exists("../out/customer_cone_prefixes/"+top_as_adversary_number+"_customer_cone_prefixes"):
+                print("Computing {} customer cone".format(top_as_adversary_number))
+                compute_customer_cone(top_as_adversary_number, "../out/customer_cone_prefixes")
+            else:
+                print("{} customer cone already computed".format(top_as_adversary_number))
+
+            # Top tier-1 ASes Adversary preparation
+            customer_cone_subnets_adversaries = dict()
+            customer_cone_files = []
+            for dirpath, dirnames, filenames in os.walk("../out/customer_cone_prefixes", followlinks=True):
+                for filename in filenames:
+                    if (filename[0] != '.'):
+                        customer_cone_files.append(os.path.join(dirpath,filename))
+            for customer_cone_file in customer_cone_files:
+                customer_cone_as = re.sub("[^0-9]", "", customer_cone_file)
+                # Takes only top adversary after DeNASA applied into account
+                if customer_cone_as == top_as_adversary_number:
+                    customer_cone_subnets_adversaries[customer_cone_as] = []
+                    guards_in_as[customer_cone_as] = 0.0
+                    exits_in_as[customer_cone_as] = 0.0
+                    with open(customer_cone_file, 'r') as ccf:
+                        for line in ccf:
+                            customer_cone_subnets_adversaries[customer_cone_as].append(line)
+                    ccf.close()
+
+            denasa_guard_compromised = dict()
+            denasa_exit_compromised = dict()
+
+            for guard_address, guard_probability in denasa_guard_probabilities.items():
+                denasa_guard_compromised[guard_address] = []
+                for as_customer_cone, cc_subnets in customer_cone_subnets.items():
+                    if ip_in_as(guard_address, cc_subnets):
+                        denasa_guard_compromised[guard_address].append(as_customer_cone)
+            for exit_address, exit_probability in denasa_exit_probabilities.items():
+                denasa_exit_compromised[exit_address] = []
+                for as_customer_cone, cc_subnets in customer_cone_subnets.items():
+                    if ip_in_as(exit_address, cc_subnets):
+                        denasa_exit_compromised[exit_address].append(as_customer_cone)
+
+            for guard_address, guard_probability in denasa_guard_probabilities.items():
+                for exit_address, exit_probability in denasa_exit_probabilities.items():
+                    # Applies DeNASA e-select:0.0
+                    for as_customer_cone, cc_subnets in customer_cone_subnets_adversaries.items():
+                        if as_customer_cone in denasa_guard_compromised[guard_address] and as_customer_cone in denasa_exit_compromised[exit_address]:
+                            top_as_probability += guard_probability * exit_probability
+
+            top_as_probability = top_as_probability / float(len(customer_cone_subnets_adversaries))
+
+            guards_probabilities = denasa_guard_probabilities
+            exits_probabilities = denasa_exit_probabilities
 
     # Number of paths/time to first compromise for top ASes
     # Period is one month, and circuits change every 10min
@@ -2415,9 +2737,6 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
                 as_influence[as_number] = probability
                 list_probabilities.append(probability)
 
-        # Compute entropy
-        as_variance = guessing_entropy(as_influence_guards, as_influence_exits, 1, denasa, e_select, as_providers)
-
         as_influence_file = os.path.join("as_influence_list")
         with open(as_influence_file, 'w') as aif:
             for as_number, as_probability in as_influence.items():
@@ -2459,6 +2778,8 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
                 if ip_in_as(exit_address, subnets):
                     as_exits_probability += exit_probability
             as_probability = as_guards_probability*as_exits_probability
+
+            as_variance += guessing_entropy(as_influence_guards, as_influence_exits, 1, denasa, e_select, as_providers)
         else:
             # Lookup in all subnets once for further analysis with DeNASA
             guards_list = dict()
@@ -2495,6 +2816,8 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
                             break
                     as_probability += path_probability
 
+            as_variance += guessing_entropy(as_influence_guards, as_influence_exits, 1, denasa, e_select, as_providers)
+
         # Period is one month, and circuits change every 10min
         period = 31*24*60
         circuits_total = period/10
@@ -2518,7 +2841,7 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
         average_number_paths_compromised += number_paths_compromised
         average_time_to_first_path_compromised += time_to_first_path_compromised
 
-    return average_number_paths_compromised/len(as_adversaries), average_time_to_first_path_compromised/len(as_adversaries), as_variance, as_adversaries
+    return average_number_paths_compromised/len(as_adversaries), average_time_to_first_path_compromised/len(as_adversaries), as_variance/len(as_adversaries), as_adversaries
 
 def country_compromise_path(guards_probabilities, exits_probabilities, country_codes, denasa, as_providers, g_select, e_select):
 
@@ -2618,9 +2941,6 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
                 country_influence[country_code] = probability
                 list_probabilities.append(probability)
 
-        # Compute entropy
-        country_variance = guessing_entropy(country_influence_guards, country_influence_exits, 1, False, e_select, [])
-
         country_influence_file = os.path.join("country_influence_list")
         with open(country_influence_file, 'w') as cif:
             for country_code, country_probability in country_influence.items():
@@ -2658,6 +2978,9 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
                 if ip_in_as(exit_address, subnets):
                     country_exits_probability += exit_probability
             country_probability = country_guards_probability*country_exits_probability
+
+            # Compute entropy
+            country_variance += guessing_entropy(country_influence_guards, country_influence_exits, 1, False, e_select, [])
         else:
             # Lookup in all subnets once for further analysis with DeNASA
             guards_list = dict()
@@ -2693,6 +3016,9 @@ def country_compromise_path(guards_probabilities, exits_probabilities, country_c
                             path_probability = 0
                             break
                     country_probability += path_probability
+
+            # Compute entropy
+            country_variance += guessing_entropy(country_influence_guards, country_influence_exits, 1, False, e_select, [])
 
         # Period is one month, and circuits change every 10min
         period = 31*24*60
