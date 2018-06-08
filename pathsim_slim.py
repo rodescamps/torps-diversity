@@ -2248,7 +2248,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
 
         if not denasa:
             # Compute entropy
-            as_variance = guessing_entropy(as_influence_guards, as_influence_exits, 1, denasa, e_select, as_providers)
+            as_variance = guessing_entropy(as_influence_guards, as_influence_exits, 1, False, e_select, as_providers)
 
             guards_in_as = dict()
             exits_in_as = dict()
@@ -2510,7 +2510,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                 if i % 500 == 0: print('[{}/{}] cone exits analyzed adversaries'.format(i, len(denasa_exit_probabilities)))
 
             # Compute entropy
-            as_variance = guessing_entropy(as_influence_guards, as_influence_exits, 1, denasa, e_select, as_providers)
+            as_variance = guessing_entropy(as_influence_guards, as_influence_exits, 1, False, e_select, as_providers)
 
             # Computes the tier-1 AS that has the greater influence on the network paths (guards probabilities * exits probabilities)
             as_influence = dict()
@@ -2808,7 +2808,7 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
                     as_exits_probability += exit_probability
             as_probability = as_guards_probability*as_exits_probability
 
-            as_variance += guessing_entropy(as_influence_guards, as_influence_exits, 1, denasa, e_select, as_providers)
+            as_variance += guessing_entropy(as_influence_guards, as_influence_exits, 1, False, e_select, as_providers)
         else:
             # Lookup in all subnets once for further analysis with DeNASA
             guards_list = dict()
@@ -2845,7 +2845,7 @@ def as_compromise_path(guards_probabilities, exits_probabilities, as_numbers, de
                             break
                     as_probability += path_probability
 
-            as_variance += guessing_entropy(as_influence_guards, as_influence_exits, 1, denasa, e_select, as_providers)
+            as_variance += guessing_entropy(as_influence_guards, as_influence_exits, 1, False, e_select, as_providers)
 
         # Period is one month, and circuits change every 10min
         period = 31*24*60
