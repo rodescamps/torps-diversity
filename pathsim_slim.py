@@ -2316,14 +2316,14 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                             customer_cone_subnets_adversaries[customer_cone_as].append(line)
                     ccf.close()
 
-            guards_probabilities_gselect = guards_probabilities
+            guards_probabilities_gselect = dict(guards_probabilities)
             for address in guards_probabilities:
                 for as_customer_cone, subnets in customer_cone_subnets_adversaries.items():
                     if as_customer_cone in g_select:
                         if ip_in_as(address, subnets):
                             del guards_probabilities_gselect[address]
                             break
-            guards_probabilities = guards_probabilities_gselect
+            guards_probabilities = dict(guards_probabilities_gselect)
 
             guards_compromised = dict()
             exits_compromised = dict()
