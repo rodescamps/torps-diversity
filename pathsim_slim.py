@@ -2250,6 +2250,30 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
             # Compute entropy
             as_variance = guessing_entropy(as_influence_guards, as_influence_exits, 1, denasa, e_select, as_providers)
 
+            guards_in_as = dict()
+            exits_in_as = dict()
+
+            top_tier1_as_adversaries_number = top_tier1_as_adversaries_number[:1]
+
+            # Top tier-1 AS Adversary preparation
+            customer_cone_subnets_adversaries = dict()
+            customer_cone_files = []
+            for dirpath, dirnames, filenames in os.walk("../out/customer_cone_prefixes", followlinks=True):
+                for filename in filenames:
+                    if (filename[0] != '.'):
+                        customer_cone_files.append(os.path.join(dirpath,filename))
+            for customer_cone_file in customer_cone_files:
+                customer_cone_as = re.sub("[^0-9]", "", customer_cone_file)
+                # Takes only top adversary after DeNASA applied into account
+                if customer_cone_as in top_tier1_as_adversaries_number:
+                    customer_cone_subnets_adversaries[customer_cone_as] = []
+                    guards_in_as[customer_cone_as] = 0.0
+                    exits_in_as[customer_cone_as] = 0.0
+                    with open(customer_cone_file, 'r') as ccf:
+                        for line in ccf:
+                            customer_cone_subnets_adversaries[customer_cone_as].append(line)
+                    ccf.close()
+
             for guard_address, guard_probability in guards_probabilities.items():
                 for as_customer_cone, subnets in customer_cone_subnets_adversaries.items():
                     if ip_in_as(guard_address, subnets):
@@ -2273,7 +2297,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
             top_as_probability = average_top_as_guards_probability * average_top_as_exits_probability
 
         # DeNASA g-select
-        if denasa:
+        else:
             # Creates customer cones for all the DeNASA adversaries we consider
             customer_cone_files = []
             for dirpath, dirnames, filenames in os.walk("../out/customer_cone_prefixes", followlinks=True):
@@ -2341,6 +2365,11 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                     if guard_allowed:
                         guards_allowed += 1
                 denasa_exit_probabilities[exit_address] = exit_probability * (guards_allowed/float(len(guards_probabilities)))
+
+            # DeNASA integrated in probabilities, do not apply it again for this test
+            g_select = []
+            e_Select = []
+
             i = 0
             # Determine the new tier-1 AS adversaries after DeNASA
             for guard_address, guard_probability in denasa_guard_probabilities.items():
@@ -2407,7 +2436,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                             break
             i += 1
             #if i == 20: break
-            if i % 500 == 0: print('[{}/{}] cone guards analyzed adversaries'.format(i, len(guards_probabilities)))
+            if i % 500 == 0: print('[{}/{}] cone guards analyzed adversaries'.format(i, len(denasa_guard_probabilities)))
             i = 0
             for exit_address, exit_probability in denasa_exit_probabilities.items():
                 for row in as_list:
@@ -2476,7 +2505,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                             break
                 i += 1
                 #if i == 20: break
-                if i % 500 == 0: print('[{}/{}] cone exits analyzed adversaries'.format(i, len(exits_probabilities)))
+                if i % 500 == 0: print('[{}/{}] cone exits analyzed adversaries'.format(i, len(denasa_exit_probabilities)))
 
             # Compute entropy
             as_variance = guessing_entropy(as_influence_guards, as_influence_exits, 1, denasa, e_select, as_providers)
@@ -2502,7 +2531,6 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                             # Probability in percentage
                             probability = (as_probability * as_influence_guards[as_number])*100
                         as_influence[as_number] = probability
-                        list_probabilities.append(probability)
                     else:
                         del as_influence_exits[as_number]
                 else:
@@ -2524,25 +2552,24 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                     if is_tier1:
                         if as_number not in as_influence_exits:
                             as_influence[as_number] = probability
-                            list_probabilities.append(probability)
                     else:
                         del as_influence_guards[as_number]
                 else:
                     del as_influence_guards[as_number]
 
-            as_influence_file = os.path.join("tier1_as_influence_list")
+            as_influence_file = os.path.join("denasa_tier1_as_influence_list")
             with open(as_influence_file, 'w') as aif:
                 for as_number, as_probability in as_influence.items():
                     aif.write("%s\t%s\n" % (as_number, as_probability))
             aif.close()
 
-            as_influence_guards_file = os.path.join("tier1_as_influence_guards_list")
+            as_influence_guards_file = os.path.join("denasa_tier1_as_influence_guards_list")
             with open(as_influence_guards_file, 'w') as aigf:
                 for as_number, as_probability in as_influence_guards.items():
                     aigf.write("%s\t%s\n" % (as_number, as_probability))
             aigf.close()
 
-            as_influence_exits_file = os.path.join("tier1_as_influence_exits_list")
+            as_influence_exits_file = os.path.join("denasa_tier1_as_influence_exits_list")
             with open(as_influence_exits_file, 'w') as aief:
                 for as_number, as_probability in as_influence_exits.items():
                     aief.write("%s\t%s\n" % (as_number, as_probability))
@@ -2567,7 +2594,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
             else:
                 print("{} customer cone already computed".format(top_as_adversary_number))
 
-            # Top tier-1 ASes Adversary preparation
+            # Top tier-1 AS Adversary preparation
             customer_cone_subnets_adversaries = dict()
             customer_cone_files = []
             for dirpath, dirnames, filenames in os.walk("../out/customer_cone_prefixes", followlinks=True):
