@@ -2317,10 +2317,10 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                     ccf.close()
 
             for address in guards_probabilities:
-                for as_customer_cone, subnets in customer_cone_subnets.items():
+                for as_customer_cone, subnets in customer_cone_subnets_adversaries.items():
                     if as_customer_cone in g_select:
                         if ip_in_as(address, subnets):
-                            guards_probabilities.remove(address)
+                            del guards_probabilities[address]
                             break
 
             guards_compromised = dict()
@@ -2331,12 +2331,12 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
 
             for guard_address, guard_probability in guards_probabilities.items():
                 guards_compromised[guard_address] = []
-                for as_customer_cone, cc_subnets in customer_cone_subnets.items():
+                for as_customer_cone, cc_subnets in customer_cone_subnets_adversaries.items():
                     if ip_in_as(guard_address, cc_subnets):
                         guards_compromised[guard_address].append(as_customer_cone)
             for exit_address, exit_probability in exits_probabilities.items():
                 exits_compromised[exit_address] = []
-                for as_customer_cone, cc_subnets in customer_cone_subnets.items():
+                for as_customer_cone, cc_subnets in customer_cone_subnets_adversaries.items():
                     if ip_in_as(exit_address, cc_subnets):
                         exits_compromised[exit_address].append(as_customer_cone)
 
@@ -2346,7 +2346,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                 for exit_address, exit_probability in exits_probabilities.items():
                     exit_allowed = True
                     # Applies DeNASA e-select:0.0
-                    for as_customer_cone, cc_subnets in customer_cone_subnets.items():
+                    for as_customer_cone, cc_subnets in customer_cone_subnets_adversaries.items():
                         if as_customer_cone in guards_compromised[guard_address] and as_customer_cone in exits_compromised[exit_address]:
                             exit_allowed = False
                             break
@@ -2358,7 +2358,7 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                 for guard_address, guard_probability in guards_probabilities.items():
                     guard_allowed = True
                     # Applies DeNASA e-select:0.0
-                    for as_customer_cone, cc_subnets in customer_cone_subnets.items():
+                    for as_customer_cone, cc_subnets in customer_cone_subnets_adversaries.items():
                         if as_customer_cone in guards_compromised[guard_address] and as_customer_cone in exits_compromised[exit_address]:
                             guard_allowed = False
                             break
@@ -2618,12 +2618,12 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
 
             for guard_address, guard_probability in denasa_guard_probabilities.items():
                 denasa_guard_compromised[guard_address] = []
-                for as_customer_cone, cc_subnets in customer_cone_subnets.items():
+                for as_customer_cone, cc_subnets in customer_cone_subnets_adversaries.items():
                     if ip_in_as(guard_address, cc_subnets):
                         denasa_guard_compromised[guard_address].append(as_customer_cone)
             for exit_address, exit_probability in denasa_exit_probabilities.items():
                 denasa_exit_compromised[exit_address] = []
-                for as_customer_cone, cc_subnets in customer_cone_subnets.items():
+                for as_customer_cone, cc_subnets in customer_cone_subnets_adversaries.items():
                     if ip_in_as(exit_address, cc_subnets):
                         denasa_exit_compromised[exit_address].append(as_customer_cone)
 
