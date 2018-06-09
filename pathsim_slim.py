@@ -3244,6 +3244,9 @@ consensuses')
                               help='indicates the number of diversity exits to add')
     guessing_entropy_parser.add_argument('--num_custom_guardsexits', type=int, default=0,
                               help='indicates the number of diversity guard and exit nodes to add')
+    guessing_entropy_parser.add_argument('--location',
+                              help='where to place the custom guards/exits: AS or country:\n \
+                                   Format: AS# or country code | Examples: "AS3356", "BE"')
     guessing_entropy_parser.add_argument('--wf_optimal', help='Recompute bwweights from dir-spec.txt\
             in a way that waterfilling would then be optimal', action='store_true')
     pathalg_subparsers = guessing_entropy_parser.add_subparsers(help='guessing entropy\
@@ -3393,6 +3396,10 @@ commands', dest='pathalg_subparser')
         # create object that will add adversary relays into network
         #adv_insertion = network_modifiers_slim.AdversaryInsertion(args, _testing)
         #network_modifications = [adv_insertion]
+
+        addresses = None
+        if args.location is not None:
+            addresses = generate_addresses(args.location, args.num_custom_guards+args.num_custom_exits+args.num_custom_guardsexits)
 
         # create object that will add diversity relays into network
         diversity_insertion = network_modifiers_slim.CustomInsertion(args, None, _testing)
