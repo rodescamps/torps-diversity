@@ -2577,6 +2577,18 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
                 else:
                     del as_influence_guards[as_number]
 
+            as_influence_denasa = dict(as_influence)
+            denasa_probability_deleted = 0
+            for as_number, as_probability in as_influence.items():
+                for as_customer_cone, cc_subnets in customer_cone_subnets_adversaries.items():
+                    if as_customer_cone in as_providers[as_number]:
+                        denasa_probability_deleted += as_probability
+                        del as_influence_denasa[as_number]
+
+            as_influence = dict()
+            for as_number, as_probability in as_influence_denasa.items():
+                as_influence[as_number] = as_probability / float(1-denasa_probability_deleted)
+
             as_influence_file = os.path.join("tier1_as_influence_list_denasa")
             with open(as_influence_file, 'w') as aif:
                 for as_number, as_probability in as_influence.items():
