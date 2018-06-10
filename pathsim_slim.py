@@ -2260,9 +2260,9 @@ def compute_probabilities(network_states, water_filling, denasa, tier1_as_advers
             else:
                 print("{} customer cone already computed".format(tier1_as_adversary))
 
-        # Takes the two top tier-1 may be optimized
-        g_select = top_tier1_as_adversaries_number[0]
-        e_select = top_tier1_as_adversaries_number[1]
+        # Takes the two top tier-1 for g-select, may be optimized
+        g_select = top_tier1_as_adversaries_number[:2]
+        e_select = top_tier1_as_adversaries_number[2:]
 
         if not denasa:
             # Compute entropy

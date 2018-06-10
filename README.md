@@ -1,37 +1,52 @@
 
 
-Obtaining Figures on anonymity metrics
-======================================
+# Obtain diversity score
 
-First, setup directories:
+## Setup
+First, create the network states from archives obtained
+from CollecTor with: [create_network_state.sh](diversity_script/create_network_state.sh)
 
-pypy setup_experiments.py "3 a E=S G > M" 20 ../out/ns-2015-01-2015-05
-../out/simulate cons_network_case 2015 2015 1 5
+## Compute score
 
-ns-2015-01-2015-05 contains all network_consensus object created by
-pathsim.py process command
-f
+Use the [pathsim_slim.py](pathsim_slim.py) file code to compute the diversity scores.
 
-cons_network_case contains files created by consensus_stat.py explore
-command
+Example 1: compute the diversity scores with vanilla network with ABWRS
+```
+python pathsim_slim.py score --nsf_dir some_path/network-states/ tor
+```
 
-Then, run script:
+Example 2: compute the diversity scores with vanilla network with Waterfilling (with optimal weights)
+```
+python pathsim_slim.py score --nsf_dir some_path/network-states/ --wf_optimal tor-wf
+```
 
- ./run_simulations_waterfilling2.sh /home/frochet/Tor/torps_git-crypto/torps/ simple=6 tor-wf
-   out/simulate/3aE\=SGM/2015.1-2015.5/
+Example 3: compute the diversity scores with modified network with DeNASA,
+by adding 5 exits nodes located in the United States of 20000 of consensus each
+```
+nohup pypy pathsim_slim.py score --nsf_dir some_path/network-states/ --location US --num_custom_exits 5 --custom_exit_cons_bw 20000 tor-denasa
+```
 
-some variables might need to be modified inside the script, such as the
-name of the network case. This script launches 20 simulations in paralell and output in 
-/out/simulate/$PATH_ALG/$NETWORKCASE/ 
+Example 4: compute the guessing entropy with vanilla network
+```
+python pathsim_slim.py guessing-entropy --nsf_dir some_path/network-states/ tor
+```
 
-Once finished, we can compute the metrics:
+## Results
 
- ./analyze_pathim_metrics.sh /home/frochet/Tor/torps_git-crypto/torps/ tor-wf 3aE=SGM degree-uniformity
+The results are stored in the output directory specified with an argument with
+the following format:
 
- ./analyze_pathim_metrics.sh /home/frochet/Tor/torps_git-crypto/torps/
-tor-wf 3aE=SGM guessing-entropy
+- "score_algorithm" if no node was added
+- "score_added_location_algorithm" if node(s) was (were) added
 
-output results in /out/metric/$NETWORKCASE/
+The files are stored in a directory named (excepted for the guessing entropy results):
 
+- "Adversaries-AS['AS_adversary']_['Country_adversary']_['Tier1AS_adversary']"
 
+Each file contain a line that describe the informations/scores in that order:
+
+[node(s) added position], [adversary], [number of nodes added], [consensus by node],
+Number of paths compromised by AS adversary, Time to first compromise by AS adversary, Guessing entropy at AS-level,
+Number of paths compromised by Country adversary, Time to first compromise by Country adversary, Guessing entropy at Country-level
+Number of paths compromised by Tier-1 AS adversary, Time to first compromise by Tier-1 AS adversary, Guessing entropy at Tier-1 AS-level
 
